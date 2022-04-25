@@ -1,0 +1,36 @@
+syntax = "proto3";
+
+enum CoinType {
+    ERC_20 = 0;
+    BEP_20 = 1;
+    ETH = 2;
+    BNB = 3;
+    BTC = 4;
+}
+
+message Token {
+    string id = 1;
+    string title = 2;
+    string name = 3;
+    string code = 4;
+    CoinType coinType=5;
+    string contractAddress=6;
+    string blockchain = 7;
+    bool isLayerOne=8;
+}
+
+message TokenResponse {
+    repeated Token tokens = 1;
+}
+
+message TokenRequest {
+    string id = 1;
+    CoinType coinType = 2;
+}
+
+service Tokens {
+    rpc GetTokens (TokenRequest) returns (TokenResponse);
+}
+
+
+

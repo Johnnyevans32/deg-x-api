@@ -1,0 +1,27 @@
+image: python:3.10.1
+
+pipelines:
+ default:
+  - step:
+     caches:
+      - pip
+     name: Noxing CodeBase!🥶
+     script:
+      - pip install poetry
+      - poetry add -D pytest
+      - poetry add -D coverage
+      - poetry add -D flake8 flake8-bugbear
+      - poetry add -D mypy
+      - poetry add -D --allow-prereleases black
+      - pip install nox
+      - nox
+ branches:
+  dev:
+   - step:
+      name: Archive project 🤐
+      script:
+       - git archive --format=tar.gz dev -o deg-x-api.tar.gz
+      artifacts:
+       - deg-x-api.tar.gz
+
+   

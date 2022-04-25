@@ -1,0 +1,26 @@
+{
+    "editor.formatOnSave": true,
+    "search.exclude": {
+        "**/.git": true,
+        "**/node_modules": true,
+        "**/bower_components": true,
+        "**/tmp": true,
+        "**/venv":true,
+        "**/.nox":true
+    },
+    "python.linting.mypyEnabled": true,
+    "mypy.debugLogging":true,
+    "mypy.dmypyExecutable":"dmypy",
+    "mypy.configFile":"mypy.ini",
+    "protoc": {
+        "path": "",
+        "compile_on_save": false,
+        "options": [
+            "--proto_path=protos/v3",
+            "--proto_path=protos/v2",
+            "--proto_path=${workspaceRoot}/proto",
+            "--proto_path=${env.GOPATH}/src",
+            "--java_out=gen/java"
+        ]
+    }
+}

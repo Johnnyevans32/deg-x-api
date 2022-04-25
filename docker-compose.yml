@@ -1,0 +1,10 @@
+version: '3.8'
+
+services:
+
+  deg-x-api:
+    container_name: deg-x-api
+    hostname: deg-x-api
+    image: "environ_image"
+    env_file:
+      - .env    
