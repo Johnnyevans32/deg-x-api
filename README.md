@@ -1,6 +1,6 @@
 # README
 
-# **Game casino api**
+# *DEG X**
 
 ### What is this repository for?
 
