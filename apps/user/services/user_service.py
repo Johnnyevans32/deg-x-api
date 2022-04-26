@@ -6,7 +6,6 @@ from pydantic import EmailStr
 from apps.featureconfig.services.featureconfig_service import FeatureConfigService
 from apps.notification.slack.services.slack_service import SlackService
 from apps.user.interfaces.user_interface import (
-    AbstractUser,
     SignUpMethod,
     User,
     UserLoginInput,
@@ -24,7 +23,7 @@ class UserService:
     slackService = SlackService()
     featureConfigService = FeatureConfigService()
 
-    def create_user(self, user: AbstractUser) -> User:
+    def create_user(self, user: User) -> User:
         session = client.start_session()
         session.start_transaction()
         try:

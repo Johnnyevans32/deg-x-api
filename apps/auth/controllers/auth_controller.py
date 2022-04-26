@@ -8,7 +8,7 @@ from apps.auth.services.auth_service import AuthService
 from apps.auth.services.google_service import GoogleService
 from apps.notification.email.services.email_service import EmailService
 from apps.user.interfaces.user_interface import (
-    AbstractUser,
+    User,
     UserLoginInput,
     UserResetPasswordInput,
 )
@@ -31,7 +31,7 @@ googleService = GoogleService()
     status_code=status.HTTP_201_CREATED,
     response_model=get_response_model(AuthResponse, "RegisterResponse"),
 )
-async def register_user(user: AbstractUser, request: Request, res: Response):
+async def register_user(user: User, request: Request, res: Response):
     try:
         request.app.logger.info(f"creating user with email - {user.email}")
         resp = authService.create_account(user)

@@ -95,9 +95,26 @@ class User(SBaseModel):
     country: Optional[Union[PyObjectId, Country]]
     signUpMethod: SignUpMethod
 
+    def __init__(self, name: Any, username: str, **data: Any):
+        super().__init__(**data)
+        self.name = Name(first=name["first"].strip(), last=name["last"].strip())
+        self.username = username.strip()
+
     class Config:
         arbitrary_types_allowed = True
         json_encoders = {ObjectId: str}
+        schema_extra = {
+            "example": {
+                "name": {
+                    "first": "demigod",
+                    "last": "evans",
+                },
+                "email": "evans@demigod.com",
+                "password": "password",
+                "username": "sss",
+                "country": "61689fc4dc4f8ba4c07f52e2",
+            }
+        }
 
     @staticmethod
     def init():

@@ -3,7 +3,7 @@ from operator import itemgetter
 from google.auth.transport import requests
 from google.oauth2 import id_token
 
-from apps.user.interfaces.user_interface import AbstractUser, SignUpMethod, User
+from apps.user.interfaces.user_interface import SignUpMethod, User
 from apps.user.services.user_service import UserService
 from core.config import settings
 from core.utils.helper_service import HelperService
@@ -34,7 +34,7 @@ class GoogleService:
                     "isVerified": True,
                     "signUpMethod": SignUpMethod.google.value,
                 }
-                user_obj = AbstractUser(**user_data)
+                user_obj = User(**user_data)
                 user = self.userService.create_user(user_obj)
 
             return {"user": user}

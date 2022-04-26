@@ -5,7 +5,7 @@ import emails as emails
 from emails.template import JinjaTemplate
 from pydantic import EmailStr
 
-from apps.user.interfaces.user_interface import AbstractUser, User
+from apps.user.interfaces.user_interface import User
 from core.config import settings
 from core.utils.helper_service import HelperService
 
@@ -40,7 +40,7 @@ class EmailService:
         r = message.send(to=email_to, render=environment, smtp=smtp_options)
         print(email_to, settings.MAIL_SENDER, environment, r)
 
-    def send_verification(self, user: Union[User, AbstractUser]) -> None:
+    def send_verification(self, user: User) -> None:
         token = HelperService.generate_confirmation_token(user.email)
         confirm_url = settings.UI_URL + "account/confirm/" + str(token)
 

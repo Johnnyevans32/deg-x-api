@@ -187,7 +187,7 @@ class ModelUtilityService:
         limit = {"$limit": 1}
         pipeline.append(limit)
         [aggregation_result] = list(model.aggregate(pipeline))
-        return genericClass(**aggregation_result)
+        return genericClass(**aggregation_result)  # type: ignore [call-arg]
 
     @staticmethod
     def find_and_populate(
@@ -226,7 +226,7 @@ class ModelUtilityService:
     def find_one(genericClass: Type[T], query: dict) -> T:
         model = db[genericClass.__name__.lower()]
 
-        return genericClass(**model.find_one(query))
+        return genericClass(**model.find_one(query))  # type: ignore [call-arg]
 
     @staticmethod
     def find(genericClass: Type[T], query: dict) -> List[T]:
@@ -298,4 +298,4 @@ class ModelUtilityService:
         genericClass: Type[T],
         _dict: dict,
     ) -> T:
-        return genericClass(**_dict)
+        return genericClass(**_dict)  # type: ignore [call-arg]
