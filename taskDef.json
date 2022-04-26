@@ -1,0 +1,100 @@
+{
+    "taskDefinitionArn": "arn:aws:ecs:us-east-1:612845305280:task-definition/deploy-deg-x-api:2",
+    "containerDefinitions": [{
+        "name": "c1",
+        "image": "docker.io/jevan32/deg-x-api",
+        "cpu": 0,
+        "portMappings": [],
+        "essential": true,
+        "environment": [{
+                "name": "DATABASE_URI",
+                "value": "mongodb+srv://root:password12345@scriptsigndb.qqgn9.mongodb.net/?retryWrites=true&w=majority"
+            },
+            {
+                "name": "MAIL_PORT",
+                "value": "587"
+            },
+            {
+                "name": "MAIL_SENDER",
+                "value": "evans@bento.africa"
+            },
+            {
+                "name": "DATABASE_NAME",
+                "value": "deg-x"
+            },
+            {
+                "name": "MAIL_USERNAME",
+                "value": "apikey"
+            },
+            {
+                "name": "EMAILS_ENABLED",
+                "value": "True"
+            },
+            {
+                "name": "ENV_MODE",
+                "value": "development"
+            },
+            {
+                "name": "MAIL_SSL",
+                "value": "False"
+            },
+            {
+                "name": "MAIL_SERVER",
+                "value": "smtp.sendgrid.net"
+            },
+            {
+                "name": "MAIL_PASSWORD",
+                "value": "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"
+            },
+            {
+                "name": "MAIL_TLS",
+                "value": "True"
+            }
+        ],
+        "mountPoints": [],
+        "volumesFrom": [],
+        "logConfiguration": {
+            "logDriver": "awslogs",
+            "options": {
+                "awslogs-group": "/ecs/deploy-deg-x-api",
+                "awslogs-region": "us-east-1",
+                "awslogs-stream-prefix": "ecs"
+            }
+        }
+    }],
+    "family": "deploy-deg-x-api",
+    "executionRoleArn": "arn:aws:iam::612845305280:role/ecsTaskExecutionRole",
+    "networkMode": "awsvpc",
+    "revision": 2,
+    "volumes": [],
+    "status": "ACTIVE",
+    "requiresAttributes": [{
+            "name": "com.amazonaws.ecs.capability.logging-driver.awslogs"
+        },
+        {
+            "name": "ecs.capability.execution-role-awslogs"
+        },
+        {
+            "name": "com.amazonaws.ecs.capability.docker-remote-api.1.19"
+        },
+        {
+            "name": "com.amazonaws.ecs.capability.docker-remote-api.1.18"
+        },
+        {
+            "name": "ecs.capability.task-eni"
+        }
+    ],
+    "placementConstraints": [],
+    "compatibilities": [
+        "EC2",
+        "FARGATE"
+    ],
+    "requiresCompatibilities": [
+        "FARGATE"
+    ],
+    "cpu": "256",
+    "memory": "512",
+    "registeredAt": "2022-04-25T23:44:05.611Z",
+    "registeredBy": "arn:aws:iam::612845305280:root",
+    "tags": []
+}
