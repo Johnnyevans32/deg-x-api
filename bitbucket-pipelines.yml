@@ -18,6 +18,18 @@ pipelines:
    branches:
       master:
          - step:
+            caches:
+            - pip
+            name: Noxing CodeBase!🥶
+            script:
+               - pip install poetry
+               - poetry add -D coverage
+               - poetry add -D flake8 flake8-bugbear
+               - poetry add -D mypy
+               - poetry add -D --allow-prereleases black
+               - pip install nox
+               - nox
+         - step:
             name: Build and Push Docker Image 🪐
             script:
                - docker login -u $DOCKER_HUB_USER -p $DOCKER_HUB_PASSWORD
