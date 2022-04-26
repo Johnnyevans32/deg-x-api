@@ -22,7 +22,7 @@ pipelines:
             script:
                - docker login -u $DOCKER_HUB_USER -p $DOCKER_HUB_PASSWORD
                - docker build -t jevan32/deg-x-api:latest .
-               - docker push jevan32:deg-x-api:latest
+               - docker push jevan32/deg-x-api:latest
             services:
                - docker
            
