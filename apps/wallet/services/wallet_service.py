@@ -1,7 +1,5 @@
-import threading
 from datetime import datetime
 from functools import partial
-from typing import Any
 from mnemonic import Mnemonic
 
 from pymongo.client_session import ClientSession
@@ -12,10 +10,6 @@ from apps.blockchain.services.blockchain_service import BlockchainService
 from apps.user.interfaces.user_interface import User
 from apps.wallet.interfaces.wallet_interface import Wallet, WalletType
 from apps.wallet.interfaces.walletasset_interface import WalletAsset
-from apps.wallettransaction.interfaces.wallettransaction_interface import (
-    WalletAction,
-    WalletTransaction,
-)
 from core.db import db
 from core.depends import PyObjectId
 from core.utils.model_utility_service import ModelUtilityService

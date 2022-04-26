@@ -13,7 +13,6 @@ from starlette.exceptions import HTTPException as StarletteHTTPException
 from starlette.responses import JSONResponse
 
 from apps.user.interfaces.user_interface import User
-from apps.wallet.interfaces.walletasset_interface import WalletAsset
 from core import urls
 from core.config import settings
 from core.cron import CronJob
@@ -29,7 +28,6 @@ from core.utils.response_service import ResponseService
 
 cronJob = CronJob()
 responseService = ResponseService()
-MONGO_URI = settings.DATABASE["URI"]
 
 # CORS
 origins = ["*"]
@@ -91,18 +89,10 @@ def create_app():
     async def custom_http_exception_handler(
         request: Request, exc: StarletteHTTPException
     ):
-        if exc.status_code == 404:
+        if exc.status_code in [404, 405, 500]:
             return JSONResponse(
-                {"message": responseService.status_code_message[404]}, status_code=404
-            )
-        if exc.status_code == 405:
-            return JSONResponse(
-                {"message": responseService.status_code_message[405]}, status_code=405
-            )
-
-        if exc.status_code == 500:
-            return JSONResponse(
-                {"message": responseService.status_code_message[500]}, status_code=500
+                {"message": responseService.status_code_message[exc.status_code]},
+                status_code=exc.status_code,
             )
         return await http_exception_handler(request, exc)
 

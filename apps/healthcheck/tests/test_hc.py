@@ -17,4 +17,4 @@ class TestHealthCheckModule(TestCase):
             json.dumps(response.json()), object_hook=lambda d: SimpleNamespace(**d)
         )
         assert response.status_code == 200
-        # assert payload_response.message == "all good here"
+        assert payload_response.message == "all good here, workkkks"

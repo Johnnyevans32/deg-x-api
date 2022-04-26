@@ -7,7 +7,6 @@ from pydantic import Field
 from apps.blockchain.interfaces.blockchain_interface import Blockchain
 from core.depends.get_object_id import PyObjectId
 from core.depends.model import SBaseModel
-from core.utils.loggly import logger
 
 
 class CoinType(str, Enum):

@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-from calendar import c
 from fastapi import Depends, Request, Response, status
 from fastapi.routing import APIRouter
 

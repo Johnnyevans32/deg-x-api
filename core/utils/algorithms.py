@@ -1,7 +1,7 @@
 from collections import deque
 import math
 from time import time
-from typing import Any, List
+from typing import List
 
 
 def timer_func(func):

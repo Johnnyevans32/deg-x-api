@@ -25,6 +25,7 @@ pipelines:
             script:
                - pip install poetry
                - poetry add -D coverage
+               - poetry add -D pytest
                - poetry add -D flake8 flake8-bugbear
                - poetry add -D mypy
                - poetry add -D --allow-prereleases black

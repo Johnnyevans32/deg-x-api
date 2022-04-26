@@ -8,7 +8,6 @@ from apps.user.interfaces.user_interface import User
 from apps.wallet.interfaces.walletasset_interface import WalletAsset
 from core.depends.get_object_id import PyObjectId
 from core.depends.model import SBaseModel
-from core.utils.loggly import logger
 from core.utils.model_utility_service import ModelUtilityService
 
 

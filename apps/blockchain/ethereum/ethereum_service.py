@@ -1,5 +1,3 @@
-import secrets
-
 from eth_account import Account
 
 from apps.blockchain.types.blockchain_service_interface import IBlockchainService

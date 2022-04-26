@@ -8,7 +8,7 @@ from core.utils.model_utility_service import ModelUtilityService
 
 
 class BlockchainService:
-    # @timed_cache(10)
+    @timed_cache(10)
     @staticmethod
     def get_blockchains() -> List[Blockchain]:
         logger.info("retrieving blockchains")
@@ -16,7 +16,7 @@ class BlockchainService:
 
         return blockchains
 
-    # @timed_cache(10)
+    @timed_cache(10)
     @staticmethod
     def get_token_assets(query: dict) -> List[TokenAsset]:
         logger.info(f"retrieving token assets for query - {query}")

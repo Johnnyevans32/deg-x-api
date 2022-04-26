@@ -1,5 +1,4 @@
 from functools import wraps
-from pyclbr import Function
 from typing import Callable
 
 from fastapi import HTTPException, Request

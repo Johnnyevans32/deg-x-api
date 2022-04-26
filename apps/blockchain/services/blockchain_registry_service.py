@@ -1,5 +1,3 @@
-from typing import Any
-
 from apps.blockchain.ethereum.ethereum_service import EthereumService
 from apps.blockchain.types.blockchain_service_interface import IBlockchainService
 from core.utils.loggly import logger

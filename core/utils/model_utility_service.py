@@ -2,13 +2,11 @@ from functools import lru_cache, partial
 import math
 import re
 from datetime import datetime
-from statistics import mode
 from typing import Any, Dict, List, Tuple, Type, TypeVar
 
 from bson import ObjectId
 from pymongo import DESCENDING
 from pymongo.client_session import ClientSession
-from pymongo.collection import Collection
 from pymongo.results import (
     DeleteResult,
     InsertManyResult,
@@ -93,17 +91,6 @@ class ModelUtilityService:
         # Calculate number of documents to skip
         skips = page_size * (page_num - 1)
 
-        lookupGen = [
-            *{
-                "$lookup": {
-                    "from": "field",
-                    "localField": "field",
-                    "foreignField": "_id",
-                    "as": "field",
-                }
-            }
-        ]
-
         pipeline = [
             {
                 "$facet": {
@@ -133,19 +120,19 @@ class ModelUtilityService:
             }
         ]
 
-        # for field in fields:
-        #     lookup = [
-        #         {
-        #             "$lookup": {
-        #                 "from": field,
-        #                 "localField": field,
-        #                 "foreignField": "_id",
-        #                 "as": field,
-        #             }
-        #         },
-        #         {"$unwind": {"path": f"${field}"}},
-        #     ]
-        #     pipeline[0]["$facet"]["pipelineData"].insert(1, *lookup)
+        for field in fields:
+            lookup = [
+                {
+                    "$lookup": {
+                        "from": field,
+                        "localField": field,
+                        "foreignField": "_id",
+                        "as": field,
+                    }
+                },
+                {"$unwind": {"path": f"${field}"}},
+            ]
+            pipeline[0]["$facet"]["pipelineData"].insert(1, *lookup)
 
         aggregation_result = list(model.aggregate(pipeline))
 

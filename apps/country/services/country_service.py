@@ -1,14 +1,11 @@
-from typing import Any, List
+from typing import List
 
 from apps.country.interfaces.country_interface import Country
-from core.db import db
 from core.utils.model_utility_service import ModelUtilityService
 from core.utils.response_service import MetaDataModel
 
 
 class CountryService:
-    modelUtilityService = ModelUtilityService
-
     def get_country(
         self, page_num: int, page_size: int
     ) -> tuple[List[Country], MetaDataModel]:
