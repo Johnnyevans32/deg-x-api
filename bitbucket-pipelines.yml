@@ -18,9 +18,8 @@ pipelines:
    branches:
       master:
          - step:
-            name: Build and Push Wavenet Repository
+            name: Build and Push Docker Image 🪐
             script:
-               - mvn clean install
                - docker login docker.io --username $DOCKER_USERNAME --password $DOCKER_PASSWORD
                - docker build -t jevan32:deg-x-api:latest .
                - docker push evan32:deg-x-api:latest
