@@ -1,27 +1,30 @@
 image: python:3.10.1
 
 pipelines:
- default:
-  - step:
-     caches:
-      - pip
-     name: Noxing CodeBase!🥶
-     script:
-      - pip install poetry
-      - poetry add -D pytest
-      - poetry add -D coverage
-      - poetry add -D flake8 flake8-bugbear
-      - poetry add -D mypy
-      - poetry add -D --allow-prereleases black
-      - pip install nox
-      - nox
- branches:
-  dev:
-   - step:
-      name: Archive project 🤐
-      script:
-       - git archive --format=tar.gz dev -o deg-x-api.tar.gz
-      artifacts:
-       - deg-x-api.tar.gz
+   default:
+      - step:
+         caches:
+         - pip
+         name: Noxing CodeBase!🥶
+         script:
+         - pip install poetry
+         - poetry add -D coverage
+         - poetry add -D flake8 flake8-bugbear
+         - poetry add -D mypy
+         - poetry add -D --allow-prereleases black
+         - pip install nox
+         - nox
+      
+   branches:
+      master:
+         - step:
+            name: Build and Push Wavenet Repository
+            script:
+               - mvn clean install
+               - docker login docker.io --username $DOCKER_USERNAME --password $DOCKER_PASSWORD
+               - docker build -t jevan32:deg-x-api:latest .
+               - docker push evan32:deg-x-api:latest
+            services:
+               - docker
 
    
