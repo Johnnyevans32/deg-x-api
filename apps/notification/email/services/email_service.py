@@ -1,5 +1,4 @@
 from pathlib import Path
-from typing import Union
 
 import emails as emails
 from emails.template import JinjaTemplate
