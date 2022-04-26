@@ -20,11 +20,4 @@ client_auth = appClientService.client_auth
 
 @router.get("")
 def health_check():
-
-    print(
-        ModelUtilityService.populate_and_paginate_data(
-            Wallet, {"walletType": "multichain"}, ["ksls", "kjss"]
-        )
-    )
-    # print("response", self.response.__dict__)
     return "all good here, workkkks"
