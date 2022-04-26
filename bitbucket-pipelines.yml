@@ -20,10 +20,12 @@ pipelines:
          - step:
             name: Build and Push Docker Image 🪐
             script:
+               - echo $DOCKER_USERNAME $DOCKER_PASSWORD
                - docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD
                - docker build -t jevan32:deg-x-api:latest .
                - docker push evan32:deg-x-api:latest
             services:
                - docker
+           
 
    
