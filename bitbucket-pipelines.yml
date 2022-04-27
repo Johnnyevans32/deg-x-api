@@ -52,5 +52,4 @@ pipelines:
                 AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION
                 CLUSTER_NAME: $ECS_PRODUCTION_CLUSTER_NAME
                 SERVICE_NAME: $ECS_PRODUCTION_SERVICE_NAME
-                TASK_DEFINITION: 'taskDef.json'
                 DEBUG: 'true'
