@@ -1,9 +1,8 @@
 import eth_utils
 from eth_typing import Address
-
 from web3.contract import Contract
-from apps.blockchain.ethereum.ethereum_service import EthereumService
 
+from apps.blockchain.ethereum.ethereum_service import EthereumService
 from apps.defi.lending.aave.aave_interface import IUserAcccountData
 from apps.defi.lending.types.lending_service_interface import ILendingService
 from core.config import settings

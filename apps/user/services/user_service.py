@@ -1,6 +1,6 @@
 from typing import Any
 
-
+from bson import ObjectId
 from pydantic import EmailStr
 
 from apps.featureconfig.services.featureconfig_service import FeatureConfigService
@@ -16,7 +16,6 @@ from core.db import client, db
 from core.depends import PyObjectId
 from core.utils.helper_service import HelperService
 from core.utils.model_utility_service import ModelUtilityService
-from bson import ObjectId
 
 
 class UserService:

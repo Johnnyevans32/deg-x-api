@@ -1,7 +1,7 @@
 from eth_account import Account
 from web3 import Web3
-
 from web3.middleware import geth_poa_middleware
+
 from apps.blockchain.types.blockchain_service_interface import IBlockchainService
 from core.config import settings
 

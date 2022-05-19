@@ -1,9 +1,9 @@
 from datetime import datetime
 from typing import Any, Optional
 
-
-from pydantic import BaseModel, Field, schema
 from bson import ObjectId
+from pydantic import BaseModel, Field, schema
+
 from core.depends.get_object_id import PyObjectId
 from core.utils.loggly import logger
 

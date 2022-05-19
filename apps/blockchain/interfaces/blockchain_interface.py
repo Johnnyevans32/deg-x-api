@@ -1,6 +1,5 @@
 from typing import Any
 
-
 from core.depends.model import SBaseModel
 
 

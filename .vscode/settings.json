@@ -23,5 +23,6 @@
             "--proto_path=${env.GOPATH}/src",
             "--java_out=gen/java"
         ]
-    }
+    },
+    "python.linting.flake8Enabled": true
 }

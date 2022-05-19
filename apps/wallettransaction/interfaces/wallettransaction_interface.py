@@ -1,7 +1,6 @@
 from enum import Enum
 from typing import Union
 
-
 from pymongo import ASCENDING
 
 from apps.user.interfaces.user_interface import User
