@@ -10,7 +10,7 @@ from core.utils.loggly import logger
 class SlackService:
     def send_message(self, text: str, channel: str, attachments: Any = None) -> None:
         try:
-            body = {"text": text, "channel": channel, "username": "jevanbot"}
+            body = {"text": text, "channel": channel, "username": "lexi"}
 
             if attachments is not None:
                 body["attachments"] = attachments

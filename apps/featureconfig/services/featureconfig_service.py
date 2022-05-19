@@ -1,6 +1,6 @@
 from typing import Any
 
-from fastapi import HTTPException, status
+from fastapi import status
 
 from apps.featureconfig.interfaces.featureconfig_interface import (
     FeatureConfig,
@@ -9,6 +9,7 @@ from apps.featureconfig.interfaces.featureconfig_interface import (
 )
 from apps.notification.slack.services.slack_service import SlackService
 from core.db import db
+from core.utils.custom_exceptions import UnicornException
 from core.utils.model_utility_service import ModelUtilityService
 
 
@@ -34,9 +35,9 @@ class FeatureConfigService:
     def check_feature_enabled_or_fail(self, name: FeatureName) -> Any:
         feature_enabled = self.is_feature_enabled(name)
         if not feature_enabled:
-            raise HTTPException(
+            raise UnicornException(
                 status_code=status.HTTP_403_FORBIDDEN,
-                detail=f"{name} has been temporarily disabled",
+                message=f"{name} has been temporarily disabled",
             )
 
     def update_feature(

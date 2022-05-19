@@ -1,11 +1,10 @@
 from datetime import datetime
 from functools import partial
-from mnemonic import Mnemonic
 
+from mnemonic import Mnemonic
 from pymongo.client_session import ClientSession
 
 from apps.blockchain.interfaces.blockchain_interface import Blockchain
-from apps.blockchain.services.blockchain_registry_service import BlockchainRegistry
 from apps.blockchain.services.blockchain_service import BlockchainService
 from apps.user.interfaces.user_interface import User
 from apps.wallet.interfaces.wallet_interface import Wallet, WalletType
@@ -16,7 +15,7 @@ from core.utils.model_utility_service import ModelUtilityService
 
 
 class WalletService:
-    blockchainRegistry = BlockchainRegistry()
+    blockchainService = BlockchainService()
     mnemo = Mnemonic("english")
 
     def update_wallet_balance(
@@ -66,9 +65,7 @@ class WalletService:
         mnemonic: str,
         chain: Blockchain,
     ) -> None:
-        address = self.blockchainRegistry.get_service(
-            chain.registryName
-        ).create_address(mnemonic)
+        address = self.blockchainService.create_address(chain.registryName, mnemonic)
 
         token_assets = BlockchainService.get_token_assets(
             {"isDeleted": False, "isLayerOne": True}
@@ -78,7 +75,7 @@ class WalletService:
                 lambda token_asset: {
                     "user": user.id,
                     "wallet": wallet.id,
-                    "asset": token_asset.id,
+                    "tokenasset": token_asset.id,
                     "address": address,
                 },
                 token_assets,
@@ -86,6 +83,14 @@ class WalletService:
         )
 
         ModelUtilityService.model_create_many(WalletAsset, dict_wallet_assets, session)
+
+    def retrieve_wallet_assets(self, user: User) -> list[WalletAsset]:
+        user_wallet = self.retrieve_wallet(user)
+        res = ModelUtilityService.find_and_populate(
+            WalletAsset, {"wallet": user_wallet.id, "isDeleted": False}, ["tokenasset"]
+        )
+        print(res)
+        return res
 
     def retrieve_wallet(self, user: User) -> Wallet:
         db_resp = db.wallet.find_one({"user": user.id, "isDeleted": False})

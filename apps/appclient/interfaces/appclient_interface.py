@@ -1,6 +1,6 @@
 from typing import Optional
 
-from bson import ObjectId
+
 from pydantic import BaseModel
 from pymongo import ASCENDING
 
@@ -34,11 +34,6 @@ class AppClient(SBaseModel):
     clientSecret: str
     callBackUrl: str
     appUrl: str
-
-    class Config:
-        orm_mode = True
-        allow_population_by_field_name = True
-        json_encoders = {ObjectId: str}
 
     @staticmethod
     def init():

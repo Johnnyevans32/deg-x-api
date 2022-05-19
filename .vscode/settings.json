@@ -6,7 +6,8 @@
         "**/bower_components": true,
         "**/tmp": true,
         "**/venv":true,
-        "**/.nox":true
+        "**/.nox":true,
+        "**/.mypy_cache": true
     },
     "python.linting.mypyEnabled": true,
     "mypy.debugLogging":true,

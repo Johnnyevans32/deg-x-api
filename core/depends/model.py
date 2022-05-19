@@ -1,18 +1,33 @@
 from datetime import datetime
-from typing import Optional
+from typing import Any, Optional
 
-from pydantic import BaseModel, Field
 
+from pydantic import BaseModel, Field, schema
+from bson import ObjectId
 from core.depends.get_object_id import PyObjectId
 from core.utils.loggly import logger
 
 
-class SBaseModel(BaseModel):
-    id: PyObjectId = Field(alias="_id")
-    createdAt: Optional[datetime]
-    updatedAt: Optional[datetime]
-    isDeleted: Optional[bool]
-    deletedAt: Optional[datetime]
+def field_schema(field, **kwargs: Any) -> Any:
+    if field.field_info.extra.get("hidden_from_schema", False):
+        raise schema.SkipField(f"{field.name} field is being hidden")
+    else:
+        return original_field_schema(field, **kwargs)
+
+
+original_field_schema = schema.field_schema
+schema.field_schema = field_schema
+
+
+class SBaseInModel(BaseModel):
+    isDeleted: bool = Field(default=False, hidden_from_schema=True)
+    deletedAt: datetime = Field(default=None, hidden_from_schema=True)
+
+
+class SBaseOutModel(BaseModel):
+    id: Optional[PyObjectId] = Field(alias="_id")
+    createdAt: datetime = Field(default=datetime.now())
+    updatedAt: datetime = Field(default=datetime.now())
 
     def __init__(self, **pydict):
         try:
@@ -23,6 +38,9 @@ class SBaseModel(BaseModel):
 
     class Config:
         arbitrary_types_allowed = True
-        json_encoders = {
-            datetime: datetime.isoformat,
-        }
+        json_encoders = {datetime: datetime.isoformat, ObjectId: str}
+        allow_population_by_field_name = True
+
+
+class SBaseModel(SBaseInModel, SBaseOutModel):
+    pass

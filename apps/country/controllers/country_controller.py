@@ -1,13 +1,10 @@
 # -*- coding: utf-8 -*-
-from typing import List
-
 from fastapi import Request, Response, status
 from fastapi.routing import APIRouter
 
 from apps.country.interfaces.country_interface import Country
 from apps.country.services.country_service import CountryService
 from core.utils.response_service import ResponseService, get_response_model
-
 
 router = APIRouter(prefix="/api/v1/country", tags=["Country 🇺🇸🇳🇬"])
 
@@ -16,7 +13,7 @@ countryService = CountryService()
 responseService = ResponseService()
 
 
-@router.get("", response_model=get_response_model(List[Country], "CountryResponse"))
+@router.get("", response_model=get_response_model(list[Country], "CountryResponse"))
 async def get_countries(
     request: Request,
     response: Response,
@@ -40,7 +37,7 @@ async def get_countries(
 
 @router.get(
     "/search",
-    response_model=get_response_model(List[Country], "SearchCountryResponse"),
+    response_model=get_response_model(list[Country], "SearchCountryResponse"),
 )
 async def search_countries(
     request: Request,

@@ -1,20 +1,21 @@
 import binascii
 import hashlib
+import json
 import os
 import random
 import string
 import time
-from functools import wraps, lru_cache
+from functools import lru_cache, wraps
+from pathlib import Path
 from typing import Union
 
-
-from itsdangerous import URLSafeTimedSerializer
-
-from pydantic import EmailStr
 import frozendict
+from itsdangerous import URLSafeTimedSerializer
+from pydantic import EmailStr
+from requests import request
+from solcx import compile_standard, install_solc
 
 from core.config import SECRET_KEY, settings
-from core.utils.loggly import logger
 
 
 def timed_cache(timeout: int, maxsize: int = 128, typed: bool = False):
@@ -67,6 +68,7 @@ class HelperService:
     @staticmethod
     def hash_password(password: str) -> str:
         """Hash a password for storing."""
+        print("pqssss", password)
         salt = hashlib.sha256(os.urandom(60)).hexdigest().encode("ascii")
         pwdhash = hashlib.pbkdf2_hmac("sha512", password.encode("utf-8"), salt, 100000)
         pwdhash = binascii.hexlify(pwdhash)
@@ -91,13 +93,61 @@ class HelperService:
         return serializer.dumps(email, salt=settings.SECURITY_PASSWORD_SALT)
 
     @staticmethod
-    def confirm_token(token: str, expiration=settings.TOKEN_EXPIRATION_IN_SEC):
+    def confirm_token(
+        token: str, expiration=settings.SERIALIZER_TOKEN_EXPIRATION_IN_SEC
+    ):
         serializer = URLSafeTimedSerializer(SECRET_KEY)
+        email = serializer.loads(
+            token, salt=settings.SECURITY_PASSWORD_SALT, max_age=expiration
+        )
+        return email
+
+    @lru_cache
+    @staticmethod
+    def get_compiled_sol(contract_file_name: str, version: str):
+
+        with open(Path(f"./solidity/{contract_file_name}.sol"), "r") as file:
+            contract_file = file.read()
+
+        install_solc(version)
+
+        # Solidity source code
+        compiled_sol = compile_standard(
+            {
+                "language": "Solidity",
+                "sources": {f"{contract_file_name}.sol": {"content": contract_file}},
+                "settings": {
+                    "outputSelection": {
+                        "*": {
+                            "*": [
+                                "abi",
+                            ]
+                        }
+                    }
+                },
+            },
+            solc_version=version,
+        )
+
+        abi = compiled_sol["contracts"][f"{contract_file_name}.sol"][
+            f"{contract_file_name}"
+        ]["abi"]
+
+        return abi
+
+    @staticmethod
+    def get_abi_network_explorer(contract_address: str):
         try:
-            email = serializer.loads(
-                token, salt=settings.SECURITY_PASSWORD_SALT, max_age=expiration
+            response = request(
+                "GET",
+                "https://api.etherscan.io/api?module=contract&action=getabi&address="
+                + contract_address,
             )
-            return email
+            response_json = response.json()
+            print("response", response_json)
+            abi_json = json.loads(response_json["result"])
+
+            print(abi_json)
+            return abi_json
         except Exception as e:
-            logger.error(e)
-            return False
+            print(e)

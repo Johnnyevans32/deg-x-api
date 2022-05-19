@@ -1,0 +1,33 @@
+version: 2.1
+
+orbs:
+  # The python orb contains a set of prepackaged CircleCI configuration you can use repeatedly in your configuration files
+  # Orb commands and jobs help you with common scripting around a language/tool
+  # so you dont have to copy and paste it everywhere.
+  # See the orb documentation here: https://circleci.com/developer/orbs/orb/circleci/python
+  python: circleci/python@1.5.0
+
+# Define the jobs we want to run for this project
+jobs:
+  nox:
+    docker:
+      - image: cimg/python:3.10.2
+    steps:
+      - checkout
+      - run:
+          name: Noxing the codebase
+          command: |
+            pip install poetry
+            poetry add -D coverage
+            poetry add -D pytest
+            poetry add -D flake8 flake8-bugbear
+            poetry add -D mypy
+            poetry add -D --allow-prereleases black
+            pip install nox
+            nox
+
+# Orchestrate our job run sequence
+workflows:
+  nox_and_deploy:
+    jobs:
+      - nox

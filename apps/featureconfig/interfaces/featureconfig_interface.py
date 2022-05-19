@@ -1,6 +1,6 @@
 from enum import Enum
 
-from bson import ObjectId
+
 from pydantic import Field
 from pydantic.main import BaseModel
 from pymongo import ASCENDING
@@ -20,11 +20,6 @@ class FeatureStatusUpdateDTO(BaseModel):
 class FeatureConfig(SBaseModel):
     name: FeatureName
     isEnabled: bool = Field(default=False)
-
-    class Config:
-        orm_mode = True
-        allow_population_by_field_name = True
-        json_encoders = {ObjectId: str}
 
     @staticmethod
     def init():

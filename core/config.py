@@ -71,18 +71,15 @@ class Settings(BaseSettings):
     DATABASE_NAME = os.getenv("DATABASE_NAME", "deg-x")
     DATABASE = {"NAME": DATABASE_NAME, "URI": DATABASE_URI}
 
-    JWT_SECRET = os.getenv("JWT_SECRET", "secret")
+    ACCESS_TOKEN_JWT_SECRET = os.getenv("ACCESS_TOKEN_JWT_SECRET", "accesssecret")
+    ACCESS_TOKEN_EXPIRATION = int(os.getenv("ACCESS_TOKEN_EXPIRATION", 10))
+
+    REFRESH_TOKEN_JWT_SECRET = os.getenv("REFRESH_TOKEN_JWT_SECRET", "refreshsecret")
+    REFRESH_TOKEN_EXPIRATION = int(os.getenv("REFRESH_TOKEN_EXPIRATION", 14400))
+
+    SERIALIZER_TOKEN_EXPIRATION_IN_SEC = int(os.getenv("TOKEN_EXPIRATION_IN_SEC", 3600))
 
     UI_URL = "https://simthrift.net/"
-
-    # ~~~~~ PAYSTACK ~~~~~
-    PAYSTACK_API_URL = os.getenv("PAYSTACK_API_URL", "https://api.paystack.co")
-    PAYSTACK_SECRET_KEY = os.getenv(
-        "PAYSTACK_SECRET_KEY", "sk_test_68cf667d5757f7e47a6e0b174e5918448a8f9938"
-    )
-
-    # ~~~~~ FLUIDCOINS ~~~~~
-    FLUIDCOINS_SECRET = os.getenv("FLUIDCOINS_SECRET", "dickhead")
 
     # ~~~~~ AWS S3 ~~~~~
     S3_BUCKET_NAME = os.getenv("S3_BUCKET_NAME", "demo-bucket")
@@ -109,9 +106,6 @@ class Settings(BaseSettings):
     # ~~~~~ Cron ~~~~~
     CRON_ENABLED = getenv_boolean("CRON_ENABLED", True)
 
-    TOKEN_EXPIRATION_IN_SEC = int(os.getenv("TOKEN_EXPIRATION_IN_SEC", 3600))
-    TOKEN_EXPIRATION_IN_HR = TOKEN_EXPIRATION_IN_SEC / 3600
-
     # ~~~ Google oauth ~~~~
     GOOGLE_CLIENT_ID = os.getenv(
         "GOOGLE_CLIENT_ID",
@@ -125,6 +119,17 @@ class Settings(BaseSettings):
     )
     ETH_PRIVATE_KEY = os.getenv(
         "ETH_PRIVATE_KEY", "sk_test_68cf667d5757f7e47a6e0b174e5918448a8f9938"
+    )
+
+    # `````AAVE CREDS`
+    AAVE_CONTRACT_ADDRESS = os.getenv(
+        "AAVE_CONTRACT_ADDRESS", "0xE0FBA4FC209B4948668006B2BE61711B7F465BAE"
+    )
+
+    # ~~~~~~ WEB3 NODE PROVIDER ~~~~~
+    WEB3_HTTP_PROVIDER = os.getenv(
+        "WEB3_HTTP_PROVIDER",
+        "https://kovan.infura.io/v3/675849285dfa4748868f4a19b72bfb50",
     )
 
     class Config:

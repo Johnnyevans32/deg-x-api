@@ -6,7 +6,6 @@ from fastapi.exception_handlers import (
 )
 from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
-
 from pymongo import monitoring
 from starlette.exceptions import ExceptionMiddleware
 from starlette.exceptions import HTTPException as StarletteHTTPException
@@ -20,6 +19,7 @@ from core.db import client
 from core.db.event_listeners import CommandLogger
 from core.middlewares.sentry import sentry_setup
 from core.middlewares.settings import settings_middleware
+from core.utils.custom_exceptions import UnicornException
 from core.utils.loggly import logger
 from core.utils.response_service import ResponseService
 
@@ -85,13 +85,23 @@ def create_app():
         cronJob.scheduler.shutdown()
         logger.info("Closed connection with MongoDB.")
 
+    @app.exception_handler(UnicornException)
+    async def unicorn_exception_handler(request: Request, exc: UnicornException):
+        return JSONResponse(
+            {"message": exc.message, "data": exc.data},
+            status_code=exc.status_code,
+        )
+
     @app.exception_handler(StarletteHTTPException)
     async def custom_http_exception_handler(
         request: Request, exc: StarletteHTTPException
     ):
         if exc.status_code in [404, 405, 500]:
             return JSONResponse(
-                {"message": responseService.status_code_message[exc.status_code]},
+                {
+                    "message": responseService.status_code_message[exc.status_code],
+                    "data": None,
+                },
                 status_code=exc.status_code,
             )
         return await http_exception_handler(request, exc)

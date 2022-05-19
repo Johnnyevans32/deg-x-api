@@ -1,10 +1,11 @@
 from functools import wraps
 from typing import Callable
 
-from fastapi import HTTPException, Request
+from fastapi import Request
 
 from apps.appclient.interfaces.appclient_interface import AppClient, AppClientIn
 from core.db import db
+from core.utils.custom_exceptions import UnicornException
 from core.utils.helper_service import HelperService
 from core.utils.model_utility_service import ModelUtilityService
 
@@ -17,15 +18,15 @@ class AppClientService:
             client_secret = request.headers.get("clientSecret")
 
             if client_id is None or client_secret is None:
-                raise HTTPException(
-                    status_code=403, detail="incomplete client credentials specified"
+                raise UnicornException(
+                    status_code=403, message="incomplete client credentials specified"
                 )
 
             app_client = self.get_client_by_id(client_id)
 
             if app_client is False or app_client.clientSecret != client_secret:
-                raise HTTPException(
-                    status_code=403, detail="incomplete client credentials specified"
+                raise UnicornException(
+                    status_code=403, message="incomplete client credentials specified"
                 )
 
             request.state.app_client = app_client
@@ -37,7 +38,7 @@ class AppClientService:
         app_client = db.appclient.find_one({"clientID": client_id})
 
         if app_client is None:
-            raise HTTPException(status_code=403, detail="client not found")
+            raise UnicornException(status_code=403, message="client not found")
 
         return AppClient(**app_client)
 
@@ -45,7 +46,7 @@ class AppClientService:
         app_client = db.appclient.find_one({"clientSecret": client_secret})
 
         if app_client is None:
-            raise HTTPException(status_code=403, detail="client not found")
+            raise UnicornException(status_code=403, message="client not found")
 
         return AppClient(**app_client)
 

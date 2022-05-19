@@ -1,11 +1,11 @@
-from functools import lru_cache, partial
 import math
 import re
 from datetime import datetime
-from typing import Any, Dict, List, Tuple, Type, TypeVar
+from functools import lru_cache, partial
+from typing import Any, Dict, Tuple, Type, TypeVar, Union
 
 from bson import ObjectId
-from pymongo import DESCENDING
+from pymongo import DESCENDING, ReturnDocument
 from pymongo.client_session import ClientSession
 from pymongo.results import (
     DeleteResult,
@@ -13,8 +13,8 @@ from pymongo.results import (
     InsertOneResult,
     UpdateResult,
 )
-from core.db import db
 
+from core.db import db
 from core.utils.response_service import MetaDataModel
 
 
@@ -43,7 +43,7 @@ class ModelUtilityService:
         query: dict,
         page_num: int,
         page_size: int,
-    ) -> Tuple[List[T], MetaDataModel]:
+    ) -> Tuple[list[T], MetaDataModel]:
         model = db[genericClass.__name__.lower()]
 
         """returns a set of documents belonging to page number `page_num`
@@ -83,10 +83,10 @@ class ModelUtilityService:
     def populate_and_paginate_data(
         genericClass: Type[T],
         query: dict,
-        fields: List[str],
+        fields: list[str],
         page_num: int = 1,
         page_size: int = 10,
-    ) -> Tuple[List[T], MetaDataModel]:
+    ) -> Tuple[list[T], MetaDataModel]:
         model = db[genericClass.__name__.lower()]
         # Calculate number of documents to skip
         skips = page_size * (page_num - 1)
@@ -164,28 +164,29 @@ class ModelUtilityService:
 
     @staticmethod
     def find_one_and_populate(
-        genericClass: Type[T], query: dict, fields: List[str]
+        genericClass: Type[T], query: dict, fields: list[str]
     ) -> T:
         model = db[genericClass.__name__.lower()]
-        pipeline: List[Dict[str, Any]] = [
+        pipeline: list[Dict[str, Any]] = [
             {
                 "$match": query,
             },
         ]
         for field in fields:
-            lookup = {
-                "$lookup": {
-                    "from": field,
-                    "localField": field,
-                    "foreignField": "_id",
-                    "as": field,
-                }
-            }
-            unwind = {"$unwind": {"path": f"${field}"}}
-            pipeline += [lookup, unwind]
+            lookup = [
+                {
+                    "$lookup": {
+                        "from": field,
+                        "localField": field,
+                        "foreignField": "_id",
+                        "as": field,
+                    }
+                },
+                {"$unwind": {"path": f"${field}"}},
+            ]
+            pipeline += lookup
 
-        limit = {"$limit": 1}
-        pipeline.append(limit)
+        pipeline += [{"$limit": 1}]
         [aggregation_result] = list(model.aggregate(pipeline))
         return genericClass(**aggregation_result)  # type: ignore [call-arg]
 
@@ -193,8 +194,8 @@ class ModelUtilityService:
     def find_and_populate(
         genericClass: Type[T],
         query: dict,
-        fields: List[str],
-    ) -> List[T]:
+        fields: list[str],
+    ) -> list[T]:
         model = db[genericClass.__name__.lower()]
         pipeline = [
             {
@@ -202,18 +203,19 @@ class ModelUtilityService:
             },
         ]
 
-        print(pipeline)
         for field in fields:
-            lookup = {
-                "$lookup": {
-                    "from": ModelUtilityService.__pluralize(field),
-                    "localField": field,
-                    "foreignField": "_id",
-                    "as": field,
-                }
-            }
-            unwind = {"$unwind": {"path": f"${field}"}}
-            pipeline += [lookup, unwind]
+            lookup = [
+                {
+                    "$lookup": {
+                        "from": field,
+                        "localField": field,
+                        "foreignField": "_id",
+                        "as": field,
+                    }
+                },
+                {"$unwind": {"path": f"${field}"}},
+            ]
+            pipeline += lookup
 
         return list(
             map(
@@ -223,13 +225,14 @@ class ModelUtilityService:
         )
 
     @staticmethod
-    def find_one(genericClass: Type[T], query: dict) -> T:
+    def find_one(genericClass: Type[T], query: dict) -> Union[T, None]:
         model = db[genericClass.__name__.lower()]
+        result = model.find_one(query)
 
-        return genericClass(**model.find_one(query))  # type: ignore [call-arg]
+        return genericClass(**result) if result is not None else None  # type: ignore [call-arg]
 
     @staticmethod
-    def find(genericClass: Type[T], query: dict) -> List[T]:
+    def find(genericClass: Type[T], query: dict) -> list[T]:
         model = db[genericClass.__name__.lower()]
 
         return list(
@@ -247,12 +250,14 @@ class ModelUtilityService:
     ) -> T:
         model = db[genericClass.__name__.lower()]
         # Adding the SBaseModel attributes to the insertion
-        record["createdAt"] = datetime.now()
-        record["isDeleted"] = False
-        record["updatedAt"] = datetime.now()
+        # record["createdAt"] = datetime.now()
+        # record["isDeleted"] = False
+        # record["updatedAt"] = datetime.now()
 
+        record.pop("_id", None)
         created_record: InsertOneResult = model.insert_one(record, session=session)
 
+        # return created_record
         res = model.find_one(
             {"_id": ObjectId(created_record.inserted_id)}, session=session
         )
@@ -260,19 +265,29 @@ class ModelUtilityService:
         return genericClass(**res)  # type: ignore
 
     @staticmethod
-    def model_update(
-        genericClass: Type[T], query: dict, record_to_update: dict
-    ) -> UpdateResult:
+    def model_update(genericClass: Type[T], query: dict, record: dict) -> UpdateResult:
         model = db[genericClass.__name__.lower()]
-        record = {"updatedAt": datetime.now(), **record_to_update}
+        record["updatedAt"] = datetime.now()
         updated_record: UpdateResult = model.update_one(query, {"$set": record})
+
+        return updated_record
+
+    @staticmethod
+    def model_find_one_and_update(
+        genericClass: Type[T], query: dict, record: dict
+    ) -> Any:
+        model = db[genericClass.__name__.lower()]
+        record["updatedAt"] = datetime.now()
+        updated_record = model.find_one_and_update(
+            query, {"$set": record}, return_document=ReturnDocument.AFTER
+        )
 
         return updated_record
 
     @staticmethod
     def model_create_many(
         genericClass: Type[T],
-        records: List[Dict[str, Any]],
+        records: list[Dict[str, Any]],
         session: ClientSession = None,
     ) -> InsertManyResult:
         model = db[genericClass.__name__.lower()]

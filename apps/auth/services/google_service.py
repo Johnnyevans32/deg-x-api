@@ -27,8 +27,10 @@ class GoogleService:
                 first_name, other_name = name.split()
                 password = HelperService.hash_password("password")
                 user_data = {
-                    "firstName": first_name,
-                    "lastName": other_name,
+                    "name": {
+                        "firstName": first_name,
+                        "lastName": other_name,
+                    },
                     "email": email,
                     "password": password,
                     "isVerified": True,

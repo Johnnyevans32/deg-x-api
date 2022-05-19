@@ -57,6 +57,7 @@ async def register_user(user: User, request: Request, res: Response):
             use_class_message=False,
         )
     except Exception as e:
+        # raise e
         request.app.logger.error(f"Error registering user {user.email}, {str(e)}")
         return responseService.send_response(
             res, status.HTTP_400_BAD_REQUEST, f"User Registration Failed: {str(e)}"
@@ -77,6 +78,7 @@ async def login_user(login_input: UserLoginInput, request: Request, res: Respons
             res, status.HTTP_200_OK, "User Log in Successful", resp
         )
     except Exception as e:
+        # raise e
         request.app.logger.error(f"Error logging user {login_input.email}, {str(e)}")
         return responseService.send_response(
             res, status.HTTP_400_BAD_REQUEST, f"User Login Failed: {str(e)}"
@@ -210,4 +212,30 @@ async def oauth_sign_in(user_id: str, request: Request, res: Response):
             res,
             status.HTTP_400_BAD_REQUEST,
             f"user authentication failed: {str(e)}",
+        )
+
+
+@router.post(
+    "/refresh-access-token",
+    status_code=status.HTTP_201_CREATED,
+)
+async def get_access_token(refresh_token: str, request: Request, res: Response):
+    try:
+        request.app.logger.info("authenticating refresh token for user")
+        user_resp = authService.authenticate_refresh_token(refresh_token)
+        request.app.logger.info("done authenticating refresh token for user ")
+        return responseService.send_response(
+            res,
+            status.HTTP_201_CREATED,
+            "access token retrieved",
+            user_resp,
+        )
+    except Exception as e:
+        request.app.logger.error(
+            f"Error authenticating refresh token for user {str(e)}"
+        )
+        return responseService.send_response(
+            res,
+            status.HTTP_400_BAD_REQUEST,
+            f"refresh token authentication failed: {str(e)}",
         )

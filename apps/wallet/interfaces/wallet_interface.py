@@ -1,7 +1,5 @@
 from enum import Enum
-from typing import List, Optional, Union
-
-from bson import ObjectId
+from typing import Optional, Union
 
 from apps.blockchain.interfaces.blockchain_interface import Blockchain
 from apps.user.interfaces.user_interface import User
@@ -25,14 +23,9 @@ class Wallet(SBaseModel):
     mnemonic: Optional[str]
 
     @property
-    def assets(self) -> List[WalletAsset]:
+    def assets(self) -> list[WalletAsset]:
         walletassets = ModelUtilityService.find(
             WalletAsset, {"wallet": self.id, "isDeleted": False}
         )
 
         return walletassets
-
-    class Config:
-        orm_mode = True
-        allow_population_by_field_name = True
-        json_encoders = {ObjectId: str}

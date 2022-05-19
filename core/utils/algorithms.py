@@ -1,7 +1,6 @@
-from collections import deque
 import math
+from collections import deque
 from time import time
-from typing import List
 
 
 def timer_func(func):
@@ -229,7 +228,7 @@ def get_unvisited_nodes(i, j, matrix, visited):
 
 
 def shift_linked_list(head: LinkedList, k: int):
-    linked_list: List[LinkedList] = []
+    linked_list: list[LinkedList] = []
     new_head = head
     while new_head is not None:
         linked_list.append(new_head)
@@ -292,18 +291,18 @@ def depth_first_transverse_letter_matrix(i, j, matrix, visited):
     return current_target_letter_size
 
 
-print(
-    get_smallest_target_letter(
-        [
-            ["W", "L", "W", "W", "W"],
-            ["W", "L5", "W", "W", "W"],
-            ["W", "W", "W", "L", "W"],
-            ["W", "W", "L", "L", "W"],
-            ["L", "W", "W", "L", "L"],
-            ["L", "L", "W", "W", "W"],
-        ]
-    )
-)
+# print(
+#     get_smallest_target_letter(
+#         [
+#             ["W", "L", "W", "W", "W"],
+#             ["W", "L5", "W", "W", "W"],
+#             ["W", "W", "W", "L", "W"],
+#             ["W", "W", "L", "L", "W"],
+#             ["L", "W", "W", "L", "L"],
+#             ["L", "L", "W", "W", "W"],
+#         ]
+#     )
+# )
 # print("depthhhhh")
 # print(depth_first_search(a))
 
@@ -368,3 +367,22 @@ print(
 
 # print(sumup(100))
 # print(sumupm(100))
+
+
+def traverse_list_for_node_difference(nodes: list[int]):
+    count = 0
+    current_highest_diff = 0
+    for x in range(len(nodes)):
+        for y in range(x + 1, len(nodes)):
+            print(x, y)
+            count += 1
+            diff = nodes[y] - nodes[x]
+            if diff > current_highest_diff:
+                current_highest_diff = diff
+
+    print(count)
+    return current_highest_diff
+
+
+# print(traverse_list_for_node_difference([14, 20, 4, 12, 5, 11, 2, 4]))
+print(traverse_list_for_node_difference([1, 2, 3, 4, 5, 6]))

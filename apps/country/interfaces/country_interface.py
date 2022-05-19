@@ -1,6 +1,7 @@
 from typing import Optional
 
-from bson import ObjectId
+
+from pydantic import Field
 from pymongo import ASCENDING
 
 from core.db import db
@@ -12,12 +13,7 @@ class Country(SBaseModel):
     code: str
     callingCode: str
     flag: str
-    metaData: Optional[dict]
-
-    class Config:
-        orm_mode = True
-        allow_population_by_field_name = True
-        json_encoders = {ObjectId: str}
+    metaData: Optional[dict] = Field(hidden_from_schema=True)
 
     @staticmethod
     def init():

@@ -1,0 +1,1 @@
+brownie networks add 'Binance smart chain' bsc_moralis host="https://speedy-nodes-nyc.moralis.io/f3f5c124f7dcdd098b420cd7/bsc/mainnet" name='Mainnet bsc (moralis)' explorer='https://bscscan.com/token'

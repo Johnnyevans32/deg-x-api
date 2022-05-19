@@ -4,12 +4,14 @@ from fastapi import Response, status
 from fastapi.routing import APIRouter
 
 from apps.appclient.services.appclient_service import AppClientService
+from apps.notification.telegram.services.telegram_service import TelegramService
 from core.utils.response_service import ResponseService
 
 router = APIRouter(prefix="/api/v1/health-check", tags=["Health Check 🩺"])
 
 
 appClientService = AppClientService()
+telegramService = TelegramService()
 responseService = ResponseService()
 
 client_auth = appClientService.client_auth

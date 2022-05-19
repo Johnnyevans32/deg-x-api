@@ -1,21 +1,22 @@
 from typing import Any
 
-from bson import ObjectId
+
 from pydantic import EmailStr
 
 from apps.featureconfig.services.featureconfig_service import FeatureConfigService
 from apps.notification.slack.services.slack_service import SlackService
 from apps.user.interfaces.user_interface import (
-    SignUpMethod,
     User,
     UserLoginInput,
     UserResetPasswordInput,
 )
+from apps.user.interfaces.user_token_interface import UserRefreshToken
 from apps.wallet.services.wallet_service import WalletService
 from core.db import client, db
 from core.depends import PyObjectId
 from core.utils.helper_service import HelperService
 from core.utils.model_utility_service import ModelUtilityService
+from bson import ObjectId
 
 
 class UserService:
@@ -28,7 +29,6 @@ class UserService:
         session.start_transaction()
         try:
             self.check_if_username_exist_and_fail(user.username)
-            user.signUpMethod = SignUpMethod.email
             dict_user = user.dict(by_alias=True)
             user_obj = ModelUtilityService.model_create(User, dict_user, session)
             self.walletService.create_wallet(user_obj, session)
@@ -98,3 +98,25 @@ class UserService:
 
     def hard_del_user(self, email: EmailStr) -> None:
         ModelUtilityService.model_hard_delete(User, {"email": email})
+
+    def create_user_refresh_token(self, user: User, refresh_token: str):
+        ModelUtilityService.model_find_one_and_update(
+            UserRefreshToken,
+            {"user": user.id, "isDeleted": False},
+            {"isDeleted": True},
+        )
+
+        ModelUtilityService.model_create(
+            UserRefreshToken,
+            {"user": user.id, "refreshToken": refresh_token},
+        )
+
+    def get_user_refresh_token(self, refresh_token: str):
+        user_refresh_token = ModelUtilityService.find_one(
+            UserRefreshToken, {"refreshToken": refresh_token, "isDeleted": False}
+        )
+
+        if user_refresh_token is None:
+            raise Exception("invalid refresh token")
+
+        return user_refresh_token
