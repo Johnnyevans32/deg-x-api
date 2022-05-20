@@ -27,8 +27,8 @@ jobs:
           pkg-manager: pip
           pypi-cache: true
       - python/install-packages:
-          args: poetry
-          pkg-manager: nox
+          args: nox
+          pkg-manager: pip
           pypi-cache: true
       - run:
           name: Noxing the codebase
