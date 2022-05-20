@@ -14,9 +14,6 @@ jobs:
       - image: cimg/python:3.10.2
     steps:
       - checkout
-      # - restore_cache:
-      #     # **restores saved dependency cache if the Branch key template or requirements.txt files have not changed since the previous run**
-      #     key: deps1-{{ .Branch }}-{{ checksum "requirements.txt" }}
       - python/install-packages:
           pkg-manager: pip
       # - python/install-packages:
@@ -25,20 +22,30 @@ jobs:
       - python/install-packages:
           args: poetry
           pkg-manager: pip
-          pypi-cache: true
       - python/install-packages:
           args: nox
           pkg-manager: pip
-          pypi-cache: true
+
+      - python/install-packages:
+          pkg-manager: poetry
+      - python/install-packages:
+          args: coverage
+          pkg-manager: poetry
+      - python/install-packages:
+          args: pytest
+          pkg-manager: poetry
+      - python/install-packages:
+          args: flake8 flake8-bugbear
+          pkg-manager: poetry
+      - python/install-packages:
+          args: mypy
+          pkg-manager: poetry
+      - python/install-packages:
+          args: --allow-prereleases black
+          pkg-manager: poetry
       - run:
           name: Noxing the codebase
-          command: |
-            poetry add -D coverage
-            poetry add -D pytest
-            poetry add -D flake8 flake8-bugbear
-            poetry add -D mypy
-            poetry add -D --allow-prereleases black
-            nox
+          command: nox
 
 # Orchestrate our job run sequence
 workflows:
