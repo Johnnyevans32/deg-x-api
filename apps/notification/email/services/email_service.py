@@ -58,7 +58,7 @@ class EmailService:
             subject_template=subject,
             html_template=template_str,
             environment={
-                "name": f"{user.name.firsts} {user.name.last}",
+                "name": f"{user.name.first} {user.name.last}",
                 "link": confirm_url,
                 "valid_hours": self.serializer_expiration_in_hr,
             },

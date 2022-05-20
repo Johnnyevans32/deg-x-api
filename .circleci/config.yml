@@ -30,7 +30,7 @@ jobs:
           pkg-manager: poetry
       - run:
           name: Noxing the codebase
-          command: nox
+          command: nox --reuse-existing-virtualenvs --no-install
 
 # Orchestrate our job run sequence
 workflows:

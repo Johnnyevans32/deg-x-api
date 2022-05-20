@@ -4,45 +4,31 @@ import nox
 
 
 @nox.session(python=["3.10"])
-def shared_venv(session):
+def tests(session: nox.Session):
     session.install("poetry")
     session.run("poetry", "install")
     session.install("-r", "requirements.txt")
-
-    if session.posargs:
-        match session.posargs[0]:
-            case 'tests':
-                print('jkjs', session.posargs[0])
-                session.run("python", "-m", "coverage", "run", "-m", "pytest")
-                session.run("coverage", "report")
-            case 'lint':
-                print('jkjs', session.posargs[0])
-                session.run("black", "--check", ".")
-                session.run("flake8", ".")
-            case 'typing':
-                print('jkjs', session.posargs[0])
-                session.run("mypy", "--config-file", "mypy.ini", ".")
-            case _:
-                pass
+    session.run("python", "-m", "coverage", "run", "-m", "pytest")
+    session.run("coverage", "report")
 
 
 @nox.session
-def tests(session):
-    session.notify('shared_venv', posargs=['tests'])
+def lint(session: nox.Session):
+    session.install("poetry")
+    session.run("poetry", "install")
+    session.run("black", "--check", ".")
+    session.run("flake8", ".")
 
 
 @nox.session
-def lint(session):
-    session.notify('shared_venv', posargs=['lint'])
+def typing(session: nox.Session):
+    session.install("poetry")
+    session.run("poetry", "install")
+    session.run("mypy", "--config-file", "mypy.ini", ".")
 
 
 @nox.session
-def typing(session):
-    session.notify('shared_venv', posargs=['typing'])
-
-
-@nox.session
-def safety(session):
+def safety(session: nox.Session):
     with tempfile.NamedTemporaryFile() as requirements:
         session.run(
             "poetry",
