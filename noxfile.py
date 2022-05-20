@@ -1,29 +1,30 @@
 import tempfile
-
 import nox
 
+from nox_poetry import session
 
-@nox.session(python=["3.10"])
+
+@session(python=["3.10"])
 def tests(session: nox.Session):
-    session.install("poetry")
-    session.run("poetry", "install")
+    session.install("poetry", ".")
+    # session.run("poetry", "install")
     session.install("-r", "requirements.txt")
     session.run("python", "-m", "coverage", "run", "-m", "pytest")
     session.run("coverage", "report")
 
 
-@nox.session
+@session
 def lint(session: nox.Session):
-    session.install("poetry")
-    session.run("poetry", "install")
+    # session.install("poetry")
+    # session.run("poetry", "install")
     session.run("black", "--check", ".")
     session.run("flake8", ".")
 
 
-@nox.session
+@session
 def typing(session: nox.Session):
-    session.install("poetry")
-    session.run("poetry", "install")
+    # session.install("poetry")
+    # session.run("poetry", "install")
     session.run("mypy", "--config-file", "mypy.ini", ".")
 
 
