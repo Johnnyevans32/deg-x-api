@@ -9,25 +9,39 @@ orbs:
 
 # Define the jobs we want to run for this project
 jobs:
-  nox:
+  build_and_nox:
     docker:
       - image: cimg/python:3.10.2
     steps:
       - checkout
+      # - restore_cache:
+      #     # **restores saved dependency cache if the Branch key template or requirements.txt files have not changed since the previous run**
+      #     key: deps1-{{ .Branch }}-{{ checksum "requirements.txt" }}
+      - python/install-packages:
+          pkg-manager: pip
+      # - python/install-packages:
+      #     pip-dependency-file: dev-requirements.txt
+      #     pkg-manager: pip
+      - python/install-packages:
+          args: poetry
+          pkg-manager: pip
+          pypi-cache: true
+      - python/install-packages:
+          args: poetry
+          pkg-manager: nox
+          pypi-cache: true
       - run:
           name: Noxing the codebase
           command: |
-            pip install poetry
             poetry add -D coverage
             poetry add -D pytest
             poetry add -D flake8 flake8-bugbear
             poetry add -D mypy
             poetry add -D --allow-prereleases black
-            pip install nox
             nox
 
 # Orchestrate our job run sequence
 workflows:
   nox_and_deploy:
     jobs:
-      - nox
+      - build_and_nox
