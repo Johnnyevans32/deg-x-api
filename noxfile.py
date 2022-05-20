@@ -3,7 +3,7 @@ import tempfile
 import nox
 
 
-@nox.session(python=["3.10"])
+@nox.session(python=["3.10"], reuse_venv=True)
 def tests(session):
     session.install("poetry")
     session.run("poetry", "install")
@@ -12,7 +12,7 @@ def tests(session):
     session.run("coverage", "report")
 
 
-@nox.session
+@nox.session(reuse_venv=True)
 def lint(session):
     # session.install("poetry")
     # session.run("poetry", "install")
@@ -20,14 +20,14 @@ def lint(session):
     session.run("flake8", ".")
 
 
-@nox.session
+@nox.session(reuse_venv=True)
 def typing(session):
     # session.install("poetry")
     # session.run("poetry", "install")
     session.run("mypy", "--config-file", "mypy.ini", ".")
 
 
-@nox.session
+@nox.session(reuse_venv=True)
 def safety(session):
     with tempfile.NamedTemporaryFile() as requirements:
         session.run(
