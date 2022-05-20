@@ -25,28 +25,16 @@ def shared_venv(session):
 
 @nox.session
 def tests(session):
-    # session.install("poetry")
-    # session.run("poetry", "install")
-    # session.install("-r", "requirements.txt")
-    # session.run("python", "-m", "coverage", "run", "-m", "pytest")
-    # session.run("coverage", "report")
     session.notify('shared_venv', posargs=['tests'])
 
 
 @nox.session
 def lint(session):
-    # session.install("poetry")
-    # session.run("poetry", "install")
-    # session.run("black", "--check", ".")
-    # session.run("flake8", ".")
     session.notify('shared_venv', posargs=['lint'])
 
 
 @nox.session
 def typing(session):
-    # session.install("poetry")
-    # session.run("poetry", "install")
-    # session.run("mypy", "--config-file", "mypy.ini", ".")
     session.notify('shared_venv', posargs=['typing'])
 
 
