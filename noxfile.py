@@ -15,7 +15,8 @@ def shared_venv(session):
                 session.run("python", "-m", "coverage", "run", "-m", "pytest")
                 session.run("coverage", "report")
             case 'lint':
-                session.run("black", "--check", ".", "--target-version", "py310")
+                print('jsjksksk')
+                session.run("black", "--target-version", "py310")
                 session.run("flake8", ".")
             case 'typing':
                 session.run("mypy", "--config-file", "mypy.ini", ".")
