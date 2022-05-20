@@ -27,3 +27,4 @@ py-solc-x~=1.1.1
 frozendict
 mnemonic
 pendulum
+nox_poetry
