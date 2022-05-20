@@ -5,25 +5,25 @@ import nox
 
 @nox.session(python=["3.10"])
 def tests(session):
-    session.install("poetry")
-    session.run("poetry", "install")
-    session.install("-r", "requirements.txt")
+    # session.install("poetry")
+    # session.run("poetry", "install")
+    # session.install("-r", "requirements.txt")
     session.run("python", "-m", "coverage", "run", "-m", "pytest")
     session.run("coverage", "report")
 
 
 @nox.session
 def lint(session):
-    session.install("poetry")
-    session.run("poetry", "install")
+    # session.install("poetry")
+    # session.run("poetry", "install")
     session.run("black", "--check", ".")
     session.run("flake8", ".")
 
 
 @nox.session
 def typing(session):
-    session.install("poetry")
-    session.run("poetry", "install")
+    # session.install("poetry")
+    # session.run("poetry", "install")
     session.run("mypy", "--config-file", "mypy.ini", ".")
 
 
