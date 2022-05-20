@@ -14,16 +14,16 @@ def tests(session):
 
 @nox.session
 def lint(session):
-    session.install("poetry")
-    session.run("poetry", "install")
+    # session.install("poetry")
+    # session.run("poetry", "install")
     session.run("black", "--check", ".")
     session.run("flake8", ".")
 
 
 @nox.session
 def typing(session):
-    session.install("poetry")
-    session.run("poetry", "install")
+    # session.install("poetry")
+    # session.run("poetry", "install")
     session.run("mypy", "--config-file", "mypy.ini", ".")
 
 
