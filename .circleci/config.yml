@@ -28,21 +28,6 @@ jobs:
 
       - python/install-packages:
           pkg-manager: poetry
-      - python/install-packages:
-          args: coverage
-          pkg-manager: poetry
-      - python/install-packages:
-          args: pytest
-          pkg-manager: poetry
-      - python/install-packages:
-          args: flake8 flake8-bugbear
-          pkg-manager: poetry
-      - python/install-packages:
-          args: mypy
-          pkg-manager: poetry
-      - python/install-packages:
-          args: --allow-prereleases black
-          pkg-manager: poetry
       - run:
           name: Noxing the codebase
           command: nox
