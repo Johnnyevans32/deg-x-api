@@ -12,12 +12,15 @@ def shared_venv(session):
     if session.posargs:
         match session.posargs[0]:
             case 'tests':
+                print('jkjs', session.posargs[0])
                 session.run("python", "-m", "coverage", "run", "-m", "pytest")
                 session.run("coverage", "report")
             case 'lint':
+                print('jkjs', session.posargs[0])
                 session.run("black", "--check", ".")
                 session.run("flake8", ".")
             case 'typing':
+                print('jkjs', session.posargs[0])
                 session.run("mypy", "--config-file", "mypy.ini", ".")
             case _:
                 pass
