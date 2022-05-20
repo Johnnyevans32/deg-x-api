@@ -15,7 +15,7 @@ def tests(session: nox.Session):
 
 @session
 def lint(session: nox.Session):
-    # session.install("poetry")
+    session.install("poetry", ".")
     # session.run("poetry", "install")
     session.run("black", "--check", ".")
     session.run("flake8", ".")
@@ -23,7 +23,7 @@ def lint(session: nox.Session):
 
 @session
 def typing(session: nox.Session):
-    # session.install("poetry")
+    session.install("poetry", ".")
     # session.run("poetry", "install")
     session.run("mypy", "--config-file", "mypy.ini", ".")
 
