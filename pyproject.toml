@@ -1,11 +1,11 @@
 [tool.poetry]
-name = "nft"
+name = "deg-x"
 version = "0.1.0"
-description = "nft"
+description = "deg x"
 authors = ["jevan <evanseburu32@gmail.com>"]
 
 [tool.poetry.dependencies]
-python = "^3.7"
+python = "^3.9"
 
 
 [tool.poetry.dev-dependencies]
