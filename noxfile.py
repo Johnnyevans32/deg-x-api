@@ -2,8 +2,6 @@ import tempfile
 
 import nox
 
-nox.options.envdir = ".cache"
-
 
 @nox.session(python=["3.10"])
 def tests(session):
