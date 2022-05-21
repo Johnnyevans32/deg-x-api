@@ -37,8 +37,8 @@ jobs:
     docker:
       - image: cimg/python:3.10.2
     steps:
-      - setup_remote_docker:
-          version: 20.10.14
+      - checkout
+      - setup_remote_docker
       - run:
           name: Build and push Docker image
           command: |
