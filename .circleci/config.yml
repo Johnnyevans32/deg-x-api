@@ -42,10 +42,9 @@ jobs:
       - run:
           name: Build and push Docker image
           command: |
-            ls
-            docker login -u $DOCKER_HUB_USER -p $DOCKER_HUB_PASSWORD
-            docker build -t jevan32/deg-x-api --file ../Dockefile .
-            docker push jevan32/deg-x-api
+            echo "$DOCKER_HUB_PASSWORD" | docker login -u $DOCKER_HUB_USER --password-stdin
+            docker build -t jevan32/deg-x-api:latest .
+            docker push jevan32/deg-x-api:latest
 
 # Orchestrate our job run sequence
 workflows:
