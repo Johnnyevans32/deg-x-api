@@ -18,6 +18,7 @@ from core.config import settings
 from core.cron import CronJob
 from core.db import client
 from core.db.event_listeners import CommandLogger
+from core.db.populate_core_data import seed_deg_x
 from core.middlewares.sentry import sentry_setup
 from core.middlewares.settings import settings_middleware
 from core.utils.custom_exceptions import UnicornException, UnicornRequest
@@ -75,6 +76,7 @@ def create_app():
         monitoring.register(CommandLogger())
         if settings.CRON_ENABLED:
             cronJob.scheduler.start()
+        seed_deg_x()
         User.init()
         BlockchainTransaction.init()
         sentry_setup()
