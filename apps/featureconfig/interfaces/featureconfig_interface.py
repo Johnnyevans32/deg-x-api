@@ -9,7 +9,7 @@ from core.depends.model import SBaseModel
 
 
 class FeatureName(str, Enum):
-    SignUpBonus = "sign-up-bonus"
+    SIGNUPBONUS = "sign-up-bonus"
 
 
 class FeatureStatusUpdateDTO(BaseModel):

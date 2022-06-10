@@ -1,5 +1,3 @@
-from typing import Union
-
 import jwt
 import pendulum
 
@@ -7,7 +5,7 @@ from core.config import settings
 
 
 class JWTService:
-    TOKEN_TYPE: dict[str, dict[str, Union[str, int]]] = {
+    TOKEN_TYPE: dict[str, dict[str, str | int]] = {
         "ACCESS_TOKEN": {
             "key": settings.ACCESS_TOKEN_JWT_SECRET,
             "expiresIn": settings.ACCESS_TOKEN_EXPIRATION,

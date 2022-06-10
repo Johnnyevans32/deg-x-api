@@ -14,7 +14,7 @@ from apps.user.interfaces.user_token_interface import UserRefreshToken
 from apps.wallet.services.wallet_service import WalletService
 from core.db import client, db
 from core.depends import PyObjectId
-from core.utils.helper_service import HelperService
+from core.utils.utils_service import Utils
 from core.utils.model_utility_service import ModelUtilityService
 
 
@@ -28,7 +28,7 @@ class UserService:
         session.start_transaction()
         try:
             self.check_if_username_exist_and_fail(user.username)
-            dict_user = user.dict(by_alias=True)
+            dict_user = user.dict(by_alias=True, exclude_none=True)
             user_obj = ModelUtilityService.model_create(User, dict_user, session)
             self.walletService.create_wallet(user_obj, session)
             session.commit_transaction()
@@ -42,9 +42,7 @@ class UserService:
     def login_user(self, login_user_input: UserLoginInput) -> User:
         user_obj = self.get_user_by_email(login_user_input.email)
 
-        if not HelperService.verify_password(
-            user_obj.password, login_user_input.password
-        ):
+        if not Utils.verify_password(user_obj.password, login_user_input.password):
             raise Exception("wrong credentials")
         if user_obj.isVerified is False:
             raise Exception("user not verified")
@@ -79,7 +77,7 @@ class UserService:
     ) -> None:
         user = self.get_user_by_email(email)
 
-        new_password = HelperService.hash_password(password_reset_dto.password)
+        new_password = Utils.hash_password(password_reset_dto.password)
 
         query = {"_id": user.id, "isDeleted": False}
         record_to_update = {"password": new_password}
@@ -107,15 +105,14 @@ class UserService:
 
         ModelUtilityService.model_create(
             UserRefreshToken,
-            {"user": user.id, "refreshToken": refresh_token},
+            UserRefreshToken(**{"user": user.id, "refreshToken": refresh_token}).dict(
+                by_alias=True, exclude_none=True
+            ),
         )
 
     def get_user_refresh_token(self, refresh_token: str):
         user_refresh_token = ModelUtilityService.find_one(
-            UserRefreshToken, {"refreshToken": refresh_token, "isDeleted": False}
+            UserRefreshToken, {"refreshToken": refresh_token, "isDeleted": False}, True
         )
-
-        if user_refresh_token is None:
-            raise Exception("invalid refresh token")
 
         return user_refresh_token

@@ -3,32 +3,31 @@ from eth_typing import Address
 from web3.contract import Contract
 
 from apps.blockchain.ethereum.ethereum_service import EthereumService
+from apps.defi.interfaces.defi_provider_interface import DefiProvider
 from apps.defi.lending.aave.aave_interface import IUserAcccountData
+from apps.defi.lending.interfaces.lending_interface import InterestRateMode
 from apps.defi.lending.types.lending_service_interface import ILendingService
-from core.config import settings
-from core.utils.helper_service import HelperService
+from core.utils.utils_service import Utils
 
 
 class AaveService(ILendingService):
-    address: bytes
     ethereumService = EthereumService()
-
-    def __init__(self) -> None:
-        super().__init__()
-        self.address = eth_utils.to_bytes(hexstr=settings.AAVE_CONTRACT_ADDRESS)
 
     def name(self) -> str:
         return "aave"
 
-    def get_contract_obj(self) -> Contract:
-        web3 = self.ethereumService.get_network_provider()
-        abi = HelperService.get_compiled_sol("ILendingPool", "0.6.12")
-        aave_protocol = web3.eth.contract(address=Address(self.address), abi=abi)
+    def get_contract_obj(self, defi_provider: DefiProvider) -> Contract:
+        address = eth_utils.to_bytes(hexstr=defi_provider.contractAddress)
+        web3 = self.ethereumService.get_network_provider(defi_provider.network)
+        abi = Utils.get_compiled_sol("ILendingPool", "0.6.12")
+        aave_protocol = web3.eth.contract(address=Address(address), abi=abi)
 
         return aave_protocol
 
-    def get_user_account_data(self, user: bytes) -> IUserAcccountData:
-        aave_contract = self.get_contract_obj()
+    def get_user_account_data(
+        self, user: bytes, defi_provider: DefiProvider
+    ) -> IUserAcccountData:
+        aave_contract = self.get_contract_obj(defi_provider)
         user_account_data: list[float] = aave_contract.functions.getUserAccountData(
             user
         ).call()
@@ -52,54 +51,85 @@ class AaveService(ILendingService):
             }
         )
 
-    def get_user_config(self, user: bytes):
-        aave_contract = self.get_contract_obj()
+    def get_user_config(self, user: bytes, defi_provider: DefiProvider):
+        aave_contract = self.get_contract_obj(defi_provider)
         user_config_data = aave_contract.functions.getUserConfiguration(user).call()
-
-        print(user_config_data)
         return user_config_data
 
-    def deposit(self, asset: bytes, amount: int, on_behalf_of: bytes, referral_code=0):
-        aave_contract = self.get_contract_obj()
+    def deposit(
+        self,
+        asset: bytes,
+        amount: float,
+        on_behalf_of: bytes,
+        defi_provider: DefiProvider,
+        referral_code=0,
+    ):
+        aave_contract = self.get_contract_obj(defi_provider)
         return aave_contract.functions.deposit(
             asset, amount, on_behalf_of, referral_code
         ).call()
 
-    def withdraw(self, asset: bytes, amount: int, to: bytes) -> float:
-        aave_contract = self.get_contract_obj()
+    def withdraw(
+        self,
+        asset: bytes,
+        amount: int,
+        to: bytes,
+        defi_provider: DefiProvider,
+    ) -> float:
+        aave_contract = self.get_contract_obj(defi_provider)
         return aave_contract.functions.withdraw(asset, amount, to).call()
 
     def borrow(
         self,
         asset: bytes,
-        amount: int,
-        interest_rate_mode: int,
+        amount: float,
+        interest_rate_mode: InterestRateMode,
         on_behalf_of: bytes,
+        defi_provider: DefiProvider,
         referral_code=0,
     ):
-        aave_contract = self.get_contract_obj()
+        aave_interest_rate_mode = {
+            InterestRateMode.STABLE: 0,
+            InterestRateMode.VARIABLE: 1,
+        }
+        aave_contract = self.get_contract_obj(defi_provider)
         return aave_contract.functions.borrow(
-            asset, amount, interest_rate_mode, referral_code, on_behalf_of
+            asset,
+            amount,
+            aave_interest_rate_mode[interest_rate_mode],
+            referral_code,
+            on_behalf_of,
         ).call()
 
     def repay(
         self,
         asset: bytes,
-        amount: int,
+        amount: float,
         rate_mode: int,
         on_behalf_of: bytes,
+        defi_provider: DefiProvider,
     ) -> float:
-        aave_contract = self.get_contract_obj()
+        aave_contract = self.get_contract_obj(defi_provider)
         return aave_contract.functions.repay(
             asset, amount, rate_mode, on_behalf_of
         ).call()
 
-    def swap_borrow_rate_mode(self, asset: bytes, rateMode: int):
-        aave_contract = self.get_contract_obj()
-        return aave_contract.functions.swapBorrowRateMode(asset, rateMode).call()
+    def swap_borrow_rate_mode(
+        self,
+        asset: bytes,
+        rate_mode: int,
+        defi_provider: DefiProvider,
+    ):
+        aave_contract = self.get_contract_obj(defi_provider)
+        return aave_contract.functions.swapBorrowRateMode(asset, rate_mode).call()
 
-    def set_user_use_reserve_as_collateral(self, asset: bytes, use_as_collateral: bool):
-        aave_contract = self.get_contract_obj()
+    def set_user_use_reserve_as_collateral(
+        self,
+        asset: bytes,
+        use_as_collateral: bool,
+        defi_provider: DefiProvider,
+    ):
+        aave_contract = self.get_contract_obj(defi_provider)
         return aave_contract.functions.setUserUseReserveAsCollateral(
             asset, use_as_collateral
         ).call()

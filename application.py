@@ -10,6 +10,7 @@ from pymongo import monitoring
 from starlette.exceptions import ExceptionMiddleware
 from starlette.exceptions import HTTPException as StarletteHTTPException
 from starlette.responses import JSONResponse
+from apps.blockchain.interfaces.transaction_interface import BlockchainTransaction
 
 from apps.user.interfaces.user_interface import User
 from core import urls
@@ -19,7 +20,7 @@ from core.db import client
 from core.db.event_listeners import CommandLogger
 from core.middlewares.sentry import sentry_setup
 from core.middlewares.settings import settings_middleware
-from core.utils.custom_exceptions import UnicornException
+from core.utils.custom_exceptions import UnicornException, UnicornRequest
 from core.utils.loggly import logger
 from core.utils.response_service import ResponseService
 
@@ -75,6 +76,7 @@ def create_app():
         if settings.CRON_ENABLED:
             cronJob.scheduler.start()
         User.init()
+        BlockchainTransaction.init()
         sentry_setup()
         logger.info("Done setting up model collections")
 
@@ -86,7 +88,7 @@ def create_app():
         logger.info("Closed connection with MongoDB.")
 
     @app.exception_handler(UnicornException)
-    async def unicorn_exception_handler(request: Request, exc: UnicornException):
+    async def unicorn_exception_handler(request: UnicornRequest, exc: UnicornException):
         return JSONResponse(
             {"message": exc.message, "data": exc.data},
             status_code=exc.status_code,

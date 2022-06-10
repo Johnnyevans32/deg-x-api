@@ -1,9 +1,10 @@
 # -*- coding: utf-8 -*-
-from fastapi import Request, Response, status
+from fastapi import Response, status
 from fastapi.routing import APIRouter
 
 from apps.country.interfaces.country_interface import Country
 from apps.country.services.country_service import CountryService
+from core.utils.custom_exceptions import UnicornRequest
 from core.utils.response_service import ResponseService, get_response_model
 
 router = APIRouter(prefix="/api/v1/country", tags=["Country 🇺🇸🇳🇬"])
@@ -15,7 +16,7 @@ responseService = ResponseService()
 
 @router.get("", response_model=get_response_model(list[Country], "CountryResponse"))
 async def get_countries(
-    request: Request,
+    request: UnicornRequest,
     response: Response,
     page_num: int = 1,
     page_size: int = 10,
@@ -40,7 +41,7 @@ async def get_countries(
     response_model=get_response_model(list[Country], "SearchCountryResponse"),
 )
 async def search_countries(
-    request: Request,
+    request: UnicornRequest,
     response: Response,
     search_query_name: str,
     page_num: int = 1,

@@ -6,7 +6,7 @@ from pydantic import EmailStr
 
 from apps.user.interfaces.user_interface import User
 from core.config import settings
-from core.utils.helper_service import HelperService
+from core.utils.utils_service import Utils
 
 
 class EmailService:
@@ -44,7 +44,7 @@ class EmailService:
         print(email_to, settings.MAIL_SENDER, environment, r)
 
     def send_verification(self, user: User) -> None:
-        token = HelperService.generate_confirmation_token(user.email)
+        token = Utils.generate_confirmation_token(user.email)
         confirm_url = settings.UI_URL + "account/confirm/" + str(token)
 
         subject = "Verify your email address"
@@ -65,7 +65,7 @@ class EmailService:
         )
 
     def send_forgotten_password_link(self, user: User) -> None:
-        token = HelperService.generate_confirmation_token(user.email)
+        token = Utils.generate_confirmation_token(user.email)
         password_reset_url = settings.UI_URL + "account/update-password/" + str(token)
 
         subject = "Forgotten your password?"

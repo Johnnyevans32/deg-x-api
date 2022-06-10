@@ -49,7 +49,6 @@ class JWTBearer(HTTPBearer):
             )
 
     def verify_jwt(self, jwt_token: str) -> dict:
-        print(jwt_token)
         payload = self.jwtService.decode_jwt(jwt_token, "ACCESS_TOKEN")
 
         return payload

@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from fastapi import Request, Response, status
+from fastapi import Response, status
 from fastapi.routing import APIRouter
 
 from apps.featureconfig.interfaces.featureconfig_interface import (
@@ -7,6 +7,7 @@ from apps.featureconfig.interfaces.featureconfig_interface import (
     FeatureStatusUpdateDTO,
 )
 from apps.featureconfig.services.featureconfig_service import FeatureConfigService
+from core.utils.custom_exceptions import UnicornRequest
 from core.utils.response_service import ResponseService
 
 router = APIRouter(prefix="/api/v1/feature-config", tags=["Feature Config 🌈"])
@@ -18,7 +19,7 @@ responseService = ResponseService()
 
 @router.get("/check-status/{feature_name}")
 async def check_feature_status(
-    request: Request, response: Response, feature_name: FeatureName
+    request: UnicornRequest, response: Response, feature_name: FeatureName
 ):
     try:
         request.app.logger.info(f"checking enabled status for {feature_name} feature")
@@ -41,7 +42,7 @@ async def check_feature_status(
 
 @router.put("/update-status/{feature_name}")
 async def update_feature_status(
-    request: Request,
+    request: UnicornRequest,
     res: Response,
     feature_name: FeatureName,
     feature_status_update_dto: FeatureStatusUpdateDTO,

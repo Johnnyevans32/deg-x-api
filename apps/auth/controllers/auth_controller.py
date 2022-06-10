@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Request, Response
+from fastapi import APIRouter, Response
 from pydantic import EmailStr
 from pymongo.errors import DuplicateKeyError
 from starlette import status
@@ -13,7 +13,8 @@ from apps.user.interfaces.user_interface import (
     UserResetPasswordInput,
 )
 from apps.user.services.user_service import UserService
-from core.utils.helper_service import HelperService
+from core.utils.custom_exceptions import UnicornRequest
+from core.utils.utils_service import Utils
 from core.utils.response_service import ResponseService, get_response_model
 
 router = APIRouter(prefix="/api/v1/account", tags=["Auth 🔐"])
@@ -31,7 +32,7 @@ googleService = GoogleService()
     status_code=status.HTTP_201_CREATED,
     response_model=get_response_model(AuthResponse, "RegisterResponse"),
 )
-async def register_user(user: User, request: Request, res: Response):
+async def register_user(user: User, request: UnicornRequest, res: Response):
     try:
         request.app.logger.info(f"creating user with email - {user.email}")
         resp = authService.create_account(user)
@@ -69,7 +70,9 @@ async def register_user(user: User, request: Request, res: Response):
     status_code=status.HTTP_200_OK,
     response_model=get_response_model(AuthResponse, "LoginResponse"),
 )
-async def login_user(login_input: UserLoginInput, request: Request, res: Response):
+async def login_user(
+    login_input: UserLoginInput, request: UnicornRequest, res: Response
+):
     try:
         request.app.logger.info(f"logging in user with email - {login_input.email}")
         resp = authService.login_user(login_input)
@@ -86,9 +89,9 @@ async def login_user(login_input: UserLoginInput, request: Request, res: Respons
 
 
 @router.get("/confirm/{token}")
-async def confirm_email(request: Request, res: Response, token):
+async def confirm_email(request: UnicornRequest, res: Response, token):
     try:
-        email = HelperService.confirm_token(token)
+        email = Utils.confirm_token(token)
         if not email:
             request.app.logger.error("Email invalid or expired")
             return responseService.send_response(
@@ -110,7 +113,7 @@ async def confirm_email(request: Request, res: Response, token):
 
 @router.get("/forgotten_password_link/{user_email}")
 async def send_forgotten_password_link(
-    request: Request, res: Response, user_email: EmailStr
+    request: UnicornRequest, res: Response, user_email: EmailStr
 ):
     try:
         user = userService.get_user_by_email(user_email)
@@ -137,13 +140,13 @@ async def send_forgotten_password_link(
 
 @router.put("/update-password/{token}")
 async def update_password(
-    request: Request,
+    request: UnicornRequest,
     res: Response,
     token,
     password_reset_dto: UserResetPasswordInput,
 ):
     try:
-        email = HelperService.confirm_token(token)
+        email = Utils.confirm_token(token)
         if not email:
             request.app.logger.error("Email invalid or expired")
             return responseService.send_response(
@@ -168,7 +171,9 @@ async def update_password(
 
 
 @router.get("/resend-verification/{user_email}")
-async def resend_confirmation(request: Request, res: Response, user_email: EmailStr):
+async def resend_confirmation(
+    request: UnicornRequest, res: Response, user_email: EmailStr
+):
     try:
         user = userService.get_user_by_email(user_email)
         request.app.logger.info(
@@ -195,7 +200,7 @@ async def resend_confirmation(request: Request, res: Response, user_email: Email
     status_code=status.HTTP_201_CREATED,
     response_model=get_response_model(AuthResponse, "OAuthRegisterResponse"),
 )
-async def oauth_sign_in(user_id: str, request: Request, res: Response):
+async def oauth_sign_in(user_id: str, request: UnicornRequest, res: Response):
     try:
         request.app.logger.info(f"authenticating user with oauth id - {user_id}")
         user_resp = await googleService.verify_oauth_sign_in(user_id)
@@ -219,7 +224,7 @@ async def oauth_sign_in(user_id: str, request: Request, res: Response):
     "/refresh-access-token",
     status_code=status.HTTP_201_CREATED,
 )
-async def get_access_token(refresh_token: str, request: Request, res: Response):
+async def get_access_token(refresh_token: str, request: UnicornRequest, res: Response):
     try:
         request.app.logger.info("authenticating refresh token for user")
         user_resp = authService.authenticate_refresh_token(refresh_token)

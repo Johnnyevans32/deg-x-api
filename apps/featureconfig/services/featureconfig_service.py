@@ -19,10 +19,12 @@ class FeatureConfigService:
     def get_feature_by_name(self, name: FeatureName) -> FeatureConfig:
         feature_config = db.featureconfig.find_one({"name": name})
 
-        if not feature_config:
+        if feature_config is None:
             feature_config = ModelUtilityService.model_create(
                 FeatureConfig,
-                {"name": name, "isEnabled": False},
+                FeatureConfig(**{"name": name, "isEnabled": False}).dict(
+                    by_alias=True, exclude_none=True
+                ),
             )
         else:
             feature_config = FeatureConfig(**feature_config)

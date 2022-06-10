@@ -1,4 +1,7 @@
 import abc
+from apps.defi.interfaces.defi_provider_interface import DefiProvider
+
+from apps.defi.lending.interfaces.lending_interface import InterestRateMode
 
 
 class ILendingService(metaclass=abc.ABCMeta):
@@ -15,24 +18,32 @@ class ILendingService(metaclass=abc.ABCMeta):
         raise NotImplementedError
 
     @abc.abstractmethod
-    def get_user_account_data(self, user: bytes):
+    def get_user_account_data(self, user: bytes, defi_provider: DefiProvider):
         raise NotImplementedError
 
     @abc.abstractmethod
-    def get_user_config(self, user: bytes):
+    def get_user_config(self, user: bytes, defi_provider: DefiProvider):
         raise NotImplementedError
 
     @abc.abstractmethod
-    def deposit(self, asset: bytes, amount: int, on_behalf_of: bytes, referral_code=0):
+    def deposit(
+        self,
+        asset: bytes,
+        amount: int,
+        on_behalf_of: bytes,
+        defi_provider: DefiProvider,
+        referral_code=0,
+    ):
         raise NotImplementedError
 
     @abc.abstractmethod
     def borrow(
         self,
         asset: bytes,
-        amount: int,
-        interest_rate_mode: int,
+        amount: float,
+        interest_rate_mode: InterestRateMode,
         on_behalf_of: bytes,
+        defi_provider: DefiProvider,
         referral_code=0,
     ):
         raise NotImplementedError
@@ -41,8 +52,9 @@ class ILendingService(metaclass=abc.ABCMeta):
     def repay(
         self,
         asset: bytes,
-        amount: int,
+        amount: float,
         rate_mode: int,
         on_behalf_of: bytes,
+        defi_provider: DefiProvider,
     ):
         raise NotImplementedError

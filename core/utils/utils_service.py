@@ -5,9 +5,9 @@ import os
 import random
 import string
 import time
-from functools import lru_cache, wraps
+from functools import lru_cache, partial, wraps
 from pathlib import Path
-from typing import Union
+from typing import Any, Type, TypeVar
 
 import frozendict
 from itsdangerous import URLSafeTimedSerializer
@@ -49,16 +49,18 @@ def timer_func(func):
     # This function shows the execution time of
     # the function object passed
     def wrap_func(*args, **kwargs):
-        t1 = time()
+        t1 = time.time()
         result = func(*args, **kwargs)
-        t2 = time()
+        t2 = time.time()
         print(f"Function {func.__name__!r} executed in {(t2-t1):.4f}s")
         return result
 
     return wrap_func
 
 
-class HelperService:
+class Utils:
+    T = TypeVar("T")
+
     @staticmethod
     def generate_random(
         length: int = 12, chars=string.ascii_letters + string.digits
@@ -68,7 +70,6 @@ class HelperService:
     @staticmethod
     def hash_password(password: str) -> str:
         """Hash a password for storing."""
-        print("pqssss", password)
         salt = hashlib.sha256(os.urandom(60)).hexdigest().encode("ascii")
         pwdhash = hashlib.pbkdf2_hmac("sha512", password.encode("utf-8"), salt, 100000)
         pwdhash = binascii.hexlify(pwdhash)
@@ -86,7 +87,7 @@ class HelperService:
         return pwd_hash == stored_password
 
     @staticmethod
-    def generate_confirmation_token(email: EmailStr = None) -> Union[str, bytes]:
+    def generate_confirmation_token(email: EmailStr = None) -> str | bytes:
         if email is None:
             raise Exception("email for token generation cant be null")
         serializer = URLSafeTimedSerializer(SECRET_KEY)
@@ -144,10 +145,24 @@ class HelperService:
                 + contract_address,
             )
             response_json = response.json()
-            print("response", response_json)
             abi_json = json.loads(response_json["result"])
 
-            print(abi_json)
             return abi_json
         except Exception as e:
             print(e)
+
+    @staticmethod
+    def parse_obj(generic_class: Type[T], obj: Any):
+        return list(
+            map(
+                partial(Utils.to_class_object, generic_class),
+                obj,
+            )
+        )
+
+    @staticmethod
+    def to_class_object(
+        genericClass: Type[T],
+        _dict: dict,
+    ) -> T:
+        return genericClass(**_dict)  # type: ignore [call-arg]

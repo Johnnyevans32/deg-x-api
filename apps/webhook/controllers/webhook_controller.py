@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
-import json
-from types import SimpleNamespace
-from typing import Any
+# import json
+# from types import SimpleNamespace
+# from typing import Any
 
 from fastapi import Response, status
 from fastapi.routing import APIRouter
@@ -15,9 +15,8 @@ responseService = ResponseService()
 
 
 @router.post("/sentry")
-def sentry_webhook(res: Response, sentry_payload: Any):
-    payload = json.loads(
-        sentry_payload.json(), object_hook=lambda d: SimpleNamespace(**d)
-    )
-    print(payload.action)
+def sentry_webhook(res: Response):
+    # payload = json.loads(
+    #     sentry_payload.json(), object_hook=lambda d: SimpleNamespace(**d)
+    # )
     return responseService.send_response(res, status.HTTP_200_OK, "all good here")

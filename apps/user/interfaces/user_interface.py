@@ -3,7 +3,6 @@ from typing import Optional, Union
 
 from pydantic import BaseModel, EmailStr, Field
 from pymongo import ASCENDING
-
 from apps.country.interfaces.country_interface import Country
 from core.db import db
 from core.depends.get_object_id import PyObjectId
@@ -19,8 +18,8 @@ class Name(BaseModel):
 
 
 class SignUpMethod(str, Enum):
-    google = "google-oauth"
-    email = "email-signup"
+    GOOGLE = "google-oauth"
+    EMAIL = "email-signup"
 
 
 class UserLoginInput(BaseModel):
@@ -40,7 +39,7 @@ class UserResetPasswordInput(BaseModel):
 class UserBase(BaseModel):
     name: Name
     email: EmailStr
-    username: Optional[str]
+    username: str
     country: Optional[Union[PyObjectId, Country]]
 
 
@@ -53,7 +52,7 @@ class User(UserBase, SBaseModel):
     password: str = Field(hidden_from_schema=True)
     isVerified: bool = Field(default=False, hidden_from_schema=True)
     signUpMethod: SignUpMethod = Field(
-        default=SignUpMethod.email, hidden_from_schema=True
+        default=SignUpMethod.EMAIL, hidden_from_schema=True
     )
 
     class Config:

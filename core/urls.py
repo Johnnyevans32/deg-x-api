@@ -13,8 +13,12 @@ from apps.featureconfig.controllers.featureconfig_controller import (
 from apps.healthcheck.controllers.healthcheck_controller import (
     router as router_health_check,
 )
+
 from apps.wallet.controllers.wallet_controller import router as router_wallet
 from apps.webhook.controllers.webhook_controller import router as router_webhook
+from apps.blockchain.controllers.blockchain_controller import (
+    router as router_blockchain,
+)
 
 router = APIRouter()
 # router = InferringRouter()
@@ -25,3 +29,4 @@ router.include_router(router_feature)
 router.include_router(router_webhook)
 router.include_router(router_client)
 router.include_router(router_defi_lending)
+router.include_router(router_blockchain)

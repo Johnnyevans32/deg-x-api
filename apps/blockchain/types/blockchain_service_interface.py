@@ -1,4 +1,9 @@
 import abc
+from typing import Any
+
+from apps.blockchain.interfaces.network_interface import Network
+from apps.user.interfaces.user_interface import User
+from apps.wallet.interfaces.wallet_interface import Wallet
 
 
 class IBlockchainService(metaclass=abc.ABCMeta):
@@ -19,9 +24,22 @@ class IBlockchainService(metaclass=abc.ABCMeta):
         raise NotImplementedError
 
     @abc.abstractmethod
-    def send(self, from_address: str, to: str, value: int) -> str:
+    def send(
+        self, from_address: str, to: str, value: int, chain_network: Network
+    ) -> str:
         raise NotImplementedError
 
     @abc.abstractmethod
-    def get_balance(self, address: str) -> str:
+    def get_balance(self, address: str, chain_network: Network) -> str:
+        raise NotImplementedError
+
+    @abc.abstractmethod
+    def get_transactions(
+        self,
+        address: str,
+        user: User,
+        wallet: Wallet,
+        chain_network: Network,
+        start_block: int,
+    ) -> list[Any]:
         raise NotImplementedError

@@ -6,7 +6,7 @@ from google.oauth2 import id_token
 from apps.user.interfaces.user_interface import SignUpMethod, User
 from apps.user.services.user_service import UserService
 from core.config import settings
-from core.utils.helper_service import HelperService
+from core.utils.utils_service import Utils
 
 
 class GoogleService:
@@ -25,7 +25,7 @@ class GoogleService:
                 user = self.userService.get_user_by_email(email)
             except ValueError:
                 first_name, other_name = name.split()
-                password = HelperService.hash_password("password")
+                password = Utils.hash_password("password")
                 user_data = {
                     "name": {
                         "firstName": first_name,
@@ -34,7 +34,7 @@ class GoogleService:
                     "email": email,
                     "password": password,
                     "isVerified": True,
-                    "signUpMethod": SignUpMethod.google.value,
+                    "signUpMethod": SignUpMethod.GOOGLE,
                 }
                 user_obj = User(**user_data)
                 user = self.userService.create_user(user_obj)

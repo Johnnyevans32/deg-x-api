@@ -1,9 +1,7 @@
-from typing import Union
-
 from apps.auth.services.jwt_service import JWTService
 from apps.user.interfaces.user_interface import User, UserLoginInput
 from apps.user.services.user_service import UserService
-from core.utils.helper_service import HelperService
+from core.utils.utils_service import Utils
 
 
 class AuthService:
@@ -11,12 +9,11 @@ class AuthService:
     jwtService = JWTService()
 
     def create_account(self, user: User) -> dict[str, User]:
-        print("user._password", user)
-        user.password = HelperService.hash_password(user.password)
+        user.password = Utils.hash_password(user.password)
         user_created = self.userService.create_user(user)
         return {"user": user_created}
 
-    def login_user(self, user: UserLoginInput) -> dict[str, Union[User, str]]:
+    def login_user(self, user: UserLoginInput) -> dict[str, User | str]:
         user_logged_in = self.userService.login_user(user)
         access_token = self.jwtService.sign_jwt(str(user_logged_in.id), "ACCESS_TOKEN")
         refresh_token = self.jwtService.sign_jwt(

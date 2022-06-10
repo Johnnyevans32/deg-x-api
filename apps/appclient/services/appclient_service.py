@@ -1,19 +1,17 @@
 from functools import wraps
 from typing import Callable
 
-from fastapi import Request
-
 from apps.appclient.interfaces.appclient_interface import AppClient, AppClientIn
 from core.db import db
-from core.utils.custom_exceptions import UnicornException
-from core.utils.helper_service import HelperService
+from core.utils.custom_exceptions import UnicornException, UnicornRequest
+from core.utils.utils_service import Utils
 from core.utils.model_utility_service import ModelUtilityService
 
 
 class AppClientService:
     def client_auth(self, func: Callable):
         @wraps(func)
-        async def wrapper(request: Request, *args, **kwargs):
+        async def wrapper(request: UnicornRequest, *args, **kwargs):
             client_id = request.headers.get("clientID")
             client_secret = request.headers.get("clientSecret")
 
@@ -51,9 +49,9 @@ class AppClientService:
         return AppClient(**app_client)
 
     def create_client(self, client: AppClientIn) -> AppClient:
-        client.clientSecret = HelperService.generate_random(24)
-        client.clientID = HelperService.generate_random(12)
-        dict_client = client.dict(by_alias=True)
+        client.clientSecret = Utils.generate_random(24)
+        client.clientID = Utils.generate_random(12)
+        dict_client = client.dict(by_alias=True, exclude_none=True)
 
         client_obj = ModelUtilityService.model_create(
             AppClient,

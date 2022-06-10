@@ -4,7 +4,6 @@ import sentry_sdk
 
 
 def traces_sampler(sampling_context):
-    print("okk")
     return random.randint(0, 1)
     # return a number between 0 and 1 or a boolean
 

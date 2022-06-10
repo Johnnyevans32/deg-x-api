@@ -1,12 +1,14 @@
 # -*- coding: utf-8 -*-
-from fastapi import Depends, Request, Response, status
+from fastapi import Depends, Response, status
 from fastapi.routing import APIRouter
 
 from apps.auth.services.auth_bearer import JWTBearer
-from apps.user.interfaces.user_interface import User
-from apps.wallet.interfaces.walletasset_interface import WalletAsset
+
+# from apps.wallet.interfaces.walletasset_interface import WalletAsset
+
 from apps.wallet.services.wallet_service import WalletService
-from core.utils.response_service import ResponseService, get_response_model
+from core.utils.custom_exceptions import UnicornRequest
+from core.utils.response_service import ResponseService
 
 router = APIRouter(prefix="/api/v1/wallet", tags=["Wallet 💸"])
 
@@ -18,13 +20,14 @@ responseService = ResponseService()
 @router.get(
     "/retrieve-wallet",
     dependencies=[Depends(JWTBearer())],
-    response_model=get_response_model(list[WalletAsset], "WalletResponse"),
+    # response_model=get_response_model(list[WalletAsset], "WalletAssetResponse"),
 )
-async def retrieve_wallet_assets(request: Request, response: Response):
+async def retrieve_wallet_assets(request: UnicornRequest, response: Response):
     try:
         if hasattr(request.state, "error"):
             raise request.state.error
-        user: User = request.state.user
+        user = request.state.user
+        request.state
         request.app.logger.info(f"checking wallet for - {user.id}")
         user_walletassets = walletService.retrieve_wallet_assets(user)
         request.app.logger.info("done retrieving wallet assets")

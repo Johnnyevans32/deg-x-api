@@ -1,9 +1,10 @@
 # -*- coding: utf-8 -*-
-from fastapi import Request, Response, status
+from fastapi import Response, status
 from fastapi.routing import APIRouter
 
 from apps.appclient.interfaces.appclient_interface import AppClientIn
 from apps.appclient.services.appclient_service import AppClientService
+from core.utils.custom_exceptions import UnicornRequest
 from core.utils.response_service import ResponseService
 
 router = APIRouter(prefix="/api/v1/appclient", tags=["App Client 🌈"])
@@ -15,7 +16,7 @@ responseService = ResponseService()
 
 @router.post("/create")
 async def create_app_client(
-    request: Request, response: Response, app_client: AppClientIn
+    request: UnicornRequest, response: Response, app_client: AppClientIn
 ):
     try:
         request.app.logger.info("")

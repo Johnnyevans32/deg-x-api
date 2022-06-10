@@ -10,7 +10,6 @@ from apps.user.interfaces.user_interface import User
 from apps.wallet.interfaces.wallet_interface import Wallet, WalletType
 from apps.wallet.interfaces.walletasset_interface import WalletAsset
 from core.db import db
-from core.depends import PyObjectId
 from core.utils.model_utility_service import ModelUtilityService
 
 
@@ -27,23 +26,33 @@ class WalletService:
             session=session,
         )
 
+    def get_user_default_wallet(self, user: User) -> Wallet:
+        user_default_wallet = ModelUtilityService.find_one(
+            Wallet, {"user": user.id, "isDeleted": False, "isDefault": True}, True
+        )
+        return user_default_wallet
+
     def create_wallet(
         self,
         user: User,
         session: ClientSession,
-        walletType: WalletType = WalletType.multichain,
+        walletType: WalletType = WalletType.MULTICHAIN,
     ) -> None:
         try:
             mnemonic = self.mnemo.generate(strength=256)
-            dict_wallet = {
-                "user": user.id,
-                "name": "dummy",
-                "walletType": walletType,
-                "mnemonic": mnemonic,
-            }
+            dict_wallet = Wallet(
+                **{
+                    "user": user.id,
+                    "name": "multi-coin wallet",
+                    "walletType": walletType,
+                    "mnemonic": mnemonic,
+                }
+            ).dict(by_alias=True, exclude_none=True)
 
             wallet_obj = ModelUtilityService.model_create(Wallet, dict_wallet, session)
-            blockchains = BlockchainService.get_blockchains()
+            blockchains = BlockchainService.get_blockchains(
+                {"isDeleted": {"$ne": True}}
+            )
             list(
                 map(
                     partial(
@@ -54,7 +63,6 @@ class WalletService:
             )
 
         except Exception as e:
-            print(e)
             raise e
 
     def create_wallet_assets(
@@ -72,12 +80,14 @@ class WalletService:
         )
         dict_wallet_assets = list(
             map(
-                lambda token_asset: {
-                    "user": user.id,
-                    "wallet": wallet.id,
-                    "tokenasset": token_asset.id,
-                    "address": address,
-                },
+                lambda token_asset: WalletAsset(
+                    **{
+                        "user": user.id,
+                        "wallet": wallet.id,
+                        "tokenasset": token_asset.id,
+                        "address": address,
+                    }
+                ).dict(by_alias=True, exclude_none=True),
                 token_assets,
             )
         )
@@ -85,21 +95,14 @@ class WalletService:
         ModelUtilityService.model_create_many(WalletAsset, dict_wallet_assets, session)
 
     def retrieve_wallet_assets(self, user: User) -> list[WalletAsset]:
-        user_wallet = self.retrieve_wallet(user)
+        user_wallet = self.retrieve_default_wallet(user)
         res = ModelUtilityService.find_and_populate(
             WalletAsset, {"wallet": user_wallet.id, "isDeleted": False}, ["tokenasset"]
         )
-        print(res)
         return res
 
-    def retrieve_wallet(self, user: User) -> Wallet:
+    def retrieve_default_wallet(self, user: User) -> Wallet:
         db_resp = db.wallet.find_one({"user": user.id, "isDeleted": False})
-        if db_resp is None:
-            raise Exception("user wallet not found")
-        return Wallet(**db_resp)
-
-    def get_user_wallet(self, user_id: PyObjectId) -> Wallet:
-        db_resp = db.wallet.find_one({"user": user_id, "isDeleted": False})
         if db_resp is None:
             raise Exception("user wallet not found")
         return Wallet(**db_resp)
