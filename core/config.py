@@ -112,26 +112,6 @@ class Settings(BaseSettings):
         "211971759182-bvjf8k5etbn2cj9hitmfi315aaurur6i.apps.googleusercontent.com",
     )
 
-    # ~~~~~ ETHEREUM BLOCKCHAIN ~~~~~
-    ETH_NETWORK = os.getenv("ETH_NETWORK", "https://demigod.com")
-    ETH_ADDRESS = os.getenv(
-        "ETH_ADDRESS", "sk_test_68cf667d5757f7e47a6e0b174e5918448a8f9938"
-    )
-    ETH_PRIVATE_KEY = os.getenv(
-        "ETH_PRIVATE_KEY", "sk_test_68cf667d5757f7e47a6e0b174e5918448a8f9938"
-    )
-
-    # `````AAVE CREDS`
-    AAVE_CONTRACT_ADDRESS = os.getenv(
-        "AAVE_CONTRACT_ADDRESS", "0xE0FBA4FC209B4948668006B2BE61711B7F465BAE"
-    )
-
-    # ~~~~~~ WEB3 NODE PROVIDER ~~~~~
-    WEB3_HTTP_PROVIDER = os.getenv(
-        "WEB3_HTTP_PROVIDER",
-        "https://kovan.infura.io/v3/675849285dfa4748868f4a19b72bfb50",
-    )
-
     class Config:
         case_sensitive = True
 

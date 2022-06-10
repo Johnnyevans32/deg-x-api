@@ -1,5 +1,5 @@
 from enum import Enum
-from typing import Union
+from typing import Optional, Union
 
 from pydantic import Field
 
@@ -20,8 +20,8 @@ class CoinType(str, Enum):
 class TokenAsset(SBaseModel):
     name: str
     coinType: CoinType
-    contractAddress: str
-    network: Union[PyObjectId, Network]
+    contractAddress: Optional[str]
+    network: Optional[Union[PyObjectId, Network]]
     image: str
     blockchain: Union[PyObjectId, Blockchain]
     isLayerOne: bool = Field(default=False)

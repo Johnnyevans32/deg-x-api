@@ -1,6 +1,6 @@
 from pydantic import BaseModel
 
-from apps.defi.lending.interfaces.lending_interface import InterestRateMode
+from apps.defi.lending.interfaces.lending_request_interface import InterestRateMode
 
 
 class BorrowAssetDTO(BaseModel):

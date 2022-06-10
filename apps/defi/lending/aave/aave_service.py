@@ -5,7 +5,7 @@ from web3.contract import Contract
 from apps.blockchain.ethereum.ethereum_service import EthereumService
 from apps.defi.interfaces.defi_provider_interface import DefiProvider
 from apps.defi.lending.aave.aave_interface import IUserAcccountData
-from apps.defi.lending.interfaces.lending_interface import InterestRateMode
+from apps.defi.lending.interfaces.lending_request_interface import InterestRateMode
 from apps.defi.lending.types.lending_service_interface import ILendingService
 from core.utils.utils_service import Utils
 
@@ -14,7 +14,7 @@ class AaveService(ILendingService):
     ethereumService = EthereumService()
 
     def name(self) -> str:
-        return "aave"
+        return "aave_service"
 
     def get_contract_obj(self, defi_provider: DefiProvider) -> Contract:
         address = eth_utils.to_bytes(hexstr=defi_provider.contractAddress)

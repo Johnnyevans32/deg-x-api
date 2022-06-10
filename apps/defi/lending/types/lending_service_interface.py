@@ -1,7 +1,7 @@
 import abc
 
 from apps.defi.interfaces.defi_provider_interface import DefiProvider
-from apps.defi.lending.interfaces.lending_interface import InterestRateMode
+from apps.defi.lending.interfaces.lending_request_interface import InterestRateMode
 
 
 class ILendingService(metaclass=abc.ABCMeta):

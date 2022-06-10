@@ -2,7 +2,7 @@ import eth_utils
 
 from apps.blockchain.services.blockchain_service import BlockchainService
 from apps.defi.interfaces.defi_provider_interface import DefiProvider, DefiServiceType
-from apps.defi.lending.interfaces.lending_interface import (
+from apps.defi.lending.interfaces.lending_request_interface import (
     LendingRequest,
     LendingRequestStatus,
     LendingRequestType,

@@ -673,4 +673,22 @@ def solve_pizza_hashcode_prob(
     return sum_pizza_slice
 
 
-print(solve_pizza_hashcode_prob(17, 4, [2, 5, 6, 8]))
+# print(solve_pizza_hashcode_prob(17, 4, [2, 5, 6, 8]))
+
+
+def find_longest_gap_btw_substrings(word: str = "pwwkew"):
+    unique_strings_visited = []
+    max_gap = 0
+    counter = 0
+    for le in word:
+        if le not in unique_strings_visited:
+            unique_strings_visited.append(le)
+            counter += 1
+        else:
+            max_gap = max(max_gap, counter)
+            counter = 1
+    print(unique_strings_visited, max_gap)
+    return max_gap
+
+
+print(find_longest_gap_btw_substrings())

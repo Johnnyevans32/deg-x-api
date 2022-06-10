@@ -284,14 +284,14 @@ class ModelUtilityService:
     @staticmethod
     def model_find_one_and_update(
         generic_class: Type[T], query: dict, record: dict, upsert=False
-    ) -> Any:
+    ) -> T:
         model = db[generic_class.__name__.lower()]
         record["updatedAt"] = datetime.now()
         updated_record = model.find_one_and_update(
             query, {"$set": record}, upsert=upsert, return_document=ReturnDocument.AFTER
         )
 
-        return updated_record
+        return generic_class(**updated_record)
 
     @staticmethod
     def model_find_or_create(generic_class: Type[T], query: dict, record: dict) -> T:

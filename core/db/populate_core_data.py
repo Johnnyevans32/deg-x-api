@@ -1,6 +1,7 @@
 from apps.blockchain.interfaces.blockchain_interface import Blockchain
 from apps.blockchain.interfaces.network_interface import Network, NetworkType
 from apps.blockchain.interfaces.tokenasset_interface import CoinType, TokenAsset
+from apps.defi.interfaces.defi_provider_interface import DefiProvider, DefiServiceType
 from core.utils.loggly import logger
 from core.utils.model_utility_service import ModelUtilityService
 
@@ -11,14 +12,16 @@ def populate_blockchains():
         {"name": "bitcoin", "registryName": "bitcoin_service", "meta": {}},
     ]
     mapped_data = list(map(lambda blc: Blockchain(**blc), data))
-    map(
-        lambda d: ModelUtilityService.model_find_one_and_update(
-            Blockchain,
-            {"registryName": d.registryName},
-            d.dict(by_alias=True, exclude_none=True),
-            True,
-        ),
-        mapped_data,
+    list(
+        map(
+            lambda d: ModelUtilityService.model_find_one_and_update(
+                Blockchain,
+                {"registryName": d.registryName},
+                d.dict(by_alias=True, exclude_none=True),
+                True,
+            ),
+            mapped_data,
+        )
     )
 
 
@@ -41,14 +44,16 @@ def populate_networks():
     ]
 
     mapped_data = list(map(lambda nt: Network(**nt), data))
-    map(
-        lambda nt: ModelUtilityService.model_find_one_and_update(
-            Network,
-            {"name": nt.name},
-            nt.dict(by_alias=True, exclude_none=True),
-            True,
-        ),
-        mapped_data,
+    list(
+        map(
+            lambda nt: ModelUtilityService.model_find_one_and_update(
+                Network,
+                {"name": nt.name},
+                nt.dict(by_alias=True, exclude_none=True),
+                True,
+            ),
+            mapped_data,
+        )
     )
 
 
@@ -67,14 +72,46 @@ def populate_tokenassets():
     ]
 
     mapped_data = list(map(lambda ta: TokenAsset(**ta), data))
-    map(
-        lambda ta: ModelUtilityService.model_find_one_and_update(
-            TokenAsset,
-            {"name": ta.name},
-            ta.dict(by_alias=True, exclude_none=True),
-            True,
-        ),
-        mapped_data,
+    list(
+        map(
+            lambda ta: ModelUtilityService.model_find_one_and_update(
+                TokenAsset,
+                {"name": ta.name},
+                ta.dict(by_alias=True, exclude_none=True),
+                True,
+            ),
+            mapped_data,
+        )
+    )
+
+
+def populate_defi_providers():
+    data = [
+        {
+            "name": "aave",
+            "contractAddress": "0xE0FBA4FC209B4948668006B2BE61711B7F465BAE",
+            "serviceType": DefiServiceType.LENDING,
+            "serviceName": "aave_service",
+            "blockchain": ModelUtilityService.find_one(
+                Blockchain, {"registryName": "ethereum_service"}, True
+            ).id,
+            "network": ModelUtilityService.find_one(
+                Network, {"name": "kovan"}, True
+            ).id,
+        }
+    ]
+
+    mapped_data = list(map(lambda dp: DefiProvider(**dp), data))
+    list(
+        map(
+            lambda dp: ModelUtilityService.model_find_one_and_update(
+                DefiProvider,
+                {"name": dp.name},
+                dp.dict(by_alias=True, exclude_none=True),
+                True,
+            ),
+            mapped_data,
+        )
     )
 
 
@@ -88,3 +125,4 @@ def seed_deg_x():
     logger.info("SEEDING ASSETS.....")
     populate_tokenassets()
     logger.info("SEEDED ASSETS!!!")
+    populate_defi_providers()
