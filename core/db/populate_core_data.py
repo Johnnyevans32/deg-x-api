@@ -1,8 +1,8 @@
 from apps.blockchain.interfaces.blockchain_interface import Blockchain
 from apps.blockchain.interfaces.network_interface import Network, NetworkType
 from apps.blockchain.interfaces.tokenasset_interface import CoinType, TokenAsset
-from core.utils.model_utility_service import ModelUtilityService
 from core.utils.loggly import logger
+from core.utils.model_utility_service import ModelUtilityService
 
 
 def populate_blockchains():

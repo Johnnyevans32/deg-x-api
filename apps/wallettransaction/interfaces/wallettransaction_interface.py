@@ -2,8 +2,8 @@ from enum import Enum
 from typing import Union
 
 from pymongo import ASCENDING
-from apps.blockchain.interfaces.transaction_interface import TxnType
 
+from apps.blockchain.interfaces.transaction_interface import TxnType
 from apps.user.interfaces.user_interface import User
 from apps.wallet.interfaces.wallet_interface import Wallet
 from core.db import db

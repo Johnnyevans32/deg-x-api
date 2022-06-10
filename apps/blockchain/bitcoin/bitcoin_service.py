@@ -2,7 +2,6 @@ from apps.blockchain.interfaces.network_interface import Network
 
 # from apps.blockchain.interfaces.transaction_interface import BlockchainTransaction
 from apps.blockchain.types.blockchain_service_interface import IBlockchainService
-
 from core.utils.request import HTTPRepository
 
 

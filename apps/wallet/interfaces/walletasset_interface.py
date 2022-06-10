@@ -1,4 +1,5 @@
 from typing import Union
+
 from apps.blockchain.interfaces.tokenasset_interface import TokenAsset
 from apps.user.interfaces.user_interface import User
 from apps.wallet.interfaces.wallet_interface import Wallet

@@ -4,7 +4,6 @@ from fastapi.routing import APIRouter
 
 from apps.auth.services.auth_bearer import JWTBearer
 from apps.blockchain.services.blockchain_service import BlockchainService
-
 from core.utils.custom_exceptions import UnicornRequest
 from core.utils.response_service import ResponseService
 

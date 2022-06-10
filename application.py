@@ -10,8 +10,8 @@ from pymongo import monitoring
 from starlette.exceptions import ExceptionMiddleware
 from starlette.exceptions import HTTPException as StarletteHTTPException
 from starlette.responses import JSONResponse
-from apps.blockchain.interfaces.transaction_interface import BlockchainTransaction
 
+from apps.blockchain.interfaces.transaction_interface import BlockchainTransaction
 from apps.user.interfaces.user_interface import User
 from core import urls
 from core.config import settings

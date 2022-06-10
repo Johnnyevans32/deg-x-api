@@ -662,7 +662,7 @@ def solve_pizza_hashcode_prob(
     sum_pizza_slice = 0
     index_list = []
     # pizza_types.sort(reverse=True)
-    for s in range(pizza_type_count-1, -1, -1):
+    for s in range(pizza_type_count - 1, -1, -1):
         print(s)
         if sum_pizza_slice + pizza_types[s] <= max_pizza_slice:
             sum_pizza_slice += pizza_types[s]

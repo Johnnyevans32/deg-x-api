@@ -1,8 +1,9 @@
+from logging import Logger
 from typing import Any
 
 from fastapi import Request
 from starlette.datastructures import State
-from logging import Logger
+
 from apps.user.interfaces.user_interface import User
 
 

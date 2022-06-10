@@ -3,6 +3,7 @@ from typing import Optional, Union
 
 from pydantic import BaseModel, EmailStr, Field
 from pymongo import ASCENDING
+
 from apps.country.interfaces.country_interface import Country
 from core.db import db
 from core.depends.get_object_id import PyObjectId

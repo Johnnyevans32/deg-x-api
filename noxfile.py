@@ -2,7 +2,6 @@ import tempfile
 
 import nox
 
-
 # @nox.session(python=["3.10"])
 # def shared_venv(session: nox.Session):
 #     session.install("poetry")

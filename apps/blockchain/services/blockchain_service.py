@@ -1,4 +1,7 @@
 from functools import partial
+
+from pymongo import DESCENDING
+
 from apps.blockchain.interfaces.blockchain_interface import Blockchain
 from apps.blockchain.interfaces.network_interface import Network
 from apps.blockchain.interfaces.tokenasset_interface import TokenAsset
@@ -9,7 +12,6 @@ from apps.user.interfaces.user_interface import User
 from apps.wallet.interfaces.wallet_interface import Wallet
 from apps.wallet.interfaces.walletasset_interface import WalletAsset
 from core.db import db
-from pymongo import DESCENDING
 
 # from core.utils.helper_service import timed_cache
 from core.utils.loggly import logger

@@ -14,8 +14,8 @@ from apps.user.interfaces.user_token_interface import UserRefreshToken
 from apps.wallet.services.wallet_service import WalletService
 from core.db import client, db
 from core.depends import PyObjectId
-from core.utils.utils_service import Utils
 from core.utils.model_utility_service import ModelUtilityService
+from core.utils.utils_service import Utils
 
 
 class UserService:

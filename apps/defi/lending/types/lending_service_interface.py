@@ -1,6 +1,6 @@
 import abc
-from apps.defi.interfaces.defi_provider_interface import DefiProvider
 
+from apps.defi.interfaces.defi_provider_interface import DefiProvider
 from apps.defi.lending.interfaces.lending_interface import InterestRateMode
 
 

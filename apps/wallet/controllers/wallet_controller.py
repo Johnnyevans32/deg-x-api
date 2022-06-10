@@ -3,12 +3,12 @@ from fastapi import Depends, Response, status
 from fastapi.routing import APIRouter
 
 from apps.auth.services.auth_bearer import JWTBearer
-
-# from apps.wallet.interfaces.walletasset_interface import WalletAsset
-
 from apps.wallet.services.wallet_service import WalletService
 from core.utils.custom_exceptions import UnicornRequest
 from core.utils.response_service import ResponseService
+
+# from apps.wallet.interfaces.walletasset_interface import WalletAsset
+
 
 router = APIRouter(prefix="/api/v1/wallet", tags=["Wallet 💸"])
 

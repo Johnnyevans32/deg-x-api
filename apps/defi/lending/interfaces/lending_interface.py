@@ -1,5 +1,6 @@
 from enum import Enum
 from typing import Union
+
 from apps.blockchain.interfaces.tokenasset_interface import TokenAsset
 from apps.defi.interfaces.defi_provider_interface import DefiProvider
 from apps.user.interfaces.user_interface import User

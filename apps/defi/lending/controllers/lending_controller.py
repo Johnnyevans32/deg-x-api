@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from fastapi import Depends, Response, status
 from fastapi.routing import APIRouter
+
 from apps.auth.services.auth_bearer import JWTBearer
 from apps.defi.lending.services.lending_service import LendingService
 from core.utils.custom_exceptions import UnicornRequest

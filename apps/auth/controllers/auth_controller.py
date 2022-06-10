@@ -14,8 +14,8 @@ from apps.user.interfaces.user_interface import (
 )
 from apps.user.services.user_service import UserService
 from core.utils.custom_exceptions import UnicornRequest
-from core.utils.utils_service import Utils
 from core.utils.response_service import ResponseService, get_response_model
+from core.utils.utils_service import Utils
 
 router = APIRouter(prefix="/api/v1/account", tags=["Auth 🔐"])
 

@@ -1,4 +1,5 @@
 import eth_utils
+
 from apps.blockchain.services.blockchain_service import BlockchainService
 from apps.defi.interfaces.defi_provider_interface import DefiProvider, DefiServiceType
 from apps.defi.lending.interfaces.lending_interface import (
@@ -6,7 +7,6 @@ from apps.defi.lending.interfaces.lending_interface import (
     LendingRequestStatus,
     LendingRequestType,
 )
-
 from apps.defi.lending.services.lending_registry import LendingRegistry
 from apps.defi.lending.types.lending_types import BorrowAssetDTO
 from apps.user.interfaces.user_interface import User

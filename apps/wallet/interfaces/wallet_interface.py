@@ -2,10 +2,9 @@ from enum import Enum
 from typing import Optional, Union
 
 from pydantic import Field
+
 from apps.blockchain.interfaces.network_interface import NetworkType
-
 from apps.user.interfaces.user_interface import User
-
 from core.depends.get_object_id import PyObjectId
 from core.depends.model import SBaseModel
 from core.utils.model_utility_service import ModelUtilityService

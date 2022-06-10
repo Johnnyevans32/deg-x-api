@@ -4,8 +4,8 @@ from typing import Callable
 from apps.appclient.interfaces.appclient_interface import AppClient, AppClientIn
 from core.db import db
 from core.utils.custom_exceptions import UnicornException, UnicornRequest
-from core.utils.utils_service import Utils
 from core.utils.model_utility_service import ModelUtilityService
+from core.utils.utils_service import Utils
 
 
 class AppClientService:

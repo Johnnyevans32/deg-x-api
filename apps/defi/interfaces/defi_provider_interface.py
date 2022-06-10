@@ -2,6 +2,7 @@ from enum import Enum
 from typing import Union
 
 from pydantic import Field
+
 from apps.blockchain.interfaces.blockchain_interface import Blockchain
 from apps.blockchain.interfaces.network_interface import Network
 from core.depends.get_object_id import PyObjectId
