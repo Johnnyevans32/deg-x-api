@@ -676,19 +676,51 @@ def solve_pizza_hashcode_prob(
 # print(solve_pizza_hashcode_prob(17, 4, [2, 5, 6, 8]))
 
 
-def find_longest_gap_btw_substrings(word: str = "pwwkew"):
-    unique_strings_visited = []
+def find_longest_gap_btw_substrings(w: str = "deevdfvgh"):
     max_gap = 0
-    counter = 0
-    for le in word:
-        if le not in unique_strings_visited:
-            unique_strings_visited.append(le)
-            counter += 1
-        else:
-            max_gap = max(max_gap, counter)
-            counter = 1
-    print(unique_strings_visited, max_gap)
+    lc = 0
+    unique_strings_visited: set[str] = set()
+    for rc in range(len(w)):
+        while w[rc] in unique_strings_visited:
+            unique_strings_visited.remove(w[lc])
+            lc += 1
+        unique_strings_visited.add(w[rc])
+        max_gap = max(max_gap, rc - lc + 1)
     return max_gap
 
 
-print(find_longest_gap_btw_substrings())
+def is_substring(s: dict[str, int], t: dict[str, int]):
+    for k in s:
+        if s[k] < t[k]:
+            return False
+    return True
+
+
+def min_window(w: str = "a", s: str = "a"):
+    t_dict: dict[str, int] = {le: s.count(le) for le in list(set(s))}
+    s_dict: dict[str, int] = {le: 0 for le in list(set(s))}
+    first = True
+    res = ""
+    min_subst = ""
+    for rc in range(len(w)):
+        if not min_subst and w[rc] not in s:
+            continue
+
+        min_subst += w[rc]
+        if w[rc] in s:
+            s_dict[w[rc]] += 1
+            while is_substring(s_dict, t_dict):
+                if first:
+                    res = min_subst
+                    first = False
+                elif len(res) > len(min_subst):
+                    res = min_subst
+                s_dict[min_subst[0]] -= 1
+                min_subst = min_subst[1:]
+                while min_subst and min_subst[0] not in s:
+                    min_subst = min_subst[1:]
+
+    return res
+
+
+print(min_window())

@@ -110,9 +110,12 @@ class UserService:
             ),
         )
 
-    def get_user_refresh_token(self, refresh_token: str):
+    def get_user_refresh_token(self, refresh_token: str) -> UserRefreshToken:
         user_refresh_token = ModelUtilityService.find_one(
-            UserRefreshToken, {"refreshToken": refresh_token, "isDeleted": False}, True
+            UserRefreshToken, {"refreshToken": refresh_token, "isDeleted": False}
         )
+
+        if user_refresh_token is None:
+            raise Exception("refresh token not found")
 
         return user_refresh_token

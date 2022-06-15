@@ -28,8 +28,11 @@ class WalletService:
 
     def get_user_default_wallet(self, user: User) -> Wallet:
         user_default_wallet = ModelUtilityService.find_one(
-            Wallet, {"user": user.id, "isDeleted": False, "isDefault": True}, True
+            Wallet, {"user": user.id, "isDeleted": False, "isDefault": True}
         )
+
+        if user_default_wallet is None:
+            raise Exception("default wallet not set")
         return user_default_wallet
 
     def create_wallet(
@@ -76,7 +79,7 @@ class WalletService:
         address = self.blockchainService.create_address(chain.registryName, mnemonic)
 
         token_assets = BlockchainService.get_token_assets(
-            {"isDeleted": False, "isLayerOne": True}
+            {"isDeleted": False, "blockchain": chain.id, "isLayerOne": True}
         )
         dict_wallet_assets = list(
             map(
@@ -86,6 +89,7 @@ class WalletService:
                         "wallet": wallet.id,
                         "tokenasset": token_asset.id,
                         "address": address,
+                        "blockchain": chain.id,
                     }
                 ).dict(by_alias=True, exclude_none=True),
                 token_assets,

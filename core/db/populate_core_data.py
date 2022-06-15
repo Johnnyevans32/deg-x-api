@@ -1,9 +1,15 @@
+from typing import Any, Callable
 from apps.blockchain.interfaces.blockchain_interface import Blockchain
 from apps.blockchain.interfaces.network_interface import Network, NetworkType
 from apps.blockchain.interfaces.tokenasset_interface import CoinType, TokenAsset
 from apps.defi.interfaces.defi_provider_interface import DefiProvider, DefiServiceType
+from core.depends.get_object_id import PyObjectId
 from core.utils.loggly import logger
 from core.utils.model_utility_service import ModelUtilityService
+
+id_or_none: Callable[[Any], PyObjectId | None] = (
+    lambda result: result.id if result is not None else None
+)
 
 
 def populate_blockchains():
@@ -30,9 +36,12 @@ def populate_networks():
         {
             "name": "kovan",
             "networkType": NetworkType.TESTNET,
-            "blockchain": ModelUtilityService.find_one(
-                Blockchain, {"registryName": "ethereum_service"}, True
-            ).id,
+            "blockchain": id_or_none(
+                ModelUtilityService.find_one(
+                    Blockchain,
+                    {"registryName": "ethereum_service"},
+                )
+            ),
             "blockExplorerUrl": "https://kovan.etherscan.io/",
             "apiExplorer": {
                 "url": "https://api-kovan.etherscan.io/api",
@@ -60,9 +69,11 @@ def populate_networks():
 def populate_tokenassets():
     data = [
         {
-            "blockchain": ModelUtilityService.find_one(
-                Blockchain, {"registryName": "ethereum_service"}, True
-            ).id,
+            "blockchain": id_or_none(
+                ModelUtilityService.find_one(
+                    Blockchain, {"registryName": "ethereum_service"}
+                )
+            ),
             "code": "ETH",
             "coinType": CoinType.ETH,
             "isLayerOne": True,
@@ -92,12 +103,20 @@ def populate_defi_providers():
             "contractAddress": "0xE0FBA4FC209B4948668006B2BE61711B7F465BAE",
             "serviceType": DefiServiceType.LENDING,
             "serviceName": "aave_service",
-            "blockchain": ModelUtilityService.find_one(
-                Blockchain, {"registryName": "ethereum_service"}, True
-            ).id,
-            "network": ModelUtilityService.find_one(
-                Network, {"name": "kovan"}, True
-            ).id,
+            "isDefault": True,
+            "blockchain": id_or_none(
+                ModelUtilityService.find_one(
+                    Blockchain, {"registryName": "ethereum_service"}
+                )
+            ),
+            "meta": {
+                "ProtocolDataProvider": {
+                    "address": "0x3c73A5E5785cAC854D468F727c606C07488a29D6"
+                }
+            },
+            "network": id_or_none(
+                ModelUtilityService.find_one(Network, {"name": "kovan"})
+            ),
         }
     ]
 

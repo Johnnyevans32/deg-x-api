@@ -1,5 +1,5 @@
 from enum import Enum
-from typing import Union
+from typing import Any, Optional, Union
 
 from pydantic import Field
 
@@ -22,3 +22,4 @@ class DefiProvider(SBaseModel):
     serviceName: str
     blockchain: Union[PyObjectId, Blockchain]
     network: Union[PyObjectId, Network]
+    meta: Optional[Any]

@@ -1,4 +1,3 @@
-from typing import Any
 import eth_utils
 from eth_typing import Address
 from web3.contract import Contract
@@ -7,11 +6,12 @@ from apps.blockchain.ethereum.ethereum_service import EthereumService
 from apps.defi.interfaces.defi_provider_interface import DefiProvider
 from apps.defi.lending.aave.aave_interface import IUserAcccountData
 from apps.defi.lending.interfaces.lending_request_interface import InterestRateMode
+from apps.defi.lending.services.lending_base_service import BaseLendingService
 from apps.defi.lending.types.lending_service_interface import ILendingService
 from core.utils.utils_service import Utils
 
 
-class AaveService(ILendingService):
+class AaveV3Service(ILendingService, BaseLendingService):
     ethereumService = EthereumService()
     aave_interest_rate_mode = {
         InterestRateMode.STABLE: 0,
@@ -19,18 +19,15 @@ class AaveService(ILendingService):
     }
 
     def name(self) -> str:
-        return "aave_service"
+        return "aave_v3_service"
 
     def get_contract_obj(
-        self,
-        defi_provider: DefiProvider,
-        addr: str = None,
-        crt_name: str = "ILendingPool",
+        self, defi_provider: DefiProvider, addr: str = None
     ) -> Contract:
         str_address = defi_provider.contractAddress if addr is None else addr
         address = eth_utils.to_bytes(hexstr=str_address)
         web3 = self.ethereumService.get_network_provider(defi_provider.network)
-        abi = Utils.get_compiled_sol(crt_name, "0.6.12")
+        abi = Utils.get_compiled_sol("ILendingPool", "0.6.12")
         aave_protocol = web3.eth.contract(address=Address(address), abi=abi)
 
         return aave_protocol
@@ -140,10 +137,3 @@ class AaveService(ILendingService):
         return aave_contract.functions.setUserUseReserveAsCollateral(
             asset, use_as_collateral
         ).call()
-
-    def get_reserved_assets(self, defi_provider: DefiProvider):
-        meta: Any = defi_provider.meta
-        aave_contract = self.get_contract_obj(
-            defi_provider,
-        )
-        return aave_contract.functions.getAddressesProvider().call()

@@ -15,7 +15,6 @@ from pymongo.results import (
 )
 
 from core.db import db
-from core.utils.custom_exceptions import UnicornException
 from core.utils.response_service import MetaDataModel
 from core.utils.utils_service import Utils
 
@@ -172,8 +171,7 @@ class ModelUtilityService:
         generic_class: Type[T],
         query: dict,
         fields: list[str],
-        throw_error_if_none=False,
-    ) -> T:
+    ) -> T | None:
         model = db[generic_class.__name__.lower()]
         pipeline: list[Dict[str, Any]] = [
             {
@@ -195,11 +193,16 @@ class ModelUtilityService:
             pipeline += lookup
 
         pipeline += [{"$limit": 1}]
-        [aggregation_result] = list(model.aggregate(pipeline))
+        result = list(model.aggregate(pipeline))
+        aggregation_result = None
+        if result:
+            [aggregation_result] = result
 
-        if throw_error_if_none and aggregation_result is None:
-            raise UnicornException(f"{generic_class.__name__.lower()} record not found")
-        return generic_class(**aggregation_result)  # type: ignore [call-arg]
+        return (
+            generic_class(**aggregation_result)  # type: ignore [call-arg]
+            if aggregation_result is not None
+            else None
+        )
 
     @staticmethod
     def find_and_populate(
@@ -227,31 +230,38 @@ class ModelUtilityService:
                 {"$unwind": {"path": f"${field}"}},
             ]
             pipeline += lookup
-
+        results = model.aggregate(pipeline)
+        if not results:
+            return []
         return list(
             map(
                 partial(Utils.to_class_object, generic_class),
-                model.aggregate(pipeline),
+                results,
             )
         )
 
     @staticmethod
-    def find_one(generic_class: Type[T], query: dict, throw_error_if_none=False) -> T:
+    def find_one(generic_class: Type[T], query: dict) -> T | None:
         model = db[generic_class.__name__.lower()]
         result = model.find_one(query)
-        if throw_error_if_none and result is None:
-            raise UnicornException(f"{generic_class.__name__.lower()} record not found")
 
-        return generic_class(**result)  # type: ignore [call-arg]
+        return (
+            generic_class(**result)  # type: ignore [call-arg]
+            if result is not None
+            else None
+        )
 
     @staticmethod
     def find(generic_class: Type[T], query: dict) -> list[T]:
         model = db[generic_class.__name__.lower()]
 
+        results = model.find(query)
+        if not results:
+            return []
         return list(
             map(
                 partial(Utils.to_class_object, generic_class),
-                model.find(query),
+                results,
             )
         )
 
@@ -283,15 +293,22 @@ class ModelUtilityService:
 
     @staticmethod
     def model_find_one_and_update(
-        generic_class: Type[T], query: dict, record: dict, upsert=False
-    ) -> T:
+        generic_class: Type[T],
+        query: dict,
+        record: dict,
+        upsert=False,
+    ) -> T | None:
         model = db[generic_class.__name__.lower()]
         record["updatedAt"] = datetime.now()
         updated_record = model.find_one_and_update(
             query, {"$set": record}, upsert=upsert, return_document=ReturnDocument.AFTER
         )
 
-        return generic_class(**updated_record)
+        return (
+            generic_class(**updated_record)  # type: ignore [call-arg]
+            if updated_record is not None
+            else None
+        )
 
     @staticmethod
     def model_find_or_create(generic_class: Type[T], query: dict, record: dict) -> T:

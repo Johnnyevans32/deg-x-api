@@ -29,7 +29,7 @@ class ILendingService(metaclass=abc.ABCMeta):
     def deposit(
         self,
         asset: bytes,
-        amount: int,
+        amount: float,
         on_behalf_of: bytes,
         defi_provider: DefiProvider,
         referral_code=0,
@@ -53,8 +53,14 @@ class ILendingService(metaclass=abc.ABCMeta):
         self,
         asset: bytes,
         amount: float,
-        rate_mode: int,
+        rate_mode: InterestRateMode,
         on_behalf_of: bytes,
         defi_provider: DefiProvider,
     ):
         raise NotImplementedError
+
+    def get_reserved_assets(
+        self,
+        defi_provider: DefiProvider,
+    ):
+        pass

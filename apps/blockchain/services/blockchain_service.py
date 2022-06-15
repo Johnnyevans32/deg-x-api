@@ -70,6 +70,9 @@ class BlockchainService:
     def get_token_asset_by_query(query: dict) -> TokenAsset:
         token_asset = ModelUtilityService.find_one(TokenAsset, query)
 
+        if token_asset is None:
+            raise Exception("")
+
         return token_asset
 
     def update_user_txns(
@@ -78,18 +81,17 @@ class BlockchainService:
         try:
             blockchain = network.blockchain
 
-            token_asset = ModelUtilityService.find_one(
-                TokenAsset, {"blockchain": blockchain.id, "isDeleted": False}, True
-            )
             user_asset = ModelUtilityService.find_one(
                 WalletAsset,
                 {
-                    "tokenasset": token_asset.id,
+                    "blockchain": blockchain.id,
                     "wallet": user_default_wallet.id,
                     "isDeleted": False,
                 },
-                True,
             )
+
+            if user_asset is None:
+                raise Exception("user asset not found")
 
             user_last_txn = BlockchainService.get_last_block_txn_by_query(
                 {
@@ -136,8 +138,11 @@ class BlockchainService:
         page_size: int,
     ) -> tuple[list[BlockchainTransaction], MetaDataModel]:
         user_default_wallet = ModelUtilityService.find_one(
-            Wallet, {"user": user.id, "isDeleted": False, "isDefault": True}, True
+            Wallet, {"user": user.id, "isDeleted": False, "isDefault": True}
         )
+
+        if user_default_wallet is None:
+            raise Exception("no default wallet set")
 
         chain_networks = ModelUtilityService.find_and_populate(
             Network,

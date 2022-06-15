@@ -7,3 +7,9 @@ class BorrowAssetDTO(BaseModel):
     amount: float
     asset: str
     interestRateMode: InterestRateMode
+
+
+class DepositAssetDTO(BaseModel):
+    amount: float
+    asset: str
+    interestRateMode: InterestRateMode
