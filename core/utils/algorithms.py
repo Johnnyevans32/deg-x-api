@@ -1,6 +1,8 @@
 import math
 from collections import deque
+import random
 from time import time
+from typing import Callable
 
 
 def timer_func(func):
@@ -723,4 +725,56 @@ def min_window(w: str = "a", s: str = "a"):
     return res
 
 
-print(min_window())
+@timer_func
+def max_sliding_window_k(nums: list[int], k: int):
+    res = []
+    window_queue = deque(nums[:k])
+    for i in range(len(nums) - k + 1):
+        if i == 0:
+            res.append(max(window_queue))
+        else:
+            window_queue.popleft()
+            window_queue.append(nums[i + k - 1])
+            res.append(max(window_queue))
+
+    return res
+
+
+@timer_func
+def smax_sliding_window_k(nums: list[int], k: int):
+    res = []
+    window_queue = deque(nums[:k])
+    res.append(max(window_queue))
+    for i in range(1, len(nums) - k + 1):
+        window_queue.popleft()
+        window_queue.append(nums[i + k - 1])
+        res.append(max(window_queue))
+
+    return res
+
+
+@timer_func
+def map_max_sliding_window_k(nums: list[int], k: int):
+    res = []
+    func: Callable[[int], None] = lambda i: res.append(max(nums[i : i + k]))
+    list(map(func, range(len(nums) - k + 1)))
+    return res
+
+
+@timer_func
+def imax_sliding_window_k(nums: list[int], k: int):
+    res = []
+    # window_queue = nums[:k]
+    for i in range(len(nums) - k + 1):
+        window_queue = nums[i : i + k]
+        res.append(max(window_queue))
+
+    return res
+
+
+# print(smax_sliding_window_k([1, 2, 3, 4, 5, 6, 7, 8, 9], 3))
+
+map_max_sliding_window_k(random.sample(range(10000000), 10000000), 20)
+(smax_sliding_window_k(random.sample(range(10000000), 10000000), 20))
+(max_sliding_window_k(random.sample(range(10000000), 10000000), 20))
+(imax_sliding_window_k(random.sample(range(10000000), 10000000), 20))

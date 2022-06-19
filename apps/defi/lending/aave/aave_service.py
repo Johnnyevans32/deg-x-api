@@ -1,4 +1,3 @@
-from typing import Any
 import eth_utils
 from eth_typing import Address
 from web3.contract import Contract
@@ -142,7 +141,7 @@ class AaveService(ILendingService):
         ).call()
 
     def get_reserved_assets(self, defi_provider: DefiProvider):
-        meta: Any = defi_provider.meta
+        # meta: Any = defi_provider.meta
         aave_contract = self.get_contract_obj(
             defi_provider,
         )

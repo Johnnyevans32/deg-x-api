@@ -55,8 +55,6 @@ class ModelUtilityService:
 
         total_count = model.count_documents(query)
 
-        print("total_count", total_count)
-
         total_page = math.ceil(total_count / page_size)
 
         prev_page = (lambda: page_num - 1 if (page_num - 1) > 0 else None)()

@@ -102,7 +102,6 @@ class LendingService:
         defi_provider_id: PyObjectId = None,
     ):
         defi_provider = self.get_defi_provider(defi_provider_id)
-
         user_wallet = self.walletService.get_user_default_wallet(user)
         user_wallet_asset = self.get_wallet_asset(user, user_wallet, defi_provider)
         user_config_data = self.lendingRegistry.get_service(
@@ -120,7 +119,6 @@ class LendingService:
         defi_provider_id: PyObjectId = None,
     ):
         defi_provider = self.get_defi_provider(defi_provider_id)
-
         user_wallet = self.walletService.get_user_default_wallet(user)
         user_wallet_asset = self.get_wallet_asset(user, user_wallet, defi_provider)
         protocol_borrow_res = self.lendingRegistry.get_service(
@@ -161,7 +159,6 @@ class LendingService:
         defi_provider_id: PyObjectId = None,
     ):
         defi_provider = self.get_defi_provider(defi_provider_id)
-
         user_wallet = self.walletService.get_user_default_wallet(user)
         user_wallet_asset = self.get_wallet_asset(user, user_wallet, defi_provider)
         protocol_deposit_res = self.lendingRegistry.get_service(
@@ -176,7 +173,6 @@ class LendingService:
         token_asset = BlockchainService.get_token_asset_by_query(
             {"contractAddress": payload.asset}
         )
-
         lending_req = ModelUtilityService.model_create(
             LendingRequest,
             LendingRequest(
@@ -201,7 +197,6 @@ class LendingService:
         defi_provider_id: PyObjectId = None,
     ):
         defi_provider = self.get_defi_provider(defi_provider_id)
-
         user_wallet = self.walletService.get_user_default_wallet(user)
         user_wallet_asset = self.get_wallet_asset(user, user_wallet, defi_provider)
         protocol_repay_res = self.lendingRegistry.get_service(
@@ -217,7 +212,6 @@ class LendingService:
         token_asset = BlockchainService.get_token_asset_by_query(
             {"contractAddress": payload.asset}
         )
-
         lending_req = ModelUtilityService.model_create(
             LendingRequest,
             LendingRequest(

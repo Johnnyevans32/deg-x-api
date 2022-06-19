@@ -23,6 +23,8 @@ COPY ./custom_logging.py /code/custom_logging.py
 COPY ./apps /code/apps
 # 
 COPY ./core /code/core
+# 
+COPY ./solidity /code/solidity
 
 # 
 CMD ["uvicorn", "application:_app", "--host", "0.0.0.0", "--port", "80"]

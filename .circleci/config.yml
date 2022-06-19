@@ -45,6 +45,14 @@ jobs:
             echo "$DOCKER_HUB_PASSWORD" | docker login -u $DOCKER_HUB_USER --password-stdin
             docker build -t jevan32/deg-x-api:latest .
             docker push jevan32/deg-x-api:latest
+  deploy_to_heroku:
+    orbs:
+      heroku: circleci/heroku@x.y
+    version: 2.1
+    workflows:
+      heroku_deploy:
+        jobs:
+          - heroku/deploy-via-git
 
 # Orchestrate our job run sequence
 workflows:

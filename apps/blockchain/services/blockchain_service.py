@@ -1,4 +1,5 @@
 from functools import partial
+from typing import Any
 
 from pymongo import DESCENDING
 
@@ -16,11 +17,13 @@ from core.db import db
 # from core.utils.helper_service import timed_cache
 from core.utils.loggly import logger
 from core.utils.model_utility_service import ModelUtilityService
+from core.utils.request import HTTPRepository
 from core.utils.response_service import MetaDataModel
 
 
 class BlockchainService:
     blockchainRegistry = BlockchainRegistry()
+    httpRepository = HTTPRepository()
     slackService = SlackService()
 
     # @timed_cache(10)
@@ -169,3 +172,7 @@ class BlockchainService:
             page_num,
             page_size,
         )
+
+    def get_historical_price_data(self):
+        api_res = self.httpRepository.call("GET", "", Any)
+        return api_res
