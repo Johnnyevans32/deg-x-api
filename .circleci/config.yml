@@ -65,3 +65,9 @@ workflows:
           filters:
             branches:
               only: master
+      - deploy_to_heroku:
+        requires:
+            - dockerize # Only run deploy job once the build job has completed
+          filters:
+            branches:
+              only: master
