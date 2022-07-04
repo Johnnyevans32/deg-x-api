@@ -8,7 +8,7 @@ from apps.defi.lending.types.lending_types import BorrowAssetDTO, DepositAssetDT
 from core.utils.custom_exceptions import UnicornRequest
 from core.utils.response_service import ResponseService
 
-router = APIRouter(prefix="/api/v1/defi/lending", tags=["Lending 💸"])
+router = APIRouter(prefix="/api/v1/defi/lending", tags=["Defi 💸"])
 
 
 lendingService = LendingService()
@@ -22,11 +22,9 @@ responseService = ResponseService()
 )
 async def get_user_account_data(request: UnicornRequest, response: Response):
     try:
-        if hasattr(request.state, "error"):
-            raise request.state.error
         user = request.state.user
         request.app.logger.info(f"getting user lending pool data for - {user.id}")
-        user_lending_data = lendingService.get_user_lending_data(user)
+        user_lending_data = await lendingService.get_user_lending_data(user)
         request.app.logger.info("done getting user lending pool data ")
         return responseService.send_response(
             response,
@@ -36,7 +34,6 @@ async def get_user_account_data(request: UnicornRequest, response: Response):
         )
 
     except Exception as e:
-        raise e
         return responseService.send_response(
             response,
             status.HTTP_400_BAD_REQUEST,
@@ -51,11 +48,9 @@ async def get_user_account_data(request: UnicornRequest, response: Response):
 )
 async def get_user_config(request: UnicornRequest, response: Response):
     try:
-        if hasattr(request.state, "error"):
-            raise request.state.error
         user = request.state.user
         request.app.logger.info(f"getting user lending pool data for - {user.id}")
-        user_lending_data = lendingService.get_user_config(user)
+        user_lending_data = await lendingService.get_user_config(user)
         request.app.logger.info("done getting user lending pool data ")
         return responseService.send_response(
             response,
@@ -65,7 +60,6 @@ async def get_user_config(request: UnicornRequest, response: Response):
         )
 
     except Exception as e:
-        # raise e
         return responseService.send_response(
             response,
             status.HTTP_400_BAD_REQUEST,
@@ -82,11 +76,9 @@ async def deposit_asset(
     request: UnicornRequest, response: Response, payload: DepositAssetDTO
 ):
     try:
-        if hasattr(request.state, "error"):
-            raise request.state.error
         user = request.state.user
         request.app.logger.info(f"initiating deposit request to protocol - {user.id}")
-        borrow_asset_res = lendingService.deposit(user, payload)
+        borrow_asset_res = await lendingService.deposit(user, payload)
         request.app.logger.info("done initiating deposit request to protocol ")
         return responseService.send_response(
             response,
@@ -96,6 +88,7 @@ async def deposit_asset(
         )
 
     except Exception as e:
+        raise e
         return responseService.send_response(
             response,
             status.HTTP_400_BAD_REQUEST,
@@ -112,11 +105,9 @@ async def borrrow_asset(
     request: UnicornRequest, response: Response, payload: BorrowAssetDTO
 ):
     try:
-        if hasattr(request.state, "error"):
-            raise request.state.error
         user = request.state.user
         request.app.logger.info(f"initiating borrow request to protocol - {user.id}")
-        borrow_asset_res = lendingService.borrow(user, payload)
+        borrow_asset_res = await lendingService.borrow(user, payload)
         request.app.logger.info("done initiating borrow request to protocol ")
         return responseService.send_response(
             response,
@@ -142,11 +133,9 @@ async def repay_asset(
     request: UnicornRequest, response: Response, payload: BorrowAssetDTO
 ):
     try:
-        if hasattr(request.state, "error"):
-            raise request.state.error
         user = request.state.user
         request.app.logger.info(f"initiating repaid request to protocol - {user.id}")
-        borrow_asset_res = lendingService.repay(user, payload)
+        borrow_asset_res = await lendingService.repay(user, payload)
         request.app.logger.info("done initiating repaid request to protocol ")
         return responseService.send_response(
             response,
@@ -170,8 +159,9 @@ async def repay_asset(
 async def get_reserved_assets(request: UnicornRequest, response: Response):
     try:
         request.app.logger.info("getting reserved assets from protocol")
-        reserved_assets_res = lendingService.get_reserved_assets()
+        reserved_assets_res = await lendingService.get_reserved_assets()
         request.app.logger.info("done getting reserved assets from protocol")
+
         return responseService.send_response(
             response,
             status.HTTP_200_OK,
@@ -180,6 +170,7 @@ async def get_reserved_assets(request: UnicornRequest, response: Response):
         )
 
     except Exception as e:
+        raise e
         return responseService.send_response(
             response,
             status.HTTP_400_BAD_REQUEST,

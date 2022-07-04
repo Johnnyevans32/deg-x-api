@@ -1,9 +1,6 @@
 import uvicorn
 from fastapi import FastAPI, Request
-from fastapi.exception_handlers import (
-    http_exception_handler,
-    request_validation_exception_handler,
-)
+from fastapi.exception_handlers import http_exception_handler
 from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from pymongo import monitoring
@@ -18,12 +15,14 @@ from core.config import settings
 from core.cron import CronJob
 from core.db import client
 from core.db.event_listeners import CommandLogger
-from core.db.populate_core_data import seed_deg_x
+
+# from core.db.populate_core_data import seed_deg_x
 from core.middlewares.sentry import sentry_setup
 from core.middlewares.settings import settings_middleware
 from core.utils.custom_exceptions import UnicornException, UnicornRequest
 from core.utils.loggly import logger
 from core.utils.response_service import ResponseService
+from starlette import status
 
 # from fastapi_admin.app import app as admin_app
 
@@ -42,6 +41,7 @@ def create_app():
         debug=False,
         openapi_url="/api/v1/openapi.json",
         terms_of_service="https://twitter.com/0xjevan",
+        contact={"twitter": "https://twitter.com/0xjevan"},
     )
 
     app.logger = logger  # type: ignore
@@ -76,7 +76,7 @@ def create_app():
         monitoring.register(CommandLogger())
         if settings.CRON_ENABLED:
             cronJob.scheduler.start()
-        seed_deg_x()
+        # seed_deg_x()
         User.init()
         BlockchainTransaction.init()
         sentry_setup()
@@ -111,8 +111,20 @@ def create_app():
         return await http_exception_handler(request, exc)
 
     @app.exception_handler(RequestValidationError)
-    async def validation_exception_handler(request, exc):
-        return await request_validation_exception_handler(request, exc)
+    async def validation_exception_handler(
+        request: Request, exc: RequestValidationError
+    ):
+        return JSONResponse(
+            {
+                "message": responseService.status_code_message[
+                    status.HTTP_422_UNPROCESSABLE_ENTITY
+                ],
+                "data": [
+                    error["loc"][-1] + f": {error['msg']}" for error in exc.errors()
+                ],
+            },
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+        )
 
     return app
 

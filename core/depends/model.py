@@ -19,12 +19,25 @@ original_field_schema = schema.field_schema
 schema.field_schema = field_schema
 
 
-class SBaseInModel(BaseModel):
+class HashableBaseModel(BaseModel):
+    def __hash__(self):
+        return hash(
+            (type(self),)
+            + tuple(
+                frozenset(getattr(self, f))
+                if isinstance(getattr(self, f), dict)
+                else getattr(self, f)
+                for f in self.__fields__.keys()
+            )
+        )
+
+
+class SBaseInModel(HashableBaseModel):
     isDeleted: bool = Field(default=False, hidden_from_schema=True)
     deletedAt: datetime = Field(default=None, hidden_from_schema=True)
 
 
-class SBaseOutModel(BaseModel):
+class SBaseOutModel(HashableBaseModel, BaseModel):
     id: Optional[PyObjectId] = Field(alias="_id")
     createdAt: datetime = Field(default=datetime.now())
     updatedAt: datetime = Field(default=datetime.now())

@@ -2,7 +2,7 @@
 from fastapi import Response, status
 from fastapi.routing import APIRouter
 
-from apps.appclient.interfaces.appclient_interface import AppClientIn
+from apps.appclient.interfaces.appclient_interface import AppClient
 from apps.appclient.services.appclient_service import AppClientService
 from core.utils.custom_exceptions import UnicornRequest
 from core.utils.response_service import ResponseService
@@ -16,14 +16,14 @@ responseService = ResponseService()
 
 @router.post("/create")
 async def create_app_client(
-    request: UnicornRequest, response: Response, app_client: AppClientIn
+    request: UnicornRequest, response: Response, app_client: AppClient
 ):
     try:
-        request.app.logger.info("")
-        client_obj = appClientService.create_client(app_client)
-        request.app.logger.info("")
+        request.app.logger.info(f"creating application client - {app_client}")
+        client_obj = await appClientService.create_client(app_client)
+        request.app.logger.info("done creating application client")
         return responseService.send_response(
-            response, status.HTTP_200_OK, "app client created", client_obj
+            response, status.HTTP_201_CREATED, "app client created", client_obj
         )
 
     except Exception as e:

@@ -5,27 +5,45 @@ import os
 import random
 import string
 import time
-from functools import lru_cache, partial, wraps
+from functools import lru_cache, wraps
 from pathlib import Path
-from typing import Any, Type, TypeVar
+from typing import Any, Callable, Type, TypeVar
+import eth_utils
+from frozendict import frozendict
 
-import frozendict
 from itsdangerous import URLSafeTimedSerializer
 from pydantic import EmailStr
 from requests import request
 from solcx import compile_standard, install_solc
-
+from core.utils.loggly import logger
 from core.config import SECRET_KEY, settings
+from async_lru import alru_cache
 
 
-def timed_cache(timeout: int, maxsize: int = 128, typed: bool = False):
+def timed_cache(
+    timeout: int, maxsize: int = 128, typed: bool = False, asyncFunction=False
+):
+    """
+    timed_cache: give lru cache time expiration ability
+
+    Args:
+        timeout (int): duration of cache power in minutes
+        maxsize (int, optional): _description_. Defaults to 128.
+        typed (bool, optional): _description_. Defaults to False.
+    """
+
     def wrapper_cache(func):
-        func = lru_cache(maxsize=maxsize, typed=typed)(func)
-        func.delta = timeout * 10 ** 9
+        func = (
+            alru_cache(maxsize=maxsize, typed=typed)(func)
+            if asyncFunction
+            else lru_cache(maxsize=maxsize, typed=typed)(func)
+        )
+        func.delta = (timeout * 10 ** 9) * 60
         func.expiration = time.monotonic_ns() + func.delta
 
         @wraps(func)
         def wrapped_func(*args, **kwargs):
+
             args = tuple(
                 [frozendict(arg) if isinstance(arg, dict) else arg for arg in args]
             )
@@ -36,6 +54,8 @@ def timed_cache(timeout: int, maxsize: int = 128, typed: bool = False):
             if time.monotonic_ns() >= func.expiration:
                 func.cache_clear()
                 func.expiration = time.monotonic_ns() + func.delta
+
+            print("args", args, "kwargs", kwargs)
             return func(*args, **kwargs)
 
         wrapped_func.cache_info = func.cache_info
@@ -45,14 +65,19 @@ def timed_cache(timeout: int, maxsize: int = 128, typed: bool = False):
     return wrapper_cache
 
 
-def timer_func(func):
-    # This function shows the execution time of
-    # the function object passed
+def timer_func(func: Callable):
+    """
+    timer_func This function shows the execution time of the function object passed
+
+    Args:
+        func (Callable): the function in question
+    """
+
     def wrap_func(*args, **kwargs):
         t1 = time.time()
         result = func(*args, **kwargs)
         t2 = time.time()
-        print(f"Function {func.__name__!r} executed in {(t2-t1):.4f}s")
+        logger.info(f"Function {func.__name__!r} executed in {(t2-t1):.4f}s")
         return result
 
     return wrap_func
@@ -76,20 +101,18 @@ class Utils:
         return (salt + pwdhash).decode("ascii")
 
     @staticmethod
-    def verify_password(stored_password, provided_password):
+    def verify_password(stored_password: str, provided_password: str) -> bool:
         """Verify a stored password against one provided by user"""
         salt = stored_password[:64]
         stored_password = stored_password[64:]
         pwd_hash = hashlib.pbkdf2_hmac(
             "sha512", provided_password.encode("utf-8"), salt.encode("ascii"), 100000
         )
-        pwd_hash = binascii.hexlify(pwd_hash).decode("ascii")
-        return pwd_hash == stored_password
+        decoded_pwd_hash = binascii.hexlify(pwd_hash).decode("ascii")
+        return decoded_pwd_hash == stored_password
 
     @staticmethod
-    def generate_confirmation_token(email: EmailStr = None) -> str | bytes:
-        if email is None:
-            raise Exception("email for token generation cant be null")
+    def generate_confirmation_token(email: EmailStr) -> str | bytes:
         serializer = URLSafeTimedSerializer(SECRET_KEY)
         return serializer.dumps(email, salt=settings.SECURITY_PASSWORD_SALT)
 
@@ -103,7 +126,7 @@ class Utils:
         )
         return email
 
-    @lru_cache
+    @lru_cache(10)
     @staticmethod
     def get_compiled_sol(contract_file_name: str, version: str):
 
@@ -137,6 +160,15 @@ class Utils:
         return abi
 
     @staticmethod
+    def get_evm_reverted_reason(err: Any):
+        code = str(err["data"]).replace("Reverted ", "")
+        if code == "Reverted":
+            return err
+
+        reason = eth_utils.to_text("0x" + code)
+        return reason
+
+    @staticmethod
     def get_abi_network_explorer(contract_address: str):
         try:
             response = request(
@@ -149,20 +181,21 @@ class Utils:
 
             return abi_json
         except Exception as e:
-            print(e)
-
-    @staticmethod
-    def parse_obj(generic_class: Type[T], obj: Any):
-        return list(
-            map(
-                partial(Utils.to_class_object, generic_class),
-                obj,
-            )
-        )
+            logger.error(f"Error getting ABI from network provider - {str(e)}")
 
     @staticmethod
     def to_class_object(
         genericClass: Type[T],
         _dict: dict,
     ) -> T:
+        """
+        to_class_object: convert to dict to class object
+
+        Args:
+            genericClass (Type[T]): class object to convert to
+            _dict (dict): dict to convert from
+
+        Returns:
+            T: converted object result
+        """
         return genericClass(**_dict)  # type: ignore [call-arg]

@@ -1,7 +1,9 @@
 import abc
 from typing import Any
 
+
 from apps.blockchain.interfaces.network_interface import Network
+from apps.blockchain.interfaces.tokenasset_interface import TokenAsset
 from apps.user.interfaces.user_interface import User
 from apps.wallet.interfaces.wallet_interface import Wallet
 
@@ -24,17 +26,22 @@ class IBlockchainService(metaclass=abc.ABCMeta):
         raise NotImplementedError
 
     @abc.abstractmethod
-    def send(
-        self, from_address: str, to: str, value: int, chain_network: Network
-    ) -> str:
+    async def send(
+        self,
+        from_address: str,
+        to: str,
+        value: float,
+        token_asset: TokenAsset,
+        private_key: str,
+    ) -> Any:
         raise NotImplementedError
 
     @abc.abstractmethod
-    def get_balance(self, address: str, chain_network: Network) -> str:
+    async def get_balance(self, address: str, token_asset: TokenAsset) -> str:
         raise NotImplementedError
 
     @abc.abstractmethod
-    def get_transactions(
+    async def get_transactions(
         self,
         address: str,
         user: User,

@@ -23,7 +23,7 @@ async def get_countries(
 ):
     try:
         request.app.logger.info("getting countries")
-        res, meta = countryService.get_country(page_num, page_size)
+        res, meta = await countryService.get_country(page_num, page_size)
         request.app.logger.info("done getting countries")
         return responseService.send_response(
             response, status.HTTP_200_OK, "countries retrieved", res, meta
@@ -49,7 +49,7 @@ async def search_countries(
 ):
     try:
         request.app.logger.info("getting countries")
-        res, meta = countryService.search_country(
+        res, meta = await countryService.search_country(
             search_query_name, page_num, page_size
         )
         request.app.logger.info("done getting country")

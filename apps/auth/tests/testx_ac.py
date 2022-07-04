@@ -40,7 +40,7 @@ class TestAuthModule(TestCase):
             json.dumps(response.json()), object_hook=lambda d: SimpleNamespace(**d)
         )
         assert response.status_code == 201
-        assert payload_response.data.user.isVerified is False
+        assert not payload_response.data.user.isVerified
 
     def test_register_user_for_dub_username(self) -> None:
         test_user_payload = {
@@ -108,7 +108,7 @@ class TestAuthModule(TestCase):
             json.dumps(response.json()), object_hook=lambda d: SimpleNamespace(**d)
         )
         assert response.status_code == 200
-        assert payload_response.data.token is not None
+        assert payload_response.data.token
 
     @classmethod
     def tearDownClass(cls) -> None:

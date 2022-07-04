@@ -2,7 +2,7 @@ import math
 import re
 from datetime import datetime
 from functools import lru_cache, partial
-from typing import Any, Dict, Tuple, Type, TypeVar
+from typing import Any, Type, TypeVar
 
 from bson import ObjectId
 from pymongo import DESCENDING, ReturnDocument
@@ -17,6 +17,7 @@ from pymongo.results import (
 from core.db import db
 from core.utils.response_service import MetaDataModel
 from core.utils.utils_service import Utils
+from core.utils.loggly import logger
 
 
 class ModelUtilityService:
@@ -39,12 +40,12 @@ class ModelUtilityService:
             return noun + "s"
 
     @staticmethod
-    def paginate_data(
+    async def paginate_data(
         generic_class: Type[T],
         query: dict,
         page_num: int,
         page_size: int,
-    ) -> Tuple[list[T], MetaDataModel]:
+    ) -> tuple[list[T], MetaDataModel]:
         model = db[generic_class.__name__.lower()]
 
         """returns a set of documents belonging to page number `page_num`
@@ -79,16 +80,26 @@ class ModelUtilityService:
         }
 
         # Return documents
-        return result, MetaDataModel(**meta_data)
+        return (
+            list(
+                map(
+                    partial(Utils.to_class_object, generic_class),
+                    result,
+                )
+            )
+            if result
+            else result,
+            MetaDataModel(**meta_data),
+        )
 
     @staticmethod
-    def populate_and_paginate_data(
+    async def populate_and_paginate_data(
         generic_class: Type[T],
         query: dict,
         fields: list[str],
         page_num: int = 1,
         page_size: int = 10,
-    ) -> Tuple[list[T], MetaDataModel]:
+    ) -> tuple[list[T], MetaDataModel]:
         model = db[generic_class.__name__.lower()]
         # Calculate number of documents to skip
         skips = page_size * (page_num - 1)
@@ -162,16 +173,26 @@ class ModelUtilityService:
         }
 
         # And there goes the populate function just as mongoose populate works 🚀🕺🏽
-        return result, MetaDataModel(**meta_data)
+        return (
+            list(
+                map(
+                    partial(Utils.to_class_object, generic_class),
+                    result,
+                )
+            )
+            if result
+            else result,
+            MetaDataModel(**meta_data),
+        )
 
     @staticmethod
-    def find_one_and_populate(
+    async def find_one_and_populate(
         generic_class: Type[T],
         query: dict,
         fields: list[str],
     ) -> T | None:
         model = db[generic_class.__name__.lower()]
-        pipeline: list[Dict[str, Any]] = [
+        pipeline: list[dict[str, Any]] = [
             {
                 "$match": query,
             },
@@ -198,12 +219,12 @@ class ModelUtilityService:
 
         return (
             generic_class(**aggregation_result)  # type: ignore [call-arg]
-            if aggregation_result is not None
+            if not aggregation_result
             else None
         )
 
     @staticmethod
-    def find_and_populate(
+    async def find_and_populate(
         generic_class: Type[T],
         query: dict,
         fields: list[str],
@@ -229,8 +250,10 @@ class ModelUtilityService:
             ]
             pipeline += lookup
         results = model.aggregate(pipeline)
+
         if not results:
             return []
+
         return list(
             map(
                 partial(Utils.to_class_object, generic_class),
@@ -239,23 +262,20 @@ class ModelUtilityService:
         )
 
     @staticmethod
-    def find_one(generic_class: Type[T], query: dict) -> T | None:
+    async def find_one(generic_class: Type[T], query: dict) -> T | None:
         model = db[generic_class.__name__.lower()]
         result = model.find_one(query)
 
-        return (
-            generic_class(**result)  # type: ignore [call-arg]
-            if result is not None
-            else None
-        )
+        return generic_class(**result) if result else None  # type: ignore [call-arg]
 
     @staticmethod
-    def find(generic_class: Type[T], query: dict) -> list[T]:
+    async def find(generic_class: Type[T], query: dict) -> list[T]:
         model = db[generic_class.__name__.lower()]
 
         results = model.find(query)
         if not results:
             return []
+
         return list(
             map(
                 partial(Utils.to_class_object, generic_class),
@@ -264,17 +284,13 @@ class ModelUtilityService:
         )
 
     @staticmethod
-    def model_create(
+    async def model_create(
         generic_class: Type[T],
         record: dict,
         session: ClientSession = None,
     ) -> T:
         model = db[generic_class.__name__.lower()]
-
-        # record.pop("_id", None)
         created_record: InsertOneResult = model.insert_one(record, session=session)
-
-        # return created_record
         res = model.find_one(
             {"_id": ObjectId(created_record.inserted_id)}, session=session
         )
@@ -282,7 +298,9 @@ class ModelUtilityService:
         return generic_class(**res)  # type: ignore
 
     @staticmethod
-    def model_update(generic_class: Type[T], query: dict, record: dict) -> UpdateResult:
+    async def model_update(
+        generic_class: Type[T], query: dict, record: dict
+    ) -> UpdateResult:
         model = db[generic_class.__name__.lower()]
         record["updatedAt"] = datetime.now()
         updated_record: UpdateResult = model.update_one(query, {"$set": record})
@@ -290,7 +308,7 @@ class ModelUtilityService:
         return updated_record
 
     @staticmethod
-    def model_find_one_and_update(
+    async def model_find_one_and_update(
         generic_class: Type[T],
         query: dict,
         record: dict,
@@ -304,37 +322,39 @@ class ModelUtilityService:
 
         return (
             generic_class(**updated_record)  # type: ignore [call-arg]
-            if updated_record is not None
+            if updated_record
             else None
         )
 
     @staticmethod
-    def model_find_or_create(generic_class: Type[T], query: dict, record: dict) -> T:
+    async def model_find_one_or_create(
+        generic_class: Type[T], query: dict, record: dict
+    ) -> T:
         model = db[generic_class.__name__.lower()]
         result = model.find_one(query)
-        if result is None:
-            result = ModelUtilityService.model_create(generic_class, record)
-        return result
+        if not result:
+            return await ModelUtilityService.model_create(generic_class, record)
+
+        return generic_class(**result)  # type: ignore [call-arg]
 
     @staticmethod
-    def model_create_many(
+    async def model_create_many(
         generic_class: Type[T],
         records: list[Any],
         session: ClientSession = None,
     ) -> InsertManyResult:
         try:
             model = db[generic_class.__name__.lower()]
-
             created_records: InsertManyResult = model.insert_many(
                 records, False, session=session
             )
 
             return created_records
         except Exception as e:
-            print(e)
+            logger.error(f"Error inserting many records - {str(e)}")
 
     @staticmethod
-    def model_hard_delete(generic_class: Type[T], query: dict) -> DeleteResult:
+    async def model_hard_delete(generic_class: Type[T], query: dict) -> DeleteResult:
         model = db[generic_class.__name__.lower()]
         deleted_record: DeleteResult = model.delete_one(query)
 

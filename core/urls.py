@@ -10,6 +10,9 @@ from apps.blockchain.controllers.blockchain_controller import (
 from apps.defi.lending.controllers.lending_controller import (
     router as router_defi_lending,
 )
+from apps.defi.controllers.defi_controller import (
+    router as router_defi,
+)
 from apps.featureconfig.controllers.featureconfig_controller import (
     router as router_feature,
 )
@@ -29,3 +32,4 @@ router.include_router(router_webhook)
 router.include_router(router_client)
 router.include_router(router_defi_lending)
 router.include_router(router_blockchain)
+router.include_router(router_defi)

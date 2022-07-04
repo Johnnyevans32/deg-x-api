@@ -37,14 +37,12 @@ class UserResetPasswordInput(BaseModel):
     password: str
 
 
-class UserBase(BaseModel):
+class UserBase(SBaseOutModel):
     name: Name
     email: EmailStr
     username: str
     country: Optional[Union[PyObjectId, Country]]
 
-
-class UserOut(UserBase, SBaseOutModel):
     class Config:
         anystr_strip_whitespace = True
 

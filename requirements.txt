@@ -22,8 +22,9 @@ nox~=2021.10.1
 poetry~=1.1.12
 isort~=5.10.1
 black~=21.12b0
-web3~=5.25.0
+web3~=5.29.2
 py-solc-x~=1.1.1
-frozendict
-mnemonic
-pendulum
+frozendict~=2.3.0
+mnemonic~=0.20
+pendulum~=2.1.2
+async_lru~=1.0.3

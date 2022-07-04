@@ -8,36 +8,33 @@ from core.utils.loggly import logger
 from core.utils.model_utility_service import ModelUtilityService
 
 id_or_none: Callable[[Any], PyObjectId | None] = (
-    lambda result: result.id if result is not None else None
+    lambda result: result.id if result else None
 )
 
 
-def populate_blockchains():
+async def populate_blockchains():
     data = [
         {"name": "ethereum", "registryName": "ethereum_service", "meta": {}},
         {"name": "bitcoin", "registryName": "bitcoin_service", "meta": {}},
     ]
     mapped_data = list(map(lambda blc: Blockchain(**blc), data))
-    list(
-        map(
-            lambda d: ModelUtilityService.model_find_one_and_update(
-                Blockchain,
-                {"registryName": d.registryName},
-                d.dict(by_alias=True, exclude_none=True),
-                True,
-            ),
-            mapped_data,
-        )
-    )
+
+    for d in mapped_data:
+        await ModelUtilityService.model_find_one_and_update(
+            Blockchain,
+            {"registryName": d.registryName},
+            d.dict(by_alias=True, exclude_none=True),
+            True,
+        ),
 
 
-def populate_networks():
+async def populate_networks():
     data = [
         {
             "name": "kovan",
             "networkType": NetworkType.TESTNET,
             "blockchain": id_or_none(
-                ModelUtilityService.find_one(
+                await ModelUtilityService.find_one(
                     Blockchain,
                     {"registryName": "ethereum_service"},
                 )
@@ -53,28 +50,24 @@ def populate_networks():
     ]
 
     mapped_data = list(map(lambda nt: Network(**nt), data))
-    list(
-        map(
-            lambda nt: ModelUtilityService.model_find_one_and_update(
-                Network,
-                {"name": nt.name},
-                nt.dict(by_alias=True, exclude_none=True),
-                True,
-            ),
-            mapped_data,
-        )
-    )
+    for nt in mapped_data:
+        await ModelUtilityService.model_find_one_and_update(
+            Network,
+            {"name": nt.name},
+            nt.dict(by_alias=True, exclude_none=True),
+            True,
+        ),
 
 
-def populate_tokenassets():
+async def populate_tokenassets():
     data = [
         {
             "blockchain": id_or_none(
-                ModelUtilityService.find_one(
+                await ModelUtilityService.find_one(
                     Blockchain, {"registryName": "ethereum_service"}
                 )
             ),
-            "code": "ETH",
+            "symbol": "ETH",
             "coinType": CoinType.ETH,
             "isLayerOne": True,
             "name": "ethereum",
@@ -83,20 +76,16 @@ def populate_tokenassets():
     ]
 
     mapped_data = list(map(lambda ta: TokenAsset(**ta), data))
-    list(
-        map(
-            lambda ta: ModelUtilityService.model_find_one_and_update(
-                TokenAsset,
-                {"name": ta.name},
-                ta.dict(by_alias=True, exclude_none=True),
-                True,
-            ),
-            mapped_data,
-        )
-    )
+    for ta in mapped_data:
+        await ModelUtilityService.model_find_one_and_update(
+            TokenAsset,
+            {"name": ta.name},
+            ta.dict(by_alias=True, exclude_none=True),
+            True,
+        ),
 
 
-def populate_defi_providers():
+async def populate_defi_providers():
     data = [
         {
             "name": "aave",
@@ -105,7 +94,7 @@ def populate_defi_providers():
             "serviceName": "aave_service",
             "isDefault": True,
             "blockchain": id_or_none(
-                ModelUtilityService.find_one(
+                await ModelUtilityService.find_one(
                     Blockchain, {"registryName": "ethereum_service"}
                 )
             ),
@@ -114,34 +103,31 @@ def populate_defi_providers():
                     "address": "0x3c73A5E5785cAC854D468F727c606C07488a29D6"
                 }
             },
+            "networkType": NetworkType.TESTNET,
             "network": id_or_none(
-                ModelUtilityService.find_one(Network, {"name": "kovan"})
+                await ModelUtilityService.find_one(Network, {"name": "kovan"})
             ),
         }
     ]
 
     mapped_data = list(map(lambda dp: DefiProvider(**dp), data))
-    list(
-        map(
-            lambda dp: ModelUtilityService.model_find_one_and_update(
-                DefiProvider,
-                {"name": dp.name},
-                dp.dict(by_alias=True, exclude_none=True),
-                True,
-            ),
-            mapped_data,
-        )
-    )
+    for dp in mapped_data:
+        await ModelUtilityService.model_find_one_and_update(
+            DefiProvider,
+            {"name": dp.name},
+            dp.dict(by_alias=True, exclude_none=True),
+            True,
+        ),
 
 
-def seed_deg_x():
+async def seed_deg_x():
     logger.info("SEEDING BLOCKCHAINS.....")
-    populate_blockchains()
+    await populate_blockchains()
     logger.info("SEEDED BLOCKCHAINS!!!")
     logger.info("SEEDING NETWORKS.....")
-    populate_networks()
+    await populate_networks()
     logger.info("SEEDED NETWORKS!!!")
     logger.info("SEEDING ASSETS.....")
-    populate_tokenassets()
+    await populate_tokenassets()
     logger.info("SEEDED ASSETS!!!")
-    populate_defi_providers()
+    await populate_defi_providers()

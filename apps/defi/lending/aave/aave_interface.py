@@ -8,3 +8,8 @@ class IUserAcccountData(BaseModel):
     currentLiquidationThreshold: float
     ltv: float
     healthFactory: float
+
+
+class IReservedTokens(BaseModel):
+    tokenSymbol: str
+    tokenAddress: str

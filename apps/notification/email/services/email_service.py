@@ -21,10 +21,10 @@ class EmailService:
         html_template: str = "",
         environment=None,
     ) -> None:
-        if email_to is None:
+        if not email_to:
             raise Exception("email for mail sending cant be null")
 
-        if environment is None:
+        if not environment:
             environment = {}
         assert settings.EMAILS_ENABLED, "Email is Disabled"
         message = emails.Message(

@@ -1,6 +1,5 @@
 import math
 from collections import deque
-import random
 from time import time
 from typing import Callable
 
@@ -772,9 +771,18 @@ def imax_sliding_window_k(nums: list[int], k: int):
     return res
 
 
+def multipliers():
+    return [lambda x: i * x for i in range(4)]
+
+
+# print [m(2) for m in multipliers()]
+
+
+# print([m(1) for m in multipliers()])
+
 # print(smax_sliding_window_k([1, 2, 3, 4, 5, 6, 7, 8, 9], 3))
 
-map_max_sliding_window_k(random.sample(range(10000000), 10000000), 20)
-(smax_sliding_window_k(random.sample(range(10000000), 10000000), 20))
-(max_sliding_window_k(random.sample(range(10000000), 10000000), 20))
-(imax_sliding_window_k(random.sample(range(10000000), 10000000), 20))
+# map_max_sliding_window_k(random.sample(range(10000000), 10000000), 20)
+# (smax_sliding_window_k(random.sample(range(10000000), 10000000), 20))
+# (max_sliding_window_k(random.sample(range(10000000), 10000000), 20))
+# (imax_sliding_window_k(random.sample(range(10000000), 10000000), 20))

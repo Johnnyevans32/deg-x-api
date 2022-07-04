@@ -15,7 +15,7 @@ from apps.user.interfaces.user_interface import (
 from apps.user.services.user_service import UserService
 from core.utils.custom_exceptions import UnicornRequest
 from core.utils.response_service import ResponseService, get_response_model
-from core.utils.utils_service import Utils
+
 
 router = APIRouter(prefix="/api/v1/account", tags=["Auth 🔐"])
 
@@ -30,12 +30,13 @@ googleService = GoogleService()
 @router.post(
     "/register",
     status_code=status.HTTP_201_CREATED,
+    response_model_by_alias=False,
     response_model=get_response_model(AuthResponse, "RegisterResponse"),
 )
 async def register_user(user: User, request: UnicornRequest, res: Response):
     try:
         request.app.logger.info(f"creating user with email - {user.email}")
-        resp = authService.create_account(user)
+        resp = await authService.create_account(user)
         request.app.logger.info(f"sending verification email to - {user.email}")
         emailService.send_verification(user)
         request.app.logger.info(f"done sending verification email to - {user.email}")
@@ -68,6 +69,7 @@ async def register_user(user: User, request: UnicornRequest, res: Response):
 @router.post(
     "/login",
     status_code=status.HTTP_200_OK,
+    response_model_by_alias=False,
     response_model=get_response_model(AuthResponse, "LoginResponse"),
 )
 async def login_user(
@@ -75,32 +77,26 @@ async def login_user(
 ):
     try:
         request.app.logger.info(f"logging in user with email - {login_input.email}")
-        resp = authService.login_user(login_input)
+        resp = await authService.login_user(login_input)
         request.app.logger.info(f"logging user with email - {login_input.email}")
         return responseService.send_response(
             res, status.HTTP_200_OK, "User Log in Successful", resp
         )
     except Exception as e:
-        # raise e
+        raise e
         request.app.logger.error(f"Error logging user {login_input.email}, {str(e)}")
         return responseService.send_response(
             res, status.HTTP_400_BAD_REQUEST, f"User Login Failed: {str(e)}"
         )
 
 
-@router.get("/confirm/{token}")
-async def confirm_email(request: UnicornRequest, res: Response, token):
+@router.get("/verify/{token}")
+async def verify_email(request: UnicornRequest, res: Response, token: str):
     try:
-        email = Utils.confirm_token(token)
-        if not email:
-            request.app.logger.error("Email invalid or expired")
-            return responseService.send_response(
-                res, status.HTTP_400_BAD_REQUEST, "Email invalid or expired"
-            )
-        request.app.logger.info(f"verifying user with email - {email}")
-        userService.verify_email(email)
 
-        request.app.logger.info(f"verified user with email - {email}")
+        request.app.logger.info(f"verifying user with token - {token}")
+        await authService.verify_email(token)
+        request.app.logger.info(f"verified user with token - {token}")
         return responseService.send_response(
             res, status.HTTP_200_OK, "email verified successfully"
         )
@@ -116,7 +112,9 @@ async def send_forgotten_password_link(
     request: UnicornRequest, res: Response, user_email: EmailStr
 ):
     try:
-        user = userService.get_user_by_email(user_email)
+        user = await userService.get_user_by_query(
+            {"email": user_email, "isDeleted": False}
+        )
         request.app.logger.info(
             f"sending forgotten password link to user with email - {user.email}"
         )
@@ -139,24 +137,17 @@ async def send_forgotten_password_link(
 
 
 @router.put("/update-password/{token}")
-async def update_password(
+async def update_user_password(
     request: UnicornRequest,
     res: Response,
-    token,
+    token: str,
     password_reset_dto: UserResetPasswordInput,
 ):
     try:
-        email = Utils.confirm_token(token)
-        if not email:
-            request.app.logger.error("Email invalid or expired")
-            return responseService.send_response(
-                res, status.HTTP_400_BAD_REQUEST, "Email invalid or expired"
-            )
-        request.app.logger.info(f"resetting password for user with email - {email}")
-        userService.update_user(email, password_reset_dto)
-
+        request.app.logger.info(f"resetting password for user with token - {token}")
+        await authService.update_user_password(token, password_reset_dto)
         request.app.logger.info(
-            f"done resetting password for user with email - {email}"
+            f"done resetting password for user with token - {token}"
         )
         return responseService.send_response(
             res, status.HTTP_200_OK, "user password updated successfully"
@@ -175,7 +166,9 @@ async def resend_confirmation(
     request: UnicornRequest, res: Response, user_email: EmailStr
 ):
     try:
-        user = userService.get_user_by_email(user_email)
+        user = await userService.get_user_by_query(
+            {"email": user_email, "isDeleted": False}
+        )
         request.app.logger.info(
             f"resending verification email to user with email - {user.email}"
         )
@@ -198,9 +191,10 @@ async def resend_confirmation(
 @router.post(
     "/oauth",
     status_code=status.HTTP_201_CREATED,
+    response_model_by_alias=False,
     response_model=get_response_model(AuthResponse, "OAuthRegisterResponse"),
 )
-async def oauth_sign_in(user_id: str, request: UnicornRequest, res: Response):
+async def oauth_sign_in(request: UnicornRequest, res: Response, user_id: str):
     try:
         request.app.logger.info(f"authenticating user with oauth id - {user_id}")
         user_resp = await googleService.verify_oauth_sign_in(user_id)
@@ -224,10 +218,10 @@ async def oauth_sign_in(user_id: str, request: UnicornRequest, res: Response):
     "/refresh-access-token",
     status_code=status.HTTP_201_CREATED,
 )
-async def get_access_token(refresh_token: str, request: UnicornRequest, res: Response):
+async def get_access_token(request: UnicornRequest, res: Response, refresh_token: str):
     try:
         request.app.logger.info("authenticating refresh token for user")
-        user_resp = authService.authenticate_refresh_token(refresh_token)
+        user_resp = await authService.authenticate_refresh_token(refresh_token)
         request.app.logger.info("done authenticating refresh token for user ")
         return responseService.send_response(
             res,

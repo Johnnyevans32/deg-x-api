@@ -1,6 +1,7 @@
 import abc
 
 from apps.defi.interfaces.defi_provider_interface import DefiProvider
+from apps.defi.lending.aave.aave_interface import IReservedTokens
 from apps.defi.lending.interfaces.lending_request_interface import InterestRateMode
 
 
@@ -18,49 +19,61 @@ class ILendingService(metaclass=abc.ABCMeta):
         raise NotImplementedError
 
     @abc.abstractmethod
-    def get_user_account_data(self, user: bytes, defi_provider: DefiProvider):
+    async def get_user_account_data(self, user: str, defi_provider: DefiProvider):
         raise NotImplementedError
 
     @abc.abstractmethod
-    def get_user_config(self, user: bytes, defi_provider: DefiProvider):
+    def get_user_config(self, user: str, defi_provider: DefiProvider):
         raise NotImplementedError
 
     @abc.abstractmethod
-    def deposit(
+    async def deposit(
         self,
-        asset: bytes,
+        asset: str,
         amount: float,
-        on_behalf_of: bytes,
+        on_behalf_of: str,
         defi_provider: DefiProvider,
-        referral_code=0,
+        mnemonic: str,
     ):
         raise NotImplementedError
 
     @abc.abstractmethod
-    def borrow(
+    async def borrow(
         self,
-        asset: bytes,
+        asset: str,
         amount: float,
         interest_rate_mode: InterestRateMode,
-        on_behalf_of: bytes,
+        on_behalf_of: str,
         defi_provider: DefiProvider,
-        referral_code=0,
+        mnemonic: str,
     ):
         raise NotImplementedError
 
     @abc.abstractmethod
-    def repay(
+    async def repay(
         self,
-        asset: bytes,
+        asset: str,
         amount: float,
         rate_mode: InterestRateMode,
-        on_behalf_of: bytes,
+        on_behalf_of: str,
         defi_provider: DefiProvider,
+        mnemonic: str,
     ):
         raise NotImplementedError
 
-    def get_reserved_assets(
+    @abc.abstractmethod
+    async def withdraw(
+        self,
+        asset: str,
+        amount: int,
+        to: str,
+        defi_provider: DefiProvider,
+        mnemonic: str,
+    ) -> float:
+        raise NotImplementedError
+
+    async def get_reserved_assets(
         self,
         defi_provider: DefiProvider,
-    ):
+    ) -> list[IReservedTokens]:
         pass

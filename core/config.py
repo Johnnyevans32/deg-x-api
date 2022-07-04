@@ -20,7 +20,7 @@ SECRET_KEY = os.getenv("SECRET_KEY", "cuerno de unicornio :D")
 def getenv_boolean(var_name, default_value=False):
     result = default_value
     env_value = os.getenv(var_name)
-    if env_value is not None:
+    if env_value:
         result = env_value.upper() in ("TRUE", "1")
     return result
 
@@ -72,14 +72,14 @@ class Settings(BaseSettings):
     DATABASE = {"NAME": DATABASE_NAME, "URI": DATABASE_URI}
 
     ACCESS_TOKEN_JWT_SECRET = os.getenv("ACCESS_TOKEN_JWT_SECRET", "accesssecret")
-    ACCESS_TOKEN_EXPIRATION = int(os.getenv("ACCESS_TOKEN_EXPIRATION", 10))
+    ACCESS_TOKEN_EXPIRATION = int(os.getenv("ACCESS_TOKEN_EXPIRATION", 600))  # in MINS
 
     REFRESH_TOKEN_JWT_SECRET = os.getenv("REFRESH_TOKEN_JWT_SECRET", "refreshsecret")
     REFRESH_TOKEN_EXPIRATION = int(os.getenv("REFRESH_TOKEN_EXPIRATION", 14400))
 
     SERIALIZER_TOKEN_EXPIRATION_IN_SEC = int(os.getenv("TOKEN_EXPIRATION_IN_SEC", 3600))
 
-    UI_URL = "https://simthrift.net/"
+    UI_URL = "https://degx.com"
 
     # ~~~~~ AWS S3 ~~~~~
     S3_BUCKET_NAME = os.getenv("S3_BUCKET_NAME", "demo-bucket")

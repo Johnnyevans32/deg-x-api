@@ -73,7 +73,7 @@ class CustomizeLogger:
             level=level.upper(),
             format=format_type,
         )
-        if settings.IS_DEV is False:
+        if not settings.IS_DEV:
             handler = loggly.handlers.HTTPSHandler(url=settings.LOGGLY_HOOK)
             logger.add(
                 handler,

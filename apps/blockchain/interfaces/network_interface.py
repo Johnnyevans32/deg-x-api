@@ -1,11 +1,11 @@
 from enum import Enum
 from typing import Optional, Union
 
-from pydantic import BaseModel, HttpUrl
+from pydantic import HttpUrl
 
 from apps.blockchain.interfaces.blockchain_interface import Blockchain
 from core.depends.get_object_id import PyObjectId
-from core.depends.model import SBaseModel
+from core.depends.model import HashableBaseModel, SBaseModel
 
 
 class NetworkType(str, Enum):
@@ -13,7 +13,7 @@ class NetworkType(str, Enum):
     TESTNET = "testnet"
 
 
-class ApiExplorer(BaseModel):
+class ApiExplorer(HashableBaseModel):
     url: HttpUrl
     keyToken: str
 

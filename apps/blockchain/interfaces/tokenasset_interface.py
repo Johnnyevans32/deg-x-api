@@ -6,7 +6,7 @@ from pydantic import Field
 from apps.blockchain.interfaces.blockchain_interface import Blockchain
 from apps.blockchain.interfaces.network_interface import Network
 from core.depends.get_object_id import PyObjectId
-from core.depends.model import SBaseModel
+from core.depends.model import SBaseModel, SBaseOutModel
 
 
 class CoinType(str, Enum):
@@ -17,11 +17,15 @@ class CoinType(str, Enum):
     BTC = "btc"
 
 
-class TokenAsset(SBaseModel):
+class TokenOut(SBaseOutModel):
     name: str
-    coinType: CoinType
-    contractAddress: Optional[str]
-    network: Optional[Union[PyObjectId, Network]]
+    symbol: str
     image: str
+    # coinType: Optional[CoinType]
+    contractAddress: Optional[str]
+
+
+class TokenAsset(TokenOut, SBaseModel):
+    network: Optional[Union[PyObjectId, Network]]
     blockchain: Union[PyObjectId, Blockchain]
     isLayerOne: bool = Field(default=False)

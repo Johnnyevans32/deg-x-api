@@ -1,38 +1,27 @@
 from typing import Optional
 
-from pydantic import BaseModel
+from pydantic import HttpUrl
 from pymongo import ASCENDING
 
 from core.db import db
 from core.depends.model import SBaseModel
 
 
-class AppClientAuth(BaseModel):
+class AppClient(SBaseModel):
+    name: str
+    callBackUrl: Optional[HttpUrl]
+    appUrl: Optional[HttpUrl]
     clientID: Optional[str]
     clientSecret: Optional[str]
-
-
-class AppClientIn(AppClientAuth):
-    name: str
-    callBackUrl: Optional[str]
-    appUrl: Optional[str]
 
     class Config:
         schema_extra = {
             "example": {
-                "name": "demi-chee",
-                "callBackUrl": "demigod.com/callback",
-                "appUrl": "demigod.com",
+                "name": "Deg X",
+                "callBackUrl": "https://string.com",
+                "appUrl": "https://string.com",
             }
         }
-
-
-class AppClient(SBaseModel):
-    name: str
-    clientID: str
-    clientSecret: str
-    callBackUrl: str
-    appUrl: str
 
     @staticmethod
     def init():

@@ -25,14 +25,18 @@ class JWTBearer(HTTPBearer):
                         status_code=403, message="Invalid authentication scheme."
                     )
                 else:
-                    payload = self.verify_jwt(credentials.credentials)
-                    if not payload:
+                    user_decoded_jwt = self.jwtService.decode_jwt(
+                        credentials.credentials, "ACCESS_TOKEN"
+                    )
+                    if not user_decoded_jwt:
                         raise UnicornException(
                             status_code=403, message="Invalid token or expired token."
                         )
-                    request.state.user = self.userService.get_user_by_id(
-                        payload["user_id"]
+
+                    request.state.user = await self.userService.get_user_by_query(
+                        {"_id": user_decoded_jwt.user, "isDeleted": False}
                     )
+
                     return credentials.credentials
             else:
                 raise UnicornException(
@@ -47,8 +51,3 @@ class JWTBearer(HTTPBearer):
             raise UnicornException(
                 status_code=401, message=self.responseService.status_code_message[401]
             )
-
-    def verify_jwt(self, jwt_token: str) -> dict:
-        payload = self.jwtService.decode_jwt(jwt_token, "ACCESS_TOKEN")
-
-        return payload

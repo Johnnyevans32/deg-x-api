@@ -22,6 +22,7 @@ class ResponseService:
             404: "hmm, one of our engineers is responsible for this or is it you?",
             405: "wrong request method, go back to the docs, please",
             409: "this is conflicting with our resources",
+            422: "unprocessable entity",
             429: "give us a break boss, too much requests sent already",
             500: "shit, we played too much, we are fixing it now",
             501: "we are working to make this implemented, give us some time please",

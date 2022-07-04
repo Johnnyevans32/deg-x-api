@@ -10,7 +10,7 @@ from apps.user.interfaces.user_interface import User
 from apps.wallet.interfaces.wallet_interface import Wallet
 from core.db import db
 from core.depends.get_object_id import PyObjectId
-from core.depends.model import SBaseModel
+from core.depends.model import SBaseModel, SBaseOutModel
 
 
 class TxnType(str, Enum):
@@ -29,14 +29,13 @@ class TxnStatus(str, Enum):
     SUCCESS = "success"
 
 
-class BlockchainTransaction(SBaseModel):
+class BlockchainTransactionOut(SBaseOutModel):
     user: Union[PyObjectId, User]
     wallet: Union[PyObjectId, Wallet]
     network: Union[PyObjectId, Network]
     fromAddress: str
     toAddress: str
     transactionHash: str
-    metaData: Any
     blockConfirmations: int
     blockNumber: int
     gasPrice: int
@@ -47,6 +46,10 @@ class BlockchainTransaction(SBaseModel):
     txnType: TxnType
     source: TxnSource = Field(default=TxnSource.EXPLORER)
     transactedAt: datetime
+
+
+class BlockchainTransaction(BlockchainTransactionOut, SBaseModel):
+    metaData: Any
 
     @staticmethod
     def init():

@@ -1,4 +1,4 @@
-from apps.blockchain.interfaces.network_interface import Network
+from apps.blockchain.interfaces.tokenasset_interface import TokenAsset
 
 # from apps.blockchain.interfaces.transaction_interface import BlockchainTransaction
 from apps.blockchain.types.blockchain_service_interface import IBlockchainService
@@ -19,8 +19,9 @@ class BitcoinService(IBlockchainService, HTTPRepository):
         self,
         from_address: str,
         to: str,
-        value: int,
-        chanin_network: Network,
+        value: float,
+        token_asset: TokenAsset,
+        private_key: str,
         gas=2000000,
         gas_price="50",
     ):
@@ -29,7 +30,7 @@ class BitcoinService(IBlockchainService, HTTPRepository):
     def get_balance(
         self,
         address: str,
-        chanin_network: Network,
+        token_asset: TokenAsset,
     ):
         pass
 

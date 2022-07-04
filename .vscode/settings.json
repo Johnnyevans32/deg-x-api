@@ -24,5 +24,9 @@
             "--java_out=gen/java"
         ]
     },
-    "python.linting.flake8Enabled": true
+    "python.linting.flake8Enabled": true,
+    "autoDocstring.includeExtendedSummary": false,
+    "autoDocstring.includeName": true,
+    "autoDocstring.startOnNewLine": true,
+    "autoDocstring.docstringFormat": "google"
 }

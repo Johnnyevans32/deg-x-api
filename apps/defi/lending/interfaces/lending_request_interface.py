@@ -1,5 +1,5 @@
 from enum import Enum
-from typing import Union
+from typing import Any, Optional, Union
 
 from apps.blockchain.interfaces.tokenasset_interface import TokenAsset
 from apps.defi.interfaces.defi_provider_interface import DefiProvider
@@ -32,9 +32,10 @@ class LendingRequest(SBaseModel):
     status: LendingRequestStatus
     tokenAsset: Union[PyObjectId, TokenAsset, str]
     amount: float
-    repaidAmount: float
+    repaidAmount: Optional[float]
     requestType: LendingRequestType
-    interestRateMode: InterestRateMode
+    interestRateMode: Optional[InterestRateMode]
+    providerResponse: Optional[Any]
     # requestBeneficiary: str
 
     # dollarRate: float

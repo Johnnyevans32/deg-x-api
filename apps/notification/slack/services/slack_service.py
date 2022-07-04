@@ -12,7 +12,7 @@ class SlackService:
         try:
             body = {"text": text, "channel": channel, "username": "lexi"}
 
-            if attachments is not None:
+            if attachments:
                 body["attachments"] = attachments
 
             requests.post(settings.SLACK_HOOK, data=json.dumps(body))
