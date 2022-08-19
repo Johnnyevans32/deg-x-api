@@ -1,11 +1,10 @@
 # -*- coding: utf-8 -*-
 from fastapi import Depends, Response, status
 from fastapi.routing import APIRouter
+
 from apps.auth.services.auth_bearer import JWTBearer
 from apps.defi.interfaces.defi_provider_interface import DefiProviderOut
-
 from apps.defi.services.defi_service import DefiService
-
 from core.utils.custom_exceptions import UnicornRequest
 from core.utils.response_service import ResponseService, get_response_model
 
@@ -19,6 +18,7 @@ responseService = ResponseService()
 @router.get(
     "/get-defi-providers",
     dependencies=[Depends(JWTBearer())],
+    response_model_by_alias=False,
     response_model=get_response_model(list[DefiProviderOut], "DefiProviderResponse"),
 )
 async def get_defi_providers_by_default_network(

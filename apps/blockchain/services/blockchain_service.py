@@ -1,18 +1,20 @@
 from typing import Any, cast
-from pydantic import BaseModel
 
+from pydantic import BaseModel
 from pymongo import DESCENDING
 
 from apps.blockchain.interfaces.blockchain_interface import Blockchain
 from apps.blockchain.interfaces.network_interface import Network
 from apps.blockchain.interfaces.tokenasset_interface import TokenAsset
 from apps.blockchain.interfaces.transaction_interface import BlockchainTransaction
-from apps.blockchain.services.blockchain_registry_service import BlockchainRegistry
+from apps.blockchain.registry.blockchain_registry_service import (
+    BlockchainRegistry,
+    ChainServiceName,
+)
 from apps.notification.slack.services.slack_service import SlackService
 from apps.user.interfaces.user_interface import User
 from apps.wallet.interfaces.wallet_interface import Wallet
-from apps.wallet.interfaces.walletasset_interface import WalletAsset
-
+from apps.wallet.interfaces.walletasset_interface import Address, WalletAsset
 from core.db import db
 from core.utils.loggly import logger
 from core.utils.model_utility_service import ModelUtilityService
@@ -26,6 +28,10 @@ class GetTokenBalance(BaseModel):
 
 class SendTokenDTO(GetTokenBalance):
     toAddress: str
+    amount: float
+
+
+class SwapTokenDTO(GetTokenBalance):
     amount: float
 
 
@@ -83,10 +89,12 @@ class BlockchainService:
 
         return token_asset
 
-    def create_address(self, blockchain_provider: str, mnemonic: str) -> str:
-        return self.blockchainRegistry.get_service(blockchain_provider).create_address(
-            mnemonic
-        )
+    async def create_address(
+        self, blockchain_provider: ChainServiceName, mnemonic: str
+    ) -> Address:
+        return await self.blockchainRegistry.get_service(
+            blockchain_provider
+        ).create_address(mnemonic)
 
     async def send(self, user: User, payload: SendTokenDTO):
         user_default_wallet = await ModelUtilityService.find_one(
@@ -171,7 +179,7 @@ class BlockchainService:
         self, user: User, user_default_wallet: Wallet, network: Network
     ):
         try:
-            blockchain = network.blockchain
+            blockchain = cast(Blockchain, network.blockchain)
 
             user_asset = await ModelUtilityService.find_one(
                 WalletAsset,
@@ -249,6 +257,40 @@ class BlockchainService:
 
         return res, meta
 
-    def get_historical_price_data(self):
-        api_res = self.httpRepository.call("GET", "", Any)
+    async def swap_between_wraps(self, user: User, payload: SwapTokenDTO):
+        user_default_wallet = await ModelUtilityService.find_one(
+            Wallet, {"user": user.id, "isDeleted": False, "isDefault": True}
+        )
+        if not user_default_wallet:
+            raise Exception("no default wallet set")
+
+        token_asset = await ModelUtilityService.find_one_and_populate(
+            TokenAsset,
+            {"symbol": payload.tokenSymbol, "isDeleted": False},
+            ["blockchain", "network"],
+        )
+        if not token_asset:
+            raise Exception("token symbol not recongized")
+
+        blockchain = cast(Blockchain, token_asset.blockchain)
+
+        user_asset = await ModelUtilityService.find_one(
+            WalletAsset,
+            {
+                "blockchain": blockchain.id,
+                "wallet": user_default_wallet.id,
+                "isDeleted": False,
+            },
+        )
+        if not user_asset:
+            raise Exception("user asset not found")
+
+        swap_txn = await self.blockchainRegistry.get_service(
+            blockchain.registryName
+        ).swap_between_wraps(payload.amount, user_default_wallet.mnemonic, token_asset)
+
+        return swap_txn
+
+    async def get_historical_price_data(self):
+        api_res = await self.httpRepository.call("GET", "", Any)
         return api_res

@@ -37,7 +37,7 @@ def lint_build(session: nox.Session):
     session.install("poetry")
     session.run("poetry", "install")
     session.run("black", "--check", ".")
-    session.run("flake8", ".")
+    session.run("flake8", "--import-order-style", "google", ".")
     # session.notify('shared_venv', posargs=['lint'])
 
 

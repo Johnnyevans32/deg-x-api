@@ -14,7 +14,11 @@ countryService = CountryService()
 responseService = ResponseService()
 
 
-@router.get("", response_model=get_response_model(list[Country], "CountryResponse"))
+@router.get(
+    "",
+    response_model_by_alias=False,
+    response_model=get_response_model(list[Country], "CountryResponse"),
+)
 async def get_countries(
     request: UnicornRequest,
     response: Response,
@@ -38,6 +42,7 @@ async def get_countries(
 
 @router.get(
     "/search",
+    response_model_by_alias=False,
     response_model=get_response_model(list[Country], "SearchCountryResponse"),
 )
 async def search_countries(

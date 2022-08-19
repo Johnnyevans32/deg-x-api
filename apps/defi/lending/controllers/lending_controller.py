@@ -159,7 +159,7 @@ async def repay_asset(
 async def get_reserved_assets(request: UnicornRequest, response: Response):
     try:
         request.app.logger.info("getting reserved assets from protocol")
-        reserved_assets_res = await lendingService.get_reserved_assets()
+        reserved_assets_res = await lendingService.get_reserve_assets()
         request.app.logger.info("done getting reserved assets from protocol")
 
         return responseService.send_response(

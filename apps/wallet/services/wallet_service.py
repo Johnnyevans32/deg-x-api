@@ -73,7 +73,7 @@ class WalletService:
 
             for chain in blockchains:
                 await self.create_wallet_assets(
-                    user, wallet_obj, session, mnemonic, chain
+                    user, wallet_obj, mnemonic, chain, session
                 )
 
             return wallet_obj
@@ -84,11 +84,13 @@ class WalletService:
         self,
         user: User,
         wallet: Wallet,
-        session: ClientSession,
         mnemonic: str,
         chain: Blockchain,
+        session: ClientSession = None,
     ) -> None:
-        address = self.blockchainService.create_address(chain.registryName, mnemonic)
+        address = await self.blockchainService.create_address(
+            chain.registryName, mnemonic
+        )
 
         token_assets = await BlockchainService.get_token_assets(
             {"isDeleted": False, "blockchain": chain.id, "isLayerOne": True}

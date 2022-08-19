@@ -10,6 +10,6 @@ class IUserAcccountData(BaseModel):
     healthFactory: float
 
 
-class IReservedTokens(BaseModel):
+class IReserveTokens(BaseModel):
     tokenSymbol: str
     tokenAddress: str

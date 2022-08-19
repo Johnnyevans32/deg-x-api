@@ -15,9 +15,9 @@ from pymongo.results import (
 )
 
 from core.db import db
+from core.utils.loggly import logger
 from core.utils.response_service import MetaDataModel
 from core.utils.utils_service import Utils
-from core.utils.loggly import logger
 
 
 class ModelUtilityService:
@@ -143,7 +143,13 @@ class ModelUtilityService:
                         "as": field,
                     }
                 },
-                {"$unwind": {"path": f"${field}"}},
+                {
+                    "$unwind": {
+                        "path": f"${field}",
+                        "includeArrayIndex": "arrayIndex",
+                        "preserveNullAndEmptyArrays": False,
+                    }
+                },
             ]
             pipeline[0]["$facet"]["pipelineData"].insert(1, *lookup)
 
@@ -198,7 +204,7 @@ class ModelUtilityService:
             },
         ]
         for field in fields:
-            lookup = [
+            lookup: list[dict[str, Any]] = [
                 {
                     "$lookup": {
                         "from": field,
@@ -207,19 +213,26 @@ class ModelUtilityService:
                         "as": field,
                     }
                 },
-                {"$unwind": {"path": f"${field}"}},
+                {
+                    "$unwind": {
+                        "path": f"${field}",
+                        "includeArrayIndex": "arrayIndex",
+                        "preserveNullAndEmptyArrays": True,
+                    }
+                },
             ]
             pipeline += lookup
 
         pipeline += [{"$limit": 1}]
         result = list(model.aggregate(pipeline))
+
         aggregation_result = None
         if result:
             [aggregation_result] = result
 
         return (
             generic_class(**aggregation_result)  # type: ignore [call-arg]
-            if not aggregation_result
+            if aggregation_result
             else None
         )
 
@@ -342,7 +355,7 @@ class ModelUtilityService:
         generic_class: Type[T],
         records: list[Any],
         session: ClientSession = None,
-    ) -> InsertManyResult:
+    ) -> InsertManyResult | None:
         try:
             model = db[generic_class.__name__.lower()]
             created_records: InsertManyResult = model.insert_many(
@@ -352,6 +365,7 @@ class ModelUtilityService:
             return created_records
         except Exception as e:
             logger.error(f"Error inserting many records - {str(e)}")
+            return None
 
     @staticmethod
     async def model_hard_delete(generic_class: Type[T], query: dict) -> DeleteResult:

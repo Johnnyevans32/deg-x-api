@@ -3,6 +3,7 @@ import pydantic
 from bson import ObjectId
 
 
+# https://python.plainenglish.io/how-to-use-fastapi-with-mongodb-75b43c8e541d
 class PyObjectId(ObjectId):
     @classmethod
     def __get_validators__(cls):

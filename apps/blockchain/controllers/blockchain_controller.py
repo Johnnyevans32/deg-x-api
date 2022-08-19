@@ -8,20 +8,26 @@ from apps.blockchain.services.blockchain_service import (
     BlockchainService,
     GetTokenBalance,
     SendTokenDTO,
+    SwapTokenDTO,
 )
+from apps.blockchain.solana.solana_service import SolanaService
+
+# from apps.blockchain.tezos.tezos_service import TezosService
 from core.utils.custom_exceptions import UnicornRequest
 from core.utils.response_service import ResponseService, get_response_model
 
 router = APIRouter(prefix="/api/v1/blockchain", tags=["Blockchain 💸"])
 
-
 blockchainService = BlockchainService()
 responseService = ResponseService()
+solanaService = SolanaService()
+# tezosService = TezosService()
 
 
 @router.get(
     "/get-transaction",
     dependencies=[Depends(JWTBearer())],
+    response_model_by_alias=False,
     response_model=get_response_model(
         list[BlockchainTransactionOut], "BlockchainTransactionOutResponse"
     ),
@@ -78,6 +84,7 @@ async def send_token(
         )
 
     except Exception as e:
+        raise e
         return responseService.send_response(
             response,
             status.HTTP_400_BAD_REQUEST,
@@ -108,8 +115,96 @@ async def get_token_balance(
         )
 
     except Exception as e:
+        raise e
         return responseService.send_response(
             response,
             status.HTTP_400_BAD_REQUEST,
             f"Error in getting token balance - {str(e)}",
         )
+
+
+@router.post(
+    "/chain-swap",
+    dependencies=[Depends(JWTBearer())],
+)
+async def swap_between_wraps(
+    request: UnicornRequest, response: Response, payload: SwapTokenDTO
+):
+    try:
+        user = request.state.user
+        request.app.logger.info(f"swapping tokens between wraps for user - {user.id}")
+        swap_txn = await blockchainService.swap_between_wraps(user, payload)
+        request.app.logger.info("done swapping tokens between wraps")
+        return responseService.send_response(
+            response,
+            status.HTTP_200_OK,
+            "successful swapping tokens between wraps",
+            swap_txn,
+        )
+
+    except Exception as e:
+        # raise e
+        return responseService.send_response(
+            response,
+            status.HTTP_400_BAD_REQUEST,
+            f"Error in swapping tokens between wraps - {str(e)}",
+        )
+
+
+@router.post(
+    "/fund-solana-account-devnet",
+)
+async def fund_my_solana_account(
+    request: UnicornRequest, response: Response, payload: SendTokenDTO
+):
+    try:
+        request.app.logger.info(
+            f"sending airdrop token balance to address - {payload.toAddress}"
+        )
+        user_token_balance = await solanaService.get_test_token(
+            payload.toAddress, int(payload.amount)
+        )
+        request.app.logger.info("done sending airdrop token balance to address")
+        return responseService.send_response(
+            response,
+            status.HTTP_200_OK,
+            "airdrop token balance sent",
+            user_token_balance,
+        )
+
+    except Exception as e:
+        return responseService.send_response(
+            response,
+            status.HTTP_400_BAD_REQUEST,
+            f"Error in sending airdrop token balance - {str(e)}",
+        )
+
+
+# @router.post(
+#     "/fund-tezos-account-devnet",
+# )
+# async def fund_my_tezos_account(
+#     request: UnicornRequest, response: Response, payload: SendTokenDTO
+# ):
+#     try:
+#         request.app.logger.info(
+#             f"sending airdrop token balance to address - {payload.toAddress}"
+#         )
+#         user_token_balance = await tezosService.fund_tezos_wallet(
+#             payload.toAddress, int(payload.amount)
+#         )
+#         request.app.logger.info("done sending airdrop token balance to address")
+#         return responseService.send_response(
+#             response,
+#             status.HTTP_200_OK,
+#             "airdrop token balance sent",
+#             user_token_balance,
+#         )
+
+#     except Exception as e:
+#         raise e
+#         return responseService.send_response(
+#             response,
+#             status.HTTP_400_BAD_REQUEST,
+#             f"Error in sending airdrop token balance - {str(e)}",
+# )

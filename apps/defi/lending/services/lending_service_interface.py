@@ -1,7 +1,7 @@
 import abc
 
 from apps.defi.interfaces.defi_provider_interface import DefiProvider
-from apps.defi.lending.aave.aave_interface import IReservedTokens
+from apps.defi.lending.aave.aave_interface import IReserveTokens
 from apps.defi.lending.interfaces.lending_request_interface import InterestRateMode
 
 
@@ -72,8 +72,8 @@ class ILendingService(metaclass=abc.ABCMeta):
     ) -> float:
         raise NotImplementedError
 
-    async def get_reserved_assets(
+    async def get_reserve_assets(
         self,
         defi_provider: DefiProvider,
-    ) -> list[IReservedTokens]:
+    ) -> list[IReserveTokens]:
         pass

@@ -6,8 +6,9 @@ from apps.defi.lending.interfaces.lending_request_interface import (
     LendingRequestStatus,
     LendingRequestType,
 )
-from apps.defi.lending.services.lending_registry import LendingRegistry
+from apps.defi.lending.registry.lending_registry import LendingRegistry
 from apps.defi.lending.types.lending_types import BorrowAssetDTO, DepositAssetDTO
+from apps.notification.slack.services.slack_service import SlackService
 from apps.user.interfaces.user_interface import User
 from apps.wallet.interfaces.wallet_interface import Wallet
 from apps.wallet.interfaces.walletasset_interface import WalletAsset
@@ -15,12 +16,11 @@ from apps.wallet.services.wallet_service import WalletService
 from core.depends.get_object_id import PyObjectId
 from core.utils.model_utility_service import ModelUtilityService
 
-# from apps.user.interfaces.user_interface import User
-
 
 class LendingService:
     walletService = WalletService()
     lendingRegistry = LendingRegistry()
+    slackService = SlackService()
 
     @staticmethod
     async def get_default_provider_key() -> DefiProvider:
@@ -86,16 +86,16 @@ class LendingService:
 
         return user_lending_data
 
-    async def get_reserved_assets(
+    async def get_reserve_assets(
         self,
         defi_provider_id: PyObjectId = None,
     ):
         defi_provider = await self.get_defi_provider(defi_provider_id)
-        reserved_assets = await self.lendingRegistry.get_service(
+        reserve_assets = await self.lendingRegistry.get_service(
             defi_provider.serviceName
-        ).get_reserved_assets(defi_provider)
+        ).get_reserve_assets(defi_provider)
 
-        return reserved_assets
+        return reserve_assets
 
     async def get_user_config(
         self,
@@ -168,16 +168,24 @@ class LendingService:
         user_wallet_asset = await self.get_wallet_asset(
             user, user_wallet, defi_provider
         )
-        protocol_deposit_res = await self.lendingRegistry.get_service(
-            defi_provider.serviceName
-        ).deposit(
-            payload.asset,
-            payload.amount,
-            user_wallet_asset.address,
-            defi_provider,
-            user_wallet.mnemonic,
-        )
-        print("protocol_deposit_res", protocol_deposit_res)
+        try:
+            protocol_deposit_res = await self.lendingRegistry.get_service(
+                defi_provider.serviceName
+            ).deposit(
+                payload.asset,
+                payload.amount,
+                user_wallet_asset.address,
+                defi_provider,
+                user_wallet.mnemonic,
+            )
+        except Exception as e:
+            self.slackService.send_formatted_message(
+                "Error from lending defi provider",
+                f"An error just occured from {defi_provider.serviceName} "
+                f"lending provider \n *Error:* ```{e}```",
+                "error-report",
+            )
+            raise e
         token_asset = await ModelUtilityService.find_one(
             TokenAsset, {"contractAddress": payload.asset, "isDeleted": False}
         )

@@ -1,11 +1,12 @@
 import abc
 from typing import Any
 
-
+from apps.blockchain.interfaces.blockchain_interface import ChainServiceName
 from apps.blockchain.interfaces.network_interface import Network
 from apps.blockchain.interfaces.tokenasset_interface import TokenAsset
 from apps.user.interfaces.user_interface import User
 from apps.wallet.interfaces.wallet_interface import Wallet
+from apps.wallet.interfaces.walletasset_interface import Address
 
 
 class IBlockchainService(metaclass=abc.ABCMeta):
@@ -18,17 +19,17 @@ class IBlockchainService(metaclass=abc.ABCMeta):
         )
 
     @abc.abstractmethod
-    def name(self) -> str:
+    def name(self) -> ChainServiceName:
         raise NotImplementedError
 
     @abc.abstractmethod
-    def create_address(self, mnemonic: str) -> str:
+    async def create_address(self, mnemonic: str) -> Address:
         raise NotImplementedError
 
     @abc.abstractmethod
     async def send(
         self,
-        from_address: str,
+        from_address: Address,
         to: str,
         value: float,
         token_asset: TokenAsset,
@@ -37,16 +38,24 @@ class IBlockchainService(metaclass=abc.ABCMeta):
         raise NotImplementedError
 
     @abc.abstractmethod
-    async def get_balance(self, address: str, token_asset: TokenAsset) -> str:
+    async def get_balance(self, address: Address, token_asset: TokenAsset) -> str:
         raise NotImplementedError
 
     @abc.abstractmethod
     async def get_transactions(
         self,
-        address: str,
+        address: Address,
         user: User,
         wallet: Wallet,
         chain_network: Network,
         start_block: int,
     ) -> list[Any]:
         raise NotImplementedError
+
+    async def swap_between_wraps(
+        self,
+        value: float,
+        mnemonic: str,
+        token_asset: TokenAsset,
+    ):
+        pass

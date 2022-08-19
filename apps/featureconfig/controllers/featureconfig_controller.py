@@ -23,7 +23,7 @@ async def check_feature_status(
 ):
     try:
         request.app.logger.info(f"checking enabled status for {feature_name} feature")
-        feature_status = featureConfigService.is_feature_enabled(feature_name)
+        feature_status = await featureConfigService.is_feature_enabled(feature_name)
         request.app.logger.info(f"checking enabled status for {feature_name} feature")
         return responseService.send_response(
             response, status.HTTP_200_OK, "feature status retrieved", feature_status
@@ -49,7 +49,9 @@ async def update_feature_status(
 ):
     try:
         request.app.logger.info(f"updating status for {feature_name} feature")
-        featureConfigService.update_feature(feature_name, feature_status_update_dto)
+        await featureConfigService.update_feature(
+            feature_name, feature_status_update_dto
+        )
 
         request.app.logger.info(f"done updating status for {feature_name} feature")
         return responseService.send_response(

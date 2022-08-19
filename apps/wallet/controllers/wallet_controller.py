@@ -7,11 +7,9 @@ from apps.blockchain.interfaces.network_interface import NetworkType
 from apps.wallet.interfaces.wallet_interface import WalletOut
 from apps.wallet.interfaces.walletasset_interface import WalletAssetOut
 from apps.wallet.services.wallet_service import WalletService
-
 from core.depends.get_object_id import PyObjectId
 from core.utils.custom_exceptions import UnicornRequest
 from core.utils.response_service import ResponseService, get_response_model
-
 
 router = APIRouter(prefix="/api/v1/wallet", tags=["Wallet 💸"])
 

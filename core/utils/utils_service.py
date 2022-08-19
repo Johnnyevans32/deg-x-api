@@ -8,16 +8,17 @@ import time
 from functools import lru_cache, wraps
 from pathlib import Path
 from typing import Any, Callable, Type, TypeVar
-import eth_utils
-from frozendict import frozendict
 
+import eth_utils
+import frozendict
+from async_lru import alru_cache
 from itsdangerous import URLSafeTimedSerializer
 from pydantic import EmailStr
 from requests import request
 from solcx import compile_standard, install_solc
-from core.utils.loggly import logger
+
 from core.config import SECRET_KEY, settings
-from async_lru import alru_cache
+from core.utils.loggly import logger
 
 
 def timed_cache(
@@ -38,24 +39,26 @@ def timed_cache(
             if asyncFunction
             else lru_cache(maxsize=maxsize, typed=typed)(func)
         )
-        func.delta = (timeout * 10 ** 9) * 60
+        func.delta = (timeout * 10**9) * 60
         func.expiration = time.monotonic_ns() + func.delta
 
         @wraps(func)
         def wrapped_func(*args, **kwargs):
 
             args = tuple(
-                [frozendict(arg) if isinstance(arg, dict) else arg for arg in args]
+                [
+                    frozendict.frozendict(arg) if isinstance(arg, dict) else arg
+                    for arg in args
+                ]
             )
             kwargs = {
-                k: frozendict(v) if isinstance(v, dict) else v
+                k: frozendict.frozendict(v) if isinstance(v, dict) else v
                 for k, v in kwargs.items()
             }
             if time.monotonic_ns() >= func.expiration:
                 func.cache_clear()
                 func.expiration = time.monotonic_ns() + func.delta
 
-            print("args", args, "kwargs", kwargs)
             return func(*args, **kwargs)
 
         wrapped_func.cache_info = func.cache_info

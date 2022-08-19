@@ -4,6 +4,7 @@ from fastapi.exception_handlers import http_exception_handler
 from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from pymongo import monitoring
+from starlette import status
 from starlette.exceptions import ExceptionMiddleware
 from starlette.exceptions import HTTPException as StarletteHTTPException
 from starlette.responses import JSONResponse
@@ -22,7 +23,6 @@ from core.middlewares.settings import settings_middleware
 from core.utils.custom_exceptions import UnicornException, UnicornRequest
 from core.utils.loggly import logger
 from core.utils.response_service import ResponseService
-from starlette import status
 
 # from fastapi_admin.app import app as admin_app
 
@@ -76,7 +76,7 @@ def create_app():
         monitoring.register(CommandLogger())
         if settings.CRON_ENABLED:
             cronJob.scheduler.start()
-        # seed_deg_x()
+        # await seed_deg_x()
         User.init()
         BlockchainTransaction.init()
         sentry_setup()

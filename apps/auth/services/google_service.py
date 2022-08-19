@@ -6,8 +6,8 @@ from google.oauth2 import id_token
 from apps.user.interfaces.user_interface import SignUpMethod, User
 from apps.user.services.user_service import UserService
 from core.config import settings
-from core.utils.utils_service import Utils
 from core.utils.loggly import logger
+from core.utils.utils_service import Utils
 
 
 class GoogleService:

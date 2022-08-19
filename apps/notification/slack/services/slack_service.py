@@ -8,6 +8,23 @@ from core.utils.loggly import logger
 
 
 class SlackService:
+    def send_formatted_message(
+        self, title: str, msg: str, channel: str, attachments: Any = None
+    ) -> None:
+        try:
+            body = {
+                "text": f">*{title}* \n {msg}",
+                "channel": channel,
+                "username": "lexi",
+            }
+
+            if attachments:
+                body["attachments"] = attachments
+
+            requests.post(settings.SLACK_HOOK, data=json.dumps(body))
+        except Exception as e:
+            logger.info(f"Error sending message to slack - {e}")
+
     def send_message(self, text: str, channel: str, attachments: Any = None) -> None:
         try:
             body = {"text": text, "channel": channel, "username": "lexi"}

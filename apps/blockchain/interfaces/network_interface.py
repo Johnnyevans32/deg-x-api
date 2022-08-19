@@ -14,8 +14,8 @@ class NetworkType(str, Enum):
 
 
 class ApiExplorer(HashableBaseModel):
-    url: HttpUrl
-    keyToken: str
+    url: Optional[HttpUrl]
+    keyToken: Optional[str]
 
 
 class Network(SBaseModel):
@@ -24,6 +24,7 @@ class Network(SBaseModel):
     networkType: NetworkType
     blockchain: Union[PyObjectId, Blockchain]
     blockExplorerUrl: Optional[HttpUrl]
-    apiExplorer: ApiExplorer
+    apiExplorer: Optional[ApiExplorer]
     isDefault: bool
-    providerUrl: HttpUrl
+    faucetUrl: Optional[HttpUrl]
+    providerUrl: Optional[HttpUrl]

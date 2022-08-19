@@ -7,11 +7,9 @@ from apps.auth.controllers.auth_controller import router as router_auth
 from apps.blockchain.controllers.blockchain_controller import (
     router as router_blockchain,
 )
+from apps.defi.controllers.defi_controller import router as router_defi
 from apps.defi.lending.controllers.lending_controller import (
     router as router_defi_lending,
-)
-from apps.defi.controllers.defi_controller import (
-    router as router_defi,
 )
 from apps.featureconfig.controllers.featureconfig_controller import (
     router as router_feature,

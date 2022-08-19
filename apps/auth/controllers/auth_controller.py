@@ -16,7 +16,6 @@ from apps.user.services.user_service import UserService
 from core.utils.custom_exceptions import UnicornRequest
 from core.utils.response_service import ResponseService, get_response_model
 
-
 router = APIRouter(prefix="/api/v1/account", tags=["Auth 🔐"])
 
 
@@ -83,7 +82,7 @@ async def login_user(
             res, status.HTTP_200_OK, "User Log in Successful", resp
         )
     except Exception as e:
-        raise e
+        # raise e
         request.app.logger.error(f"Error logging user {login_input.email}, {str(e)}")
         return responseService.send_response(
             res, status.HTTP_400_BAD_REQUEST, f"User Login Failed: {str(e)}"
