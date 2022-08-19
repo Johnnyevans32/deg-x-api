@@ -51,9 +51,10 @@ class EmailService:
         html = """
             Hi {{ name }}  👋🏽 <br><br>
 
-            Please kindly confirm your email address so we can verify your account by clicking the link below: <br>
-            {{ link }} <br>
-            The verification of account link / button will expire in {{ valid_hours }} hours. <br><br>
+            Please kindly confirm your email address so we
+            can verify your account by clicking the link below: <br>
+            {{ link }} <br> The verification of account link / button will
+            expire in {{ valid_hours }} hours. <br><br>
 
             <span>©2021 deg x</span> <br>
             <span style="color:#A9A9A9">bringing defi to africa </span> <br>
@@ -84,7 +85,8 @@ class EmailService:
         html = """
             Hi {{ name }}  👋🏽  <br><br>
 
-            We received a request to recover your password, reset your password by clicking the link below: <br>
+            We received a request to recover your password,
+            reset your password by clicking the link below: <br>
             {{ link }} <br>
             The reset password link / button will expire in {{valid_hours }} hours.  <br><br>
 
