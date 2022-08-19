@@ -1,4 +1,4 @@
-from pathlib import Path
+# from pathlib import Path
 
 import emails as emails
 from emails.template import JinjaTemplate
@@ -48,15 +48,22 @@ class EmailService:
         confirm_url = settings.UI_URL + "account/confirm/" + str(token)
 
         subject = "Verify your email address"
-        with open(
-            Path(settings.EMAIL_TEMPLATES_DIR) / "verifyaccount.html", encoding="utf-8"
-        ) as f:
-            template_str = f.read()
+        html = """
+            Hi {{ name }}  👋🏽 <br><br>
+
+            Please kindly confirm your email address so we can verify your account by clicking the link below: <br>
+            {{ link }} <br>
+            The verification of account link / button will expire in {{ valid_hours }} hours. <br><br>
+
+            <span>©2021 deg x</span> <br>
+            <span style="color:#A9A9A9">bringing defi to africa </span> <br>
+            If you didn't request an account registration you can disregard this email.
+        """
 
         self.send_template_email(
             email_to=user.email,
             subject_template=subject,
-            html_template=template_str,
+            html_template=html,
             environment={
                 "name": f"{user.name.first} {user.name.last}",
                 "link": confirm_url,
@@ -69,15 +76,26 @@ class EmailService:
         password_reset_url = settings.UI_URL + "account/update-password/" + str(token)
 
         subject = "Forgotten your password?"
-        with open(
-            Path(settings.EMAIL_TEMPLATES_DIR) / "resetpassword.html", encoding="utf-8"
-        ) as f:
-            template_str = f.read()
+        # with open(
+        #     Path(settings.EMAIL_TEMPLATES_DIR) / "resetpassword.html", encoding="utf-8"
+        # ) as f:
+        #     template_str = f.read()
 
+        html = """
+            Hi {{ name }}  👋🏽  <br><br>
+
+            We received a request to recover your password, reset your password by clicking the link below: <br>
+            {{ link }} <br>
+            The reset password link / button will expire in {{valid_hours }} hours.  <br><br>
+
+            <span>©2021 deg x</span><br><br>
+            <span style="color:#A9A9A9">bringing defi to africa </span> <br>
+            If you didn't request a password recovery you can disregard this email.
+        """
         self.send_template_email(
             email_to=user.email,
             subject_template=subject,
-            html_template=template_str,
+            html_template=html,
             environment={
                 "name": f"{user.name.first} {user.name.last}",
                 "link": password_reset_url,
