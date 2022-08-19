@@ -3,13 +3,12 @@ import json
 from types import SimpleNamespace
 from unittest import TestCase
 
+# import pytest
+from httpx import AsyncClient
 from pydantic import EmailStr
 
 from application import _app as app
 from apps.user.services.user_service import UserService
-
-# import pytest
-from httpx import AsyncClient
 
 client = AsyncClient(app=app)
 

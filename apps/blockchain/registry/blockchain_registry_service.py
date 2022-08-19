@@ -4,12 +4,12 @@ from apps.blockchain.binance.bsc_service import BSCService
 from apps.blockchain.bitcoin.bitcoin_service import BitcoinService
 from apps.blockchain.bitcoin.dashcoin_service import DashcoinService
 from apps.blockchain.bitcoin.dogecoin_service import DogecoinService
+from apps.blockchain.bitcoin.litecoin_service import LitecoinService
 from apps.blockchain.evm_chains.avax_service import AvaxService
 from apps.blockchain.evm_chains.ethereum_service import EthereumService
 from apps.blockchain.evm_chains.polygon_service import PolygonService
 from apps.blockchain.evm_chains.tron_service import TronService
 from apps.blockchain.interfaces.blockchain_interface import ChainServiceName
-from apps.blockchain.bitcoin.litecoin_service import LitecoinService
 from apps.blockchain.solana.solana_service import SolanaService
 
 # from apps.blockchain.tezos.tezos_service import TezosService
