@@ -132,7 +132,6 @@ class Utils:
     @lru_cache(10)
     @staticmethod
     def get_compiled_sol(contract_file_name: str, version: str):
-
         with open(Path(f"./solidity/{contract_file_name}.sol"), "r") as file:
             contract_file = file.read()
 

@@ -36,9 +36,7 @@ async def register_user(user: User, request: UnicornRequest, res: Response):
     try:
         request.app.logger.info(f"creating user with email - {user.email}")
         resp = await authService.create_account(user)
-        request.app.logger.info(f"sending verification email to - {user.email}")
         emailService.send_verification(user)
-        request.app.logger.info(f"done sending verification email to - {user.email}")
         request.app.logger.info(f"created user with email - {user.email} successfully")
         return responseService.send_response(
             res,

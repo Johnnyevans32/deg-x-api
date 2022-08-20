@@ -9,7 +9,11 @@ from core.utils.loggly import logger
 
 class SlackService:
     def send_formatted_message(
-        self, title: str, msg: str, channel: str, attachments: Any = None
+        self,
+        title: str,
+        msg: str,
+        channel: str = "error-report",
+        attachments: Any = None,
     ) -> None:
         try:
             body = {
@@ -25,7 +29,9 @@ class SlackService:
         except Exception as e:
             logger.info(f"Error sending message to slack - {e}")
 
-    def send_message(self, text: str, channel: str, attachments: Any = None) -> None:
+    def send_message(
+        self, text: str, channel: str = "error-report", attachments: Any = None
+    ) -> None:
         try:
             body = {"text": text, "channel": channel, "username": "lexi"}
 
