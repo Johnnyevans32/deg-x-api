@@ -13,6 +13,9 @@ from core.utils.utils_service import Utils
 class EmailService:
     slackService = SlackService()
     email_sigx = """
+        <span style="color:red">
+            If you didn't make this request you can disregard this email.
+        </span> <br><br>
         <a href="https://degx.typedream.app/">
             <img src="https://i.ibb.co/vd7H65L/degx-removebg-preview.png"
              alt="degx" width="40" height="40" border="0">
@@ -59,17 +62,15 @@ class EmailService:
             token = Utils.generate_confirmation_token(user.email)
             confirm_url = settings.UI_URL + "account/confirm/" + str(token)
 
-            subject = "Verify your email address"
+            subject = "Welcome!!!"
             html = (
                 """
                 Hi {{ name }}  👋🏽 <br><br>
 
-                Please kindly confirm your email address so we
-                can verify your account by clicking the link below: <br>
-                {{ link }} <br> The verification of account link / button will
+                Please kindly confirm your email address by clicking the link
+                 below so we can get you started on Deg X: <br>
+                {{ link }} <br> The verification of account link will
                 expire in {{ valid_hours }} hour(s). <br><br>
-                <span style="color:red">If you didn't request an account registration
-                 you can disregard this email.</span> <br><br>
             """
                 + EmailService.email_sigx
             )
@@ -110,9 +111,8 @@ class EmailService:
                 We received a request to recover your password,
                 reset your password by clicking the link below: <br>
                 {{ link }} <br>
-                The reset password link / button will expire in {{ valid_hours }} hour(s). <br><br>
-                <span style="color:red">If you didn't request a password recovery you can
-                 disregard this email.</span> <br><br>
+                The reset password link will expire in {{ valid_hours }} hour(s).
+                 <br><br>
             """
                 + EmailService.email_sigx
             )
