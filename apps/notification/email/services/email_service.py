@@ -67,7 +67,8 @@ class EmailService:
                 can verify your account by clicking the link below: <br>
                 {{ link }} <br> The verification of account link / button will
                 expire in {{ valid_hours }} hours. <br><br>
-                If you didn't request an account registration you can disregard this email.<br><br>
+                If you didn't request an account registration
+                 you can disregard this email.<br><br>
             """
                 + EmailService.email_sigx
             )
