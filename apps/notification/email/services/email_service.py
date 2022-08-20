@@ -12,7 +12,11 @@ from core.utils.utils_service import Utils
 
 class EmailService:
     slackService = SlackService()
-
+    email_sigx = """
+        <a href="https://degx.typedream.app/"><img src="https://i.ibb.co/vd7H65L/degx-removebg-preview.png" alt="degx" border="0"></a>
+        <span>©2021 deg x</span>
+        <span style="color:#A9A9A9">bringing defi to africa </span>
+    """
     serializer_expiration_in_hr = settings.SERIALIZER_TOKEN_EXPIRATION_IN_SEC / (
         60 * 60
     )
@@ -43,8 +47,9 @@ class EmailService:
             "password": settings.MAIL_PASSWORD,
         }
         print(smtp_options)
-        r = message.send(to=email_to, render=environment, smtp=smtp_options)
-        print(email_to, settings.MAIL_SENDER, environment, r)
+        res = message.send(to=email_to, render=environment, smtp=smtp_options)
+
+        print(email_to, settings.MAIL_SENDER, environment, res)
 
     def send_verification(self, user: User) -> None:
         try:
@@ -52,18 +57,18 @@ class EmailService:
             confirm_url = settings.UI_URL + "account/confirm/" + str(token)
 
             subject = "Verify your email address"
-            html = """
+            html = (
+                """
                 Hi {{ name }}  👋🏽 <br><br>
 
                 Please kindly confirm your email address so we
                 can verify your account by clicking the link below: <br>
                 {{ link }} <br> The verification of account link / button will
                 expire in {{ valid_hours }} hours. <br><br>
-
-                <span>©2021 deg x</span> <br>
-                <span style="color:#A9A9A9">bringing defi to africa </span> <br>
-                If you didn't request an account registration you can disregard this email.
+                If you didn't request an account registration you can disregard this email.<br><br>
             """
+                + EmailService.email_sigx
+            )
 
             self.send_template_email(
                 email_to=user.email,
@@ -94,18 +99,18 @@ class EmailService:
             # ) as f:
             #     template_str = f.read()
 
-            html = """
+            html = (
+                """
                 Hi {{ name }}  👋🏽  <br><br>
 
                 We received a request to recover your password,
                 reset your password by clicking the link below: <br>
                 {{ link }} <br>
-                The reset password link / button will expire in {{valid_hours }} hours.  <br><br>
-
-                <span>©2021 deg x</span><br><br>
-                <span style="color:#A9A9A9">bringing defi to africa </span> <br>
-                If you didn't request a password recovery you can disregard this email.
+                The reset password link / button will expire in {{valid_hours }} hours. <br><br>
+                If you didn't request a password recovery you can disregard this email. <br><br>
             """
+                + EmailService.email_sigx
+            )
             self.send_template_email(
                 email_to=user.email,
                 subject_template=subject,

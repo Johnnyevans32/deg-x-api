@@ -54,7 +54,7 @@ class Settings(BaseSettings):
     # ~~~~~ EMAIL ~~~~~
     # SENTRY_DSN = os.getenv('SENTRY_DSN')
 
-    EMAILS_FROM_NAME = PROJECT_NAME
+    EMAILS_FROM_NAME = "Deg X"
     EMAIL_TEMPLATES_DIR = "./apps/notification/email/templates/build"
     EMAILS_ENABLED = getenv_boolean("EMAILS_ENABLED", True)
 
