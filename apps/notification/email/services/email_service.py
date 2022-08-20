@@ -15,9 +15,9 @@ class EmailService:
     email_sigx = """
         <a href="https://degx.typedream.app/">
             <img src="https://i.ibb.co/vd7H65L/degx-removebg-preview.png"
-             alt="degx" width="20" height="20" border="0">
+             alt="degx" width="40" height="40" border="0">
         </a><br>
-        <span>©2021 deg x</span><br>
+        <span>©2022 deg x</span><br>
         <span style="color:#A9A9A9">bringing defi to africa </span>
     """
     serializer_expiration_in_hr = settings.SERIALIZER_TOKEN_EXPIRATION_IN_SEC / (
@@ -67,9 +67,9 @@ class EmailService:
                 Please kindly confirm your email address so we
                 can verify your account by clicking the link below: <br>
                 {{ link }} <br> The verification of account link / button will
-                expire in {{ valid_hours }} hours. <br><br>
-                If you didn't request an account registration
-                 you can disregard this email.<br><br>
+                expire in {{ valid_hours }} hour(s). <br><br>
+                <span style="color:red">If you didn't request an account registration
+                 you can disregard this email.</span> <br><br>
             """
                 + EmailService.email_sigx
             )
@@ -81,7 +81,7 @@ class EmailService:
                 environment={
                     "name": f"{user.name.first} {user.name.last}",
                     "link": confirm_url,
-                    "valid_hours": self.serializer_expiration_in_hr,
+                    "valid_hours": int(self.serializer_expiration_in_hr),
                 },
             )
         except Exception as e:
@@ -94,7 +94,7 @@ class EmailService:
         try:
             token = Utils.generate_confirmation_token(user.email)
             password_reset_url = (
-                settings.UI_URL + "account/update-password/" + str(token)
+                settings.UI_URL + "/account/update-password/" + str(token)
             )
 
             subject = "Forgotten your password?"
@@ -110,8 +110,9 @@ class EmailService:
                 We received a request to recover your password,
                 reset your password by clicking the link below: <br>
                 {{ link }} <br>
-                The reset password link / button will expire in {{valid_hours }} hours. <br><br>
-                If you didn't request a password recovery you can disregard this email. <br><br>
+                The reset password link / button will expire in {{ valid_hours }} hour(s). <br><br>
+                <span style="color:red">If you didn't request a password recovery you can
+                 disregard this email.</span> <br><br>
             """
                 + EmailService.email_sigx
             )
@@ -122,7 +123,7 @@ class EmailService:
                 environment={
                     "name": f"{user.name.first} {user.name.last}",
                     "link": password_reset_url,
-                    "valid_hours": self.serializer_expiration_in_hr,
+                    "valid_hours": int(self.serializer_expiration_in_hr),
                 },
             )
         except Exception as e:
