@@ -13,7 +13,9 @@ from core.utils.utils_service import Utils
 class EmailService:
     slackService = SlackService()
     email_sigx = """
-        <a href="https://degx.typedream.app/"><img src="https://i.ibb.co/vd7H65L/degx-removebg-preview.png" alt="degx" border="0"></a>
+        <a href="https://degx.typedream.app/">
+            <img src="https://i.ibb.co/vd7H65L/degx-removebg-preview.png" alt="degx" border="0">
+        </a>
         <span>©2021 deg x</span>
         <span style="color:#A9A9A9">bringing defi to africa </span>
     """
