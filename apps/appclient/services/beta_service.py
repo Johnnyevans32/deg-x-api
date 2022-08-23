@@ -17,6 +17,7 @@ class BetaService:
     base_url: str = ""
 
     def __init__(self):
+        client_data = None
         try:
             client_data = self.appClientService.get_client_by_name(Apps.Beta)
         except Exception as e:
