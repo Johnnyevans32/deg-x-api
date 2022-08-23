@@ -22,7 +22,7 @@ class BetaService:
             client_data = self.appClientService.get_client_by_name(Apps.Beta)
         except Exception as e:
             print(e)
-        self.base_url = client_data.appUrl or None
+        self.base_url = client_data.appUrl if not client_data else None
         self.httpRepository = HTTPRepository(self.base_url)
 
     async def interact_on_solend(self, action: str, payload: Any):
