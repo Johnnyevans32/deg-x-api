@@ -1,3 +1,4 @@
+import asyncio
 from enum import IntEnum
 from typing import Union
 
@@ -112,6 +113,7 @@ async def get_or_create_assoc_token_acc(
             )
             # after creation of token account it takes some moments for txn to get mined
             # and this get account to work so we might need to do a callback time sleep
+            await asyncio.sleep(1)
             account = await get_token_account(solana_client, associated_token_account)
         else:
             raise e
@@ -130,6 +132,7 @@ async def get_token_account(client: AsyncClient, addr: PublicKey) -> AccountInfo
         The parsed `AccountInfo` of the token account.
     """
     depositor_acc_info_raw = await client.get_account_info(addr)
+    print("depositor_acc_info_raw", depositor_acc_info_raw)
     return parse_token_account(depositor_acc_info_raw)
 
 

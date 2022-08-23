@@ -27,4 +27,4 @@ COPY ./core /code/core
 COPY ./solidity /code/solidity
 
 # 
-CMD ["uvicorn", "application:_app", "--host", "0.0.0.0", "--port", "80"]
+CMD ["uvicorn", "application:_app", "--host", "0.0.0.0", "--port", "80", "--workers", "4"]

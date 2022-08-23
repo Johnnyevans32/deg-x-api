@@ -1,3 +1,4 @@
+from enum import Enum
 from functools import wraps
 from typing import Callable
 
@@ -5,6 +6,10 @@ from apps.appclient.interfaces.appclient_interface import AppClient
 from core.utils.custom_exceptions import UnicornException, UnicornRequest
 from core.utils.model_utility_service import ModelUtilityService
 from core.utils.utils_service import Utils
+
+
+class Apps(str, Enum):
+    Beta = "beta"
 
 
 class AppClientService:
@@ -37,6 +42,17 @@ class AppClientService:
         app_client = await ModelUtilityService.find_one(
             AppClient,
             query,
+        )
+
+        if not app_client:
+            raise UnicornException(status_code=403, message="client not found")
+
+        return app_client
+
+    def get_client_by_name(self, name: str) -> AppClient:
+        app_client = ModelUtilityService.non_async_find_one(
+            AppClient,
+            {"name": name, "isDeleted": False},
         )
 
         if not app_client:

@@ -292,5 +292,5 @@ class BlockchainService:
         return swap_txn
 
     async def get_historical_price_data(self):
-        api_res = await self.httpRepository.call("GET", "", Any)
+        api_res = await self.httpRepository.call("GET", "", Any, {"": ""})
         return api_res

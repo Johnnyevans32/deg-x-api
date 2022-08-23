@@ -179,6 +179,7 @@ class SolanaService(IBlockchainService, HTTPRepository):
 
             return str(balance)
         finally:
+            print("always get here")
             await solana_client.close()
 
     async def approve_spl_token_delegate(

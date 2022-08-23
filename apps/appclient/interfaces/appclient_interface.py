@@ -1,6 +1,5 @@
 from typing import Optional
 
-from pydantic import HttpUrl
 from pymongo import ASCENDING
 
 from core.db import db
@@ -9,8 +8,8 @@ from core.depends.model import SBaseModel
 
 class AppClient(SBaseModel):
     name: str
-    callBackUrl: Optional[HttpUrl]
-    appUrl: Optional[HttpUrl]
+    callBackUrl: Optional[str]
+    appUrl: str
     clientID: Optional[str]
     clientSecret: Optional[str]
 

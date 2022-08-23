@@ -18,7 +18,7 @@ class Address(BaseModel):
 class WalletAssetOut(SBaseOutModel):
     tokenasset: Union[PyObjectId, TokenOut]
     wallet: Union[PyObjectId, WalletOut]
-    address: str
+    address: Address
 
 
 class WalletAsset(SBaseModel):

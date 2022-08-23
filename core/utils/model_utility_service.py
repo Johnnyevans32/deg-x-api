@@ -282,6 +282,13 @@ class ModelUtilityService:
         return generic_class(**result) if result else None  # type: ignore [call-arg]
 
     @staticmethod
+    def non_async_find_one(generic_class: Type[T], query: dict) -> T | None:
+        model = db[generic_class.__name__.lower()]
+        result = model.find_one(query)
+
+        return generic_class(**result) if result else None  # type: ignore [call-arg]
+
+    @staticmethod
     async def find(generic_class: Type[T], query: dict) -> list[T]:
         model = db[generic_class.__name__.lower()]
 

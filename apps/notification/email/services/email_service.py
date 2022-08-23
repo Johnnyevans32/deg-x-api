@@ -3,11 +3,12 @@
 import emails as emails
 from emails.template import JinjaTemplate
 from pydantic import EmailStr
-from ...slack.services.slack_service import SlackService
 
 from apps.user.interfaces.user_interface import User
 from core.config import settings
 from core.utils.utils_service import Utils
+
+from ...slack.services.slack_service import SlackService
 
 
 class EmailService:
@@ -21,7 +22,7 @@ class EmailService:
              alt="degx" width="40" height="40" border="0">
         </a><br>
         <span>©2022 deg x</span><br>
-        <span style="color:#A9A9A9">bringing defi to africa </span>
+        <span style="color:#A9A9A9">bringing defi to africa...</span>
     """
     serializer_expiration_in_hr = settings.SERIALIZER_TOKEN_EXPIRATION_IN_SEC / (
         60 * 60
@@ -69,10 +70,10 @@ class EmailService:
 
                 Please kindly confirm your email address by clicking the link
                  below so we can get you started on Deg X: <br>
-                {{ link }} <br> The verification of account link will
+                <a href="{{ link }}">link</a> <br> The verification of account link will
                 expire in {{ valid_hours }} hour(s). <br><br>
             """
-                + EmailService.email_sigx
+                + self.email_sigx
             )
 
             self.send_template_email(
@@ -110,11 +111,11 @@ class EmailService:
 
                 We received a request to recover your password,
                 reset your password by clicking the link below: <br>
-                {{ link }} <br>
+                <a href="{{ link }}">link</a> <br>
                 The reset password link will expire in {{ valid_hours }} hour(s).
                  <br><br>
             """
-                + EmailService.email_sigx
+                + self.email_sigx
             )
             self.send_template_email(
                 email_to=user.email,

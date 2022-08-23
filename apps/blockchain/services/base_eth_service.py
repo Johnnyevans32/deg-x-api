@@ -28,11 +28,13 @@ from apps.user.interfaces.user_interface import User
 from apps.wallet.interfaces.wallet_interface import Wallet
 from apps.wallet.interfaces.walletasset_interface import Address
 from core.utils.loggly import logger
-from core.utils.request import HTTPRepository
+from core.utils.request import REQUEST_METHOD, HTTPRepository
 from core.utils.utils_service import Utils, timed_cache
 
 
-class BaseEvmService(IBlockchainService, HTTPRepository):
+class BaseEvmService(IBlockchainService):
+    httpRepository = HTTPRepository()
+
     def __init__(self, service_name: ChainServiceName) -> None:
         self.service_name = service_name
 
@@ -181,8 +183,8 @@ class BaseEvmService(IBlockchainService, HTTPRepository):
         assert chain_network.apiExplorer, "network apiexplorer not found"
         end_block = 999999999999999
         address = address_obj.main
-        res = await self.call(
-            "GET",
+        res = await self.httpRepository.call(
+            REQUEST_METHOD.GET,
             f"{chain_network.apiExplorer.url}?module=account&action=txlist&"
             f"address={address}&startblock={start_block}&endblock={end_block}"
             f"&page=1&offset=10000&sort=asc&apikey={chain_network.apiExplorer.keyToken}",
