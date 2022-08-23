@@ -17,11 +17,11 @@ jobs:
       - image: cimg/python:3.10.2
     steps:
       - checkout
-      # - python/install-packages:
-      #     pkg-manager: pip
-      # - python/install-packages:
-      #     pip-dependency-file: requirements.txt
-      #     pkg-manager: pip
+      - python/install-packages:
+          pkg-manager: pip
+      - python/install-packages:
+          pip-dependency-file: requirements.txt
+          pkg-manager: pip
       # - python/install-packages:
       #     args: poetry
       #     pkg-manager: pip
@@ -31,22 +31,22 @@ jobs:
 
       # - python/install-packages:
       #     pkg-manager: poetry
-      - restore_cache: # **restores saved dependency cache if the Branch key template or requirements.txt files have not changed since the previous run**
-          key: pydeps-v01__{{ checksum "requirements.txt" }}
-      - run: # install and activate virtual environment with pip
-          command: |
-            python3 -m venv venv
-            . venv/bin/activate
-            pip install -r requirements.txt
-      - save_cache: # ** special step to save dependency cache **
-          key: pydeps-v01__{{ checksum "requirements.txt" }}
-          paths:
-            - '.venv'
-            - '~/.cache/pip'
+      # - restore_cache: # **restores saved dependency cache if the Branch key template or requirements.txt files have not changed since the previous run**
+      #     key: pydeps-v01__{{ checksum "requirements.txt" }}
+      # - run: # install and activate virtual environment with pip
+      #     command: |
+      #       python3 -m venv venv
+      #       . venv/bin/activate
+      #       pip install -r requirements.txt
+      # - save_cache: # ** special step to save dependency cache **
+      #     key: pydeps-v01__{{ checksum "requirements.txt" }}
+      #     paths:
+      #       - '.venv'
+      #       - '~/.cache/pip'
       - run:
           name: Noxing the codebase
           command: |
-            python -m nox
+            nox --reuse-existing-virtualenvs --no-install
   dockerize:
     docker:
       - image: cimg/python:3.10.2
