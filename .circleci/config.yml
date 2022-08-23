@@ -32,20 +32,21 @@ jobs:
       # - python/install-packages:
       #     pkg-manager: poetry
       - restore_cache: # **restores saved dependency cache if the Branch key template or requirements.txt files have not changed since the previous run**
-          key: deps1-{{ .Branch }}-{{ checksum "requirements.txt" }}
+          key: pydeps-v01__{{ checksum "requirements.txt" }}
       - run: # install and activate virtual environment with pip
           command: |
             python3 -m venv venv
             . venv/bin/activate
             pip install -r requirements.txt
       - save_cache: # ** special step to save dependency cache **
-          key: deps1-{{ .Branch }}-{{ checksum "requirements.txt" }}
+          key: pydeps-v01__{{ checksum "requirements.txt" }}
           paths:
-            - 'venv'
+            - '.venv'
+            - '~/.cache/pip'
       - run:
           name: Noxing the codebase
           command: |
-            python nox --reuse-existing-virtualenvs --no-install
+            nox --reuse-existing-virtualenvs --no-install
   dockerize:
     docker:
       - image: cimg/python:3.10.2
