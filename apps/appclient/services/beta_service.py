@@ -14,7 +14,6 @@ class BaseBetaResponse(BaseModel):
 
 class BetaService:
     appClientService = AppClientService()
-    base_url: str = ""
 
     def __init__(self):
         client_data = None
