@@ -33,3 +33,4 @@ construct==2.10.67
 solana==0.25.1
 # pytezos==3.6.1
 bitcoinlib==0.6.5
+scout_apm==2.26.1

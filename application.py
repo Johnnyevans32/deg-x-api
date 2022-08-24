@@ -9,6 +9,11 @@ from starlette.exceptions import ExceptionMiddleware
 from starlette.exceptions import HTTPException as StarletteHTTPException
 from starlette.responses import JSONResponse
 
+from scout_apm.api import Config
+from scout_apm.async_.starlette import ScoutMiddleware
+from starlette.applications import Starlette
+from starlette.middleware import Middleware
+
 from apps.blockchain.interfaces.transaction_interface import BlockchainTransaction
 from apps.user.interfaces.user_interface import User
 from core import urls
@@ -35,6 +40,16 @@ origins = ["*"]
 
 
 def create_app():
+    Config.set(
+        key="[AVAILABLE IN THE SCOUT UI]",
+        name="deg-x-alpha",
+        monitor=True,
+    )
+    middleware = [
+        # Should be *first* in your stack, so it's the outermost and can
+        # track all requests
+        Middleware(ScoutMiddleware),
+    ]
     app = FastAPI(
         title=settings.PROJECT_NAME,
         description=settings.PROJECT_DESCRIPTION,
@@ -42,6 +57,7 @@ def create_app():
         openapi_url="/api/v1/openapi.json",
         terms_of_service="https://twitter.com/0xjevan",
         contact={"twitter": "https://twitter.com/0xjevan"},
+        middleware=middleware,
     )
 
     app.logger = logger  # type: ignore
