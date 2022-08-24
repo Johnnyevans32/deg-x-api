@@ -11,7 +11,6 @@ from starlette.responses import JSONResponse
 
 from scout_apm.api import Config
 from scout_apm.async_.starlette import ScoutMiddleware
-from starlette.applications import Starlette
 from starlette.middleware import Middleware
 
 from apps.blockchain.interfaces.transaction_interface import BlockchainTransaction
