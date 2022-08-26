@@ -12,7 +12,7 @@ from apps.blockchain.services.blockchain_service import (
 )
 from apps.blockchain.solana.solana_service import SolanaService
 
-# from apps.blockchain.tezos.tezos_service import TezosService
+from apps.blockchain.tezos.tezos_service import TezosService
 from core.utils.custom_exceptions import UnicornRequest
 from core.utils.response_service import ResponseService, get_response_model
 
@@ -21,7 +21,7 @@ router = APIRouter(prefix="/api/v1/blockchain", tags=["Blockchain 💸"])
 blockchainService = BlockchainService()
 responseService = ResponseService()
 solanaService = SolanaService()
-# tezosService = TezosService()
+tezosService = TezosService()
 
 
 @router.get(
@@ -180,31 +180,31 @@ async def fund_my_solana_account(
         )
 
 
-# @router.post(
-#     "/fund-tezos-account-devnet",
-# )
-# async def fund_my_tezos_account(
-#     request: UnicornRequest, response: Response, payload: SendTokenDTO
-# ):
-#     try:
-#         request.app.logger.info(
-#             f"sending airdrop token balance to address - {payload.toAddress}"
-#         )
-#         user_token_balance = await tezosService.fund_tezos_wallet(
-#             payload.toAddress, int(payload.amount)
-#         )
-#         request.app.logger.info("done sending airdrop token balance to address")
-#         return responseService.send_response(
-#             response,
-#             status.HTTP_200_OK,
-#             "airdrop token balance sent",
-#             user_token_balance,
-#         )
+@router.post(
+    "/fund-tezos-account-devnet",
+)
+async def fund_my_tezos_account(
+    request: UnicornRequest, response: Response, payload: SendTokenDTO
+):
+    try:
+        request.app.logger.info(
+            f"sending airdrop token balance to address - {payload.toAddress}"
+        )
+        user_token_balance = await tezosService.fund_tezos_wallet(
+            payload.toAddress, int(payload.amount)
+        )
+        request.app.logger.info("done sending airdrop token balance to address")
+        return responseService.send_response(
+            response,
+            status.HTTP_200_OK,
+            "airdrop token balance sent",
+            user_token_balance,
+        )
 
-#     except Exception as e:
-#         raise e
-#         return responseService.send_response(
-#             response,
-#             status.HTTP_400_BAD_REQUEST,
-#             f"Error in sending airdrop token balance - {str(e)}",
-# )
+    except Exception as e:
+        raise e
+        return responseService.send_response(
+            response,
+            status.HTTP_400_BAD_REQUEST,
+            f"Error in sending airdrop token balance - {str(e)}",
+        )

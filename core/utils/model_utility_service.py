@@ -319,11 +319,16 @@ class ModelUtilityService:
 
     @staticmethod
     async def model_update(
-        generic_class: Type[T], query: dict, record: dict
+        generic_class: Type[T],
+        query: dict,
+        record: dict,
+        session: ClientSession = None,
     ) -> UpdateResult:
         model = db[generic_class.__name__.lower()]
         record["updatedAt"] = datetime.now()
-        updated_record: UpdateResult = model.update_one(query, {"$set": record})
+        updated_record: UpdateResult = model.update_one(
+            query, {"$set": record}, session=session
+        )
 
         return updated_record
 
@@ -333,11 +338,16 @@ class ModelUtilityService:
         query: dict,
         record: dict,
         upsert=False,
+        session: ClientSession = None,
     ) -> T | None:
         model = db[generic_class.__name__.lower()]
         record["updatedAt"] = datetime.now()
         updated_record = model.find_one_and_update(
-            query, {"$set": record}, upsert=upsert, return_document=ReturnDocument.AFTER
+            query,
+            {"$set": record},
+            upsert=upsert,
+            return_document=ReturnDocument.AFTER,
+            session=session,
         )
 
         return (

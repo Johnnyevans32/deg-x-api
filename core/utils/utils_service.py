@@ -1,3 +1,4 @@
+import base64
 import binascii
 import hashlib
 import json
@@ -8,7 +9,9 @@ import time
 from functools import lru_cache, wraps
 from pathlib import Path
 from typing import Any, Callable, Type, TypeVar
+import uuid
 
+from boto3 import client
 import eth_utils
 import frozendict
 from async_lru import alru_cache
@@ -19,6 +22,11 @@ from solcx import compile_standard, install_solc
 
 from core.config import SECRET_KEY, settings
 from core.utils.loggly import logger
+from io import BytesIO
+import qrcode
+from qrcode.image.styledpil import StyledPilImage
+from qrcode.image.styles.moduledrawers import RoundedModuleDrawer
+from qrcode.image.styles.colormasks import RadialGradiantColorMask
 
 
 def timed_cache(
@@ -201,3 +209,66 @@ class Utils:
             T: converted object result
         """
         return genericClass(**_dict)  # type: ignore [call-arg]
+
+    @staticmethod
+    async def create_qr_image(data_to_encode: Any):
+        # Creating an instance of QRCode class
+        qr = qrcode.QRCode(
+            version=2, box_size=10, border=4, error_correction=qrcode.ERROR_CORRECT_L
+        )
+
+        # Adding data to the instance 'qr'
+        qr.add_data(data_to_encode)
+
+        qr.make(fit=True)
+        img = qr.make_image(
+            image_factory=StyledPilImage,
+            module_drawer=RoundedModuleDrawer(),
+            color_mask=RadialGradiantColorMask(edge_color=(218, 112, 214)),
+        )
+        buffer = BytesIO()
+        img.save(buffer)
+        img_base64 = base64.b64encode(buffer.getvalue()).decode()
+        image_url = Utils.upload_file(data_to_encode, img_base64)
+        return image_url
+
+    @staticmethod
+    def upload_file(file_name: str, base64_data: str):
+        if settings.IS_DEV:
+            return (
+                "https://s3-us-west-2.amazonaws.com/verifi-app-bucket/"
+                + "1bad0760-22c5-4ac6-bcac-c963193e393063080868bcec8b55dc441a19"
+            )
+        else:
+            s3_client = client(
+                "s3",
+                aws_access_key_id=settings.AWS_ACCESS_KEY_ID,
+                aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY,
+            )
+
+        file_name = Utils.generate_unique_file_name(file_name)
+        s3_client.put_object(
+            Body=base64.b64decode(base64_data),
+            Bucket=settings.S3_BUCKET_NAME,
+            Key=file_name,
+        )
+        # get object url
+        object_url = Utils.get_file_url_location(s3_client, file_name)
+        return object_url
+
+    @staticmethod
+    def generate_unique_file_name(file_name: str):
+        return "{}{}".format(uuid.uuid4(), file_name)
+
+    @staticmethod
+    def get_file_url_location(s3_client, file_name: str) -> str:
+        if settings.IS_DEV:
+            return "{}/{}/{}".format(
+                settings.AWS_S3_URL, settings.S3_BUCKET_NAME, file_name
+            )
+        location = s3_client.get_bucket_location(Bucket=settings.S3_BUCKET_NAME)[
+            "LocationConstraint"
+        ]
+        return "https://s3-{}.amazonaws.com/{}/{}".format(
+            location, settings.S3_BUCKET_NAME, file_name
+        )

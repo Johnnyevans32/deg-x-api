@@ -14,6 +14,7 @@ from apps.wallet.interfaces.walletasset_interface import WalletAsset
 from core.db import db
 from core.depends.get_object_id import PyObjectId
 from core.utils.model_utility_service import ModelUtilityService
+from core.utils.utils_service import Utils
 
 
 class WalletService:
@@ -44,41 +45,47 @@ class WalletService:
         session: ClientSession = None,
         walletType: WalletType = WalletType.MULTICHAIN,
     ) -> Wallet:
-        try:
-            # if not session:
-            #     session = client.start_session()
-            #     session.start_transaction()
-            mnemonic = self.mnemo.generate(strength=256)
-            dict_wallet = Wallet(
-                **{
-                    "user": user.id,
-                    "name": "multi-coin wallet",
-                    "walletType": walletType,
-                    "mnemonic": mnemonic,
-                }
-            ).dict(by_alias=True, exclude_none=True)
+        # if not session:
+        #     session = client.start_session()
+        #     session.start_transaction()
+        mnemonic = self.mnemo.generate(strength=256)
+        dict_wallet = Wallet(
+            **{
+                "user": user.id,
+                "name": "multi-coin wallet",
+                "walletType": walletType,
+                "mnemonic": mnemonic,
+            }
+        ).dict(by_alias=True, exclude_none=True)
 
+        await ModelUtilityService.model_find_one_and_update(
+            Wallet,
+            {"user": user.id, "isDeleted": False, "isDefault": True},
+            {"isDefault": False},
+        )
+
+        wallet_obj = await ModelUtilityService.model_create(
+            Wallet, dict_wallet, session
+        )
+        qr_code_image = await Utils.create_qr_image(wallet_obj.id)
+
+        wallet_obj = (
             await ModelUtilityService.model_find_one_and_update(
                 Wallet,
-                {"user": user.id, "isDeleted": False, "isDefault": True},
-                {"isDefault": False},
+                {"_id": wallet_obj.id},
+                {"qrImage": qr_code_image},
+                session=session,
             )
+            or wallet_obj
+        )
+        blockchains = await BlockchainService.get_blockchains(
+            {"isDeleted": {"$ne": True}}
+        )
 
-            wallet_obj = await ModelUtilityService.model_create(
-                Wallet, dict_wallet, session
-            )
-            blockchains = await BlockchainService.get_blockchains(
-                {"isDeleted": {"$ne": True}}
-            )
+        for chain in blockchains:
+            await self.create_wallet_assets(user, wallet_obj, mnemonic, chain, session)
 
-            for chain in blockchains:
-                await self.create_wallet_assets(
-                    user, wallet_obj, mnemonic, chain, session
-                )
-
-            return wallet_obj
-        except Exception as e:
-            raise e
+        return wallet_obj
 
     async def create_wallet_assets(
         self,
@@ -130,13 +137,11 @@ class WalletService:
         return user_wallets
 
     async def update_wallet_network(self, user: User, network_type: NetworkType):
-        user_def_wallet = await ModelUtilityService.model_update(
+        await ModelUtilityService.model_update(
             Wallet,
             {"user": user.id, "isDeleted": False, "isDefault": True},
             {"networkType": network_type},
         )
-
-        print("user_def_wallet", user_def_wallet.raw_result)
 
     async def update_dafault_wallet(self, user: User, wallet_id: PyObjectId):
         await ModelUtilityService.model_find_one_and_update(
@@ -145,13 +150,11 @@ class WalletService:
             {"isDefault": False},
         )
 
-        user_def_wallet = await ModelUtilityService.model_update(
+        await ModelUtilityService.model_update(
             Wallet,
             {"_id": wallet_id, "user": user.id, "isDeleted": False},
             {"isDefault": True},
         )
-
-        print("user_def_wallet", user_def_wallet)
 
     # def debit_wallet(
     #     self, user: User, amount: int, ref: str, session: ClientSession = None

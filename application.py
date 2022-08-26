@@ -56,7 +56,7 @@ def create_app():
         openapi_url="/api/v1/openapi.json",
         terms_of_service="https://twitter.com/0xjevan",
         contact={"twitter": "https://twitter.com/0xjevan"},
-        middleware=middleware,
+        # middleware=middleware,
     )
 
     app.logger = logger  # type: ignore
@@ -94,7 +94,7 @@ def create_app():
         # await seed_deg_x()
         User.init()
         BlockchainTransaction.init()
-        sentry_setup()
+        # sentry_setup()
         logger.info("Done setting up model collections")
 
     @app.on_event("shutdown")
