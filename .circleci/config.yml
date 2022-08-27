@@ -21,7 +21,7 @@ jobs:
       - run:
           name: Building libsodium
           command: |
-            sudo apt-get install libtool
+            sudo apt-get update
             set -xe
             if [ -d libsodium ]; then exit 0; fi # restored
             git clone --branch stable https://github.com/jedisct1/libsodium.git
