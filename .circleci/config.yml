@@ -48,16 +48,32 @@ jobs:
             nox --reuse-existing-virtualenvs --no-install
   dockerize:
     docker:
-      - image: cimg/python:3.10.2
+      - image: jevan32/deg-x-api:latest
+        auth:
+          username: $DOCKER_HUB_USER
+          password: $DOCKERHUB_PASSWORD
     steps:
       - checkout
-      - setup_remote_docker
-      - run:
-          name: Build and push Docker image
-          command: |
-            echo "$DOCKER_HUB_PASSWORD" | docker login -u $DOCKER_HUB_USER --password-stdin
-            docker build -t jevan32/deg-x-api:latest .
-            docker push jevan32/deg-x-api:latest
+    # docker:
+    #   - image: cimg/python:3.10.2
+    # steps:
+    #   - checkout
+    #   - setup_remote_docker
+    #   - run:
+    #       name: Build and push Docker image
+    #       command: |
+    #         echo "$DOCKER_HUB_PASSWORD" | docker login -u $DOCKER_HUB_USER --password-stdin
+    #         docker build -t jevan32/deg-x-api:latest .
+    #         docker push jevan32/deg-x-api:latest
+
+  dockerizeHeroku:
+    docker:
+      - image: registry.heroku.com/deg-x-api/web:latest
+        auth:
+          username: $DOCKER_HUB_USER
+          password: $DOCKERHUB_PASSWORD
+    steps:
+      - checkout
 
 # Orchestrate our job run sequence
 workflows:
@@ -70,9 +86,15 @@ workflows:
           filters:
             branches:
               only: master
-      - heroku/deploy-via-git:
+      - dockerizeHeroku:
           requires:
             - dockerize # Only run deploy job once the docker job has completed
           filters:
             branches:
               only: master
+      # - heroku/deploy-via-git:
+      #     requires:
+      #       - dockerize # Only run deploy job once the docker job has completed
+      #     filters:
+      #       branches:
+      #         only: master

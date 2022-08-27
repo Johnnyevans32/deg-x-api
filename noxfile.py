@@ -26,7 +26,7 @@ import nox
 def test_build(session: nox.Session):
     session.install("poetry")
     session.run("poetry", "install")
-    session.install("-r", "requirements.txt")
+    session.install("-r", "requirements.txt", "--no-deps")
     session.run("python", "-m", "coverage", "run", "-m", "pytest")
     session.run("coverage", "report")
     # session.notify('shared_venv', posargs=['tests'])

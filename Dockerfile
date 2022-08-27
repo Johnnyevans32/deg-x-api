@@ -12,8 +12,7 @@ ENV USE_DOCKER=true
 COPY ./requirements.txt /code/requirements.txt
 
 # 
-RUN pip install --no-cache-dir --upgrade -r /code/requirements.txt
-
+RUN pip install --no-cache-dir --upgrade -r /code/requirements.txt  --no-deps
 
 # 
 COPY ./application.py /code/application.py
@@ -27,4 +26,6 @@ COPY ./core /code/core
 COPY ./solidity /code/solidity
 
 # 
-CMD ["uvicorn", "application:_app", "--host", "0.0.0.0", "--port", "$PORT"]
+# CMD ["uvicorn", "application:_app", "--host", "0.0.0.0", "--port", $PORT]
+
+CMD ["python", "application.py"]
