@@ -11,6 +11,29 @@ orbs:
 
 # Define the jobs we want to run for this project
 jobs:
+  system_dependencies:
+    machine: true
+    working_directory: '~/dcos-net'
+    steps:
+      - checkout
+      - restore_cache:
+          key: libsodium-{{ arch }}-{{ checksum ".circleci/config.yml" }}
+      - run:
+          name: Building libsodium
+          command: |
+            set -xe
+            if [ -d libsodium ]; then exit 0; fi # restored
+            git clone --branch stable https://github.com/jedisct1/libsodium.git
+            git -C libsodium checkout b732443c442239c2e0184820e9b23cca0de0828c # 1.0.17
+            ( cd libsodium && ./autogen.sh && ./configure )
+            make -C libsodium -j$(getconf _NPROCESSORS_ONLN)
+      - save_cache:
+          key: libsodium-{{ arch }}-{{ checksum ".circleci/config.yml" }}
+          paths:
+            - libsodium
+      - run:
+          name: Installing libsodium
+          command: sudo make -C libsodium install
   build_and_nox:
     docker:
       - image: cimg/python:3.10.2
@@ -79,7 +102,10 @@ jobs:
 workflows:
   nox_and_deploy:
     jobs:
-      - build_and_nox
+      - system_dependencies
+      - build_and_nox:
+          requires:
+            - system_dependencies
       - dockerize:
           requires:
             - build_and_nox # Only run docker job once the nox job has completed
