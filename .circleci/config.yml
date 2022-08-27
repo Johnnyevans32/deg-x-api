@@ -21,6 +21,7 @@ jobs:
       - run:
           name: Building libsodium
           command: |
+            sudo apt-cache search libsodium
             sudo apt-get update
       #       set -xe
       #       if [ -d libsodium ]; then exit 0; fi # restored
