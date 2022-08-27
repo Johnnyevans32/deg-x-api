@@ -11,9 +11,9 @@ orbs:
 
 # Define the jobs we want to run for this project
 jobs:
-  system_dependencies:
-    machine: true
-    working_directory: '~/dcos-net'
+  build_and_nox:
+    docker:
+      - image: cimg/python:3.10.2
     steps:
       - checkout
       - restore_cache:
@@ -34,11 +34,7 @@ jobs:
       - run:
           name: Installing libsodium
           command: sudo make -C libsodium install
-  build_and_nox:
-    docker:
-      - image: cimg/python:3.10.2
-    steps:
-      - checkout
+
       - python/install-packages:
           pkg-manager: pip
       - python/install-packages:
