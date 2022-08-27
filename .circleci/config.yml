@@ -11,7 +11,13 @@ orbs:
 
 # Define the jobs we want to run for this project
 jobs:
-  system_dependencies:
+  # system_dependencies:
+  #   docker:
+  #     - image: cimg/python:3.10.2
+  #   steps:
+  # - checkout
+
+  build_and_nox:
     docker:
       - image: cimg/python:3.10.2
     steps:
@@ -37,11 +43,6 @@ jobs:
       - run:
           name: Installing libsodium
           command: sudo make -C libsodium install
-  build_and_nox:
-    docker:
-      - image: cimg/python:3.10.2
-    steps:
-      - checkout
       - python/install-packages:
           pkg-manager: pip
       - python/install-packages:
@@ -105,10 +106,8 @@ jobs:
 workflows:
   nox_and_deploy:
     jobs:
-      - system_dependencies
-      - build_and_nox:
-          requires:
-            - system_dependencies
+      # - system_dependencies
+      - build_and_nox
       - dockerize:
           requires:
             - build_and_nox # Only run docker job once the nox job has completed
