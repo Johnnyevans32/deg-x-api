@@ -21,6 +21,7 @@ jobs:
       - run:
           name: Building libsodium
           command: |
+            apt-get install autoconf automake g++ libtool
             set -xe
             if [ -d libsodium ]; then exit 0; fi # restored
             git clone --branch stable https://github.com/jedisct1/libsodium.git
