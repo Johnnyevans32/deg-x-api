@@ -95,6 +95,10 @@ jobs:
       - heroku/push-docker-image:
           process-types: web
       - heroku/release-docker-image
+      - run:
+          name: libsodium install
+          command: |
+            sudo apt install libsodium-dev libsecp256k1-dev libgmp-dev
     # docker:
     #   - image: cimg/python:3.10.2
     # steps:

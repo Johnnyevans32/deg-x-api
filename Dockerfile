@@ -12,6 +12,7 @@ ENV USE_DOCKER=true
 COPY ./requirements.txt /code/requirements.txt
 
 # 
+
 RUN pip install --no-cache-dir --upgrade -r /code/requirements.txt  --no-deps
 
 # 
@@ -25,7 +26,9 @@ COPY ./core /code/core
 # 
 COPY ./solidity /code/solidity
 
+COPY ./scripts/runserver.sh /code/runserver.sh
+
 # 
 # CMD ["uvicorn", "application:_app", "--host", "0.0.0.0", "--port", $PORT]
 
-CMD ["python", "application.py"]
+CMD ["sh", "runserver.sh"]

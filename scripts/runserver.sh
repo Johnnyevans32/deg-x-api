@@ -1,1 +1,2 @@
-uvicorn application:app --host 0.0.0.0 --access-log --reload
+sudo apt install libsodium-dev libsecp256k1-dev libgmp-dev
+python application.py
