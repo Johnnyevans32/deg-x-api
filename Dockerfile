@@ -35,6 +35,6 @@ COPY ./solidity /code/solidity
 COPY ./scripts/runserver.sh /code/runserver.sh
 
 # 
-# CMD ["uvicorn", "application:_app", "--host", "0.0.0.0", "--port", $PORT]
+CMD ["uvicorn", "application:_app", "--host", "0.0.0.0", "--port=${PORT}"]
 
-CMD ["sh", "runserver.sh"]
+# CMD ["sh", "runserver.sh"]
