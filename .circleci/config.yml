@@ -40,20 +40,11 @@ jobs:
           key: libsodium-{{ arch }}-{{ checksum ".circleci/config.yml" }}
           paths:
             - libsodium
-
-      - run:
-          name: check
-          command: |
-            ls
       - run:
           name: Installing libsodium
           command: |
             sudo make -C libsodium install
             sudo ldconfig
-      - run:
-          name: check
-          command: |
-            ls
       - python/install-packages:
           pkg-manager: pip
       - python/install-packages:
