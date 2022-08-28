@@ -83,6 +83,16 @@ jobs:
           password: $DOCKERHUB_PASSWORD
     steps:
       - checkout
+  heroku-registry-release:
+    executor: heroku/default
+    steps:
+      - checkout
+      - heroku/install
+      - run:
+          command: >
+            echo "The command above installs Heroku, the command below deploys.
+            What you do inbetween is up to you!"
+      - heroku/release-docker-image
     # docker:
     #   - image: cimg/python:3.10.2
     # steps:
@@ -113,7 +123,7 @@ workflows:
           filters:
             branches:
               only: master
-      - heroku/release-docker-image:
+      - heroku-registry-release:
           requires:
             - heroku/push-docker-image # Only run release job once the push job has completed
           filters:
