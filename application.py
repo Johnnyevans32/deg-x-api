@@ -44,11 +44,11 @@ def create_app():
         name="deg-x-alpha",
         monitor=True,
     )
-    middleware = [
-        # Should be *first* in your stack, so it's the outermost and can
-        # track all requests
-        Middleware(ScoutMiddleware),
-    ]
+    # middleware = [
+    #     # Should be *first* in your stack, so it's the outermost and can
+    #     # track all requests
+    #     Middleware(ScoutMiddleware),
+    # ]
     app = FastAPI(
         title=settings.PROJECT_NAME,
         description=settings.PROJECT_DESCRIPTION,
@@ -148,7 +148,7 @@ _app = create_app()
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 8000))
-    host = str(os.environ.get("HOST", "127.0.0.1"))
+    host = str(os.environ.get("HOST", "0.0.0.0"))
     uvicorn.run(
         "application:_app",
         host=host,

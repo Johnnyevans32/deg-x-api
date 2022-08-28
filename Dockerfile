@@ -35,6 +35,8 @@ COPY ./solidity /code/solidity
 COPY ./scripts/runserver.sh /code/runserver.sh
 
 # 
-CMD ["uvicorn", "application:_app", "--host", "0.0.0.0", "--port", "8000"]
+CMD ["python", "application.py"]
+
+# CMD ["uvicorn", "application:_app", "--host", "0.0.0.0", "--port", "8000"]
 
 # CMD ["sh", "runserver.sh"]
