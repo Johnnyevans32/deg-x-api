@@ -6,11 +6,13 @@ from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from pymongo import monitoring
 from scout_apm.api import Config
-from scout_apm.async_.starlette import ScoutMiddleware
+
+# from scout_apm.async_.starlette import ScoutMiddleware
 from starlette import status
 from starlette.exceptions import ExceptionMiddleware
 from starlette.exceptions import HTTPException as StarletteHTTPException
-from starlette.middleware import Middleware
+
+# from starlette.middleware import Middleware
 from starlette.responses import JSONResponse
 
 from apps.blockchain.interfaces.transaction_interface import BlockchainTransaction
