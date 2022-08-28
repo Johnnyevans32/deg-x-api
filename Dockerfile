@@ -21,8 +21,7 @@ RUN pip install --no-cache-dir --upgrade -r /code/requirements.txt  --no-deps
 
 # 
 COPY ./application.py /code/application.py
-# 
-COPY ./Aptfile /code/Aptfile
+
 # 
 COPY ./custom_logging.py /code/custom_logging.py
 # 
