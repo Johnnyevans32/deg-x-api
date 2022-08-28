@@ -11,8 +11,11 @@ ENV USE_DOCKER=true
 # 
 COPY ./requirements.txt /code/requirements.txt
 
-# 
 
+RUN apt-get update \
+    && apt-get install -y sudo
+
+# 
 RUN pip install --no-cache-dir --upgrade -r /code/requirements.txt  --no-deps
 
 # 
