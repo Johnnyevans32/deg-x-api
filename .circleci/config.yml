@@ -91,6 +91,7 @@ jobs:
       - checkout
       - setup_remote_docker:
           version: 20.10.14
+      - heroku/install
       - heroku/push-docker-image
       - heroku/release-docker-image
     # docker:
@@ -110,7 +111,7 @@ workflows:
   nox_and_deploy:
     jobs:
       # - system_dependencies
-      - build_and_nox
+      # - build_and_nox
       - dockerize:
           requires:
             - build_and_nox # Only run docker job once the nox job has completed
