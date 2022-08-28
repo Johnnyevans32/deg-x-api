@@ -148,9 +148,10 @@ _app = create_app()
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 8000))
+    host = str(os.environ.get("HOST", "127.0.0.1"))
     uvicorn.run(
         "application:_app",
-        host="127.0.0.1",
+        host=host,
         port=port,
         log_level="info",
         reload=True,
