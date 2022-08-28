@@ -15,7 +15,7 @@ COPY ./requirements.txt /code/requirements.txt
 RUN apt-get update \
     && apt-get install -y sudo
 
-RUN sudo apt-get install libsodium-dev libsecp256k1-dev libgmp-dev
+RUN sudo apt-get install -y libsodium-dev libsecp256k1-dev libgmp-dev
 # 
 RUN pip install --no-cache-dir --upgrade -r /code/requirements.txt  --no-deps
 
