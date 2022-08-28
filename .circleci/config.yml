@@ -95,19 +95,6 @@ jobs:
     #         docker build -t jevan32/deg-x-api:latest .
     #         docker push jevan32/deg-x-api:latest
 
-  dockerizeHeroku:
-    docker:
-      - image: cimg/python:3.10.2
-    # docker:
-    #   - image: registry.heroku.com/deg-x-api/web:latest
-    #     auth:
-    #       username: $DOCKER_HUB_USER
-    #       password: $DOCKERHUB_PASSWORD
-    steps:
-      - checkout
-      - push-docker-image
-      - release-docker-image
-
 # Orchestrate our job run sequence
 workflows:
   nox_and_deploy:
@@ -120,9 +107,15 @@ workflows:
           filters:
             branches:
               only: master
-      - dockerizeHeroku:
+      - heroku/push-docker-image:
           requires:
             - dockerize # Only run deploy job once the docker job has completed
+          filters:
+            branches:
+              only: master
+      - heroku/release-docker-image:
+          requires:
+            - heroku/push-docker-image # Only run release job once the push job has completed
           filters:
             branches:
               only: master
