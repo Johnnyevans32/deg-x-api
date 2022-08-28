@@ -97,12 +97,16 @@ jobs:
 
   dockerizeHeroku:
     docker:
-      - image: registry.heroku.com/deg-x-api/web:latest
-        auth:
-          username: $DOCKER_HUB_USER
-          password: $DOCKERHUB_PASSWORD
+      - image: cimg/python:3.10.2
+    # docker:
+    #   - image: registry.heroku.com/deg-x-api/web:latest
+    #     auth:
+    #       username: $DOCKER_HUB_USER
+    #       password: $DOCKERHUB_PASSWORD
     steps:
       - checkout
+      - push-docker-image
+      - release-docker-image
 
 # Orchestrate our job run sequence
 workflows:
