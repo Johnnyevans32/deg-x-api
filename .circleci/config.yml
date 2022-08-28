@@ -117,7 +117,7 @@ workflows:
   nox_and_deploy:
     jobs:
       # - system_dependencies
-      # - build_and_nox
+      - build_and_nox
       - dockerize:
           # requires:
           #   - build_and_nox # Only run docker job once the nox job has completed
