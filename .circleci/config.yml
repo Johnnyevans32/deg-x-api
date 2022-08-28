@@ -84,9 +84,14 @@ jobs:
     steps:
       - checkout
   heroku-registry-release:
-    executor: heroku/default
+    # executor: heroku/default
+    docker:
+      - image: cimg/python:3.10.2
     steps:
       - checkout
+      - setup_remote_docker:
+          version: 20.10.14
+      - heroku/push-docker-image
       - heroku/release-docker-image
     # docker:
     #   - image: cimg/python:3.10.2
@@ -112,15 +117,9 @@ workflows:
           filters:
             branches:
               only: master
-      - heroku/push-docker-image:
-          requires:
-            - dockerize # Only run deploy job once the docker job has completed
-          filters:
-            branches:
-              only: master
       - heroku-registry-release:
           requires:
-            - heroku/push-docker-image # Only run release job once the push job has completed
+            - dockerize # Only run deploy job once the docker job has completed
           filters:
             branches:
               only: master
