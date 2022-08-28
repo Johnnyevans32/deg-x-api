@@ -44,9 +44,7 @@ jobs:
           name: Installing libsodium
           command: |
             sudo make -C libsodium install
-            ls
-            cd ..
-            ls
+            sudo ldconfig
       - python/install-packages:
           pkg-manager: pip
       - python/install-packages:
