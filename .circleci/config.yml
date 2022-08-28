@@ -92,7 +92,8 @@ jobs:
       - setup_remote_docker:
           version: 20.10.14
       - heroku/install
-      - heroku/push-docker-image
+      - heroku/push-docker-image:
+          process-types: web
       - heroku/release-docker-image
     # docker:
     #   - image: cimg/python:3.10.2
