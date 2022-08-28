@@ -1,6 +1,10 @@
 from typing import Any, Callable, Union, cast
 
 from mnemonic import Mnemonic
+from pytezos import pytezos
+from pytezos.client import PyTezosClient
+from pytezos.crypto.key import Key
+from pytezos.operation.group import OperationGroup
 
 from apps.blockchain.interfaces.blockchain_interface import ChainServiceName
 from apps.blockchain.interfaces.network_interface import Network
@@ -9,14 +13,8 @@ from apps.blockchain.types.blockchain_service_interface import IBlockchainServic
 from apps.user.interfaces.user_interface import User
 from apps.wallet.interfaces.wallet_interface import Wallet
 from apps.wallet.interfaces.walletasset_interface import Address
-
 from core.utils.model_utility_service import ModelUtilityService
 from core.utils.request import HTTPRepository
-
-from pytezos import pytezos
-from pytezos.client import PyTezosClient
-from pytezos.crypto.key import Key
-from pytezos.operation.group import OperationGroup
 
 
 class TezosService(IBlockchainService, HTTPRepository):

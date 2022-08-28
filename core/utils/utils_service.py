@@ -6,27 +6,27 @@ import os
 import random
 import string
 import time
+import uuid
 from functools import lru_cache, wraps
+from io import BytesIO
 from pathlib import Path
 from typing import Any, Callable, Type, TypeVar
-import uuid
 
-from boto3 import client
 import eth_utils
 import frozendict
+import qrcode
 from async_lru import alru_cache
+from boto3 import client
 from itsdangerous import URLSafeTimedSerializer
 from pydantic import EmailStr
+from qrcode.image.styledpil import StyledPilImage
+from qrcode.image.styles.colormasks import RadialGradiantColorMask
+from qrcode.image.styles.moduledrawers import RoundedModuleDrawer
 from requests import request
 from solcx import compile_standard, install_solc
 
 from core.config import SECRET_KEY, settings
 from core.utils.loggly import logger
-from io import BytesIO
-import qrcode
-from qrcode.image.styledpil import StyledPilImage
-from qrcode.image.styles.moduledrawers import RoundedModuleDrawer
-from qrcode.image.styles.colormasks import RadialGradiantColorMask
 
 
 def timed_cache(

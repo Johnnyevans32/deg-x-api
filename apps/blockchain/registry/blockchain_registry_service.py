@@ -11,7 +11,6 @@ from apps.blockchain.evm_chains.polygon_service import PolygonService
 from apps.blockchain.evm_chains.tron_service import TronService
 from apps.blockchain.interfaces.blockchain_interface import ChainServiceName
 from apps.blockchain.solana.solana_service import SolanaService
-
 from apps.blockchain.tezos.tezos_service import TezosService
 from apps.blockchain.types.blockchain_service_interface import IBlockchainService
 from core.utils.loggly import logger

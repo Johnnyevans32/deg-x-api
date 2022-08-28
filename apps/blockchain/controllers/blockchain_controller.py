@@ -11,7 +11,6 @@ from apps.blockchain.services.blockchain_service import (
     SwapTokenDTO,
 )
 from apps.blockchain.solana.solana_service import SolanaService
-
 from apps.blockchain.tezos.tezos_service import TezosService
 from core.utils.custom_exceptions import UnicornRequest
 from core.utils.response_service import ResponseService, get_response_model

@@ -1,5 +1,8 @@
 from typing import Any, cast
 
+from pytezos import pytezos
+from pytezos.client import PyTezosClient
+
 from apps.blockchain.interfaces.network_interface import Network
 from apps.blockchain.solana.solana_service import SolanaService
 from apps.blockchain.tezos.tezos_service import TezosService
@@ -7,12 +10,8 @@ from apps.defi.interfaces.defi_provider_interface import DefiProvider
 from apps.defi.lending.aave.aave_interface import IReserveTokens, IUserAcccountData
 from apps.defi.lending.interfaces.lending_request_interface import InterestRateMode
 from apps.defi.lending.services.lending_service_interface import ILendingService
-
 from core.utils.request import HTTPRepository
 from core.utils.utils_service import timed_cache
-
-from pytezos import pytezos
-from pytezos.client import PyTezosClient
 
 
 class YupanaService(ILendingService):
@@ -92,7 +91,7 @@ class YupanaService(ILendingService):
                 *borrow_updates,
                 yupana.updateInterest(token_id),
                 proxy.getPrice([token_id]),
-                yupana.redeem(token_id, amount)
+                yupana.redeem(token_id, amount),
             )
             .autofill()
             .sign()
@@ -131,7 +130,7 @@ class YupanaService(ILendingService):
                 *borrow_updates,
                 yupana.updateInterest(token_id),
                 proxy.getPrice([token_id]),
-                yupana.borrow(token_id, amount)
+                yupana.borrow(token_id, amount),
             )
             .autofill()
             .sign()
@@ -171,7 +170,7 @@ class YupanaService(ILendingService):
                 *borrow_updates,
                 yupana.updateInterest(token_id),
                 proxy.getPrice([token_id]),
-                yupana.repay(token_id, amount)
+                yupana.repay(token_id, amount),
             )
             .autofill()
             .sign()
