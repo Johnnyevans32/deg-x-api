@@ -1,3 +1,4 @@
+import os
 import uvicorn
 from fastapi import FastAPI, Request
 from fastapi.exception_handlers import http_exception_handler
@@ -146,10 +147,11 @@ def create_app():
 _app = create_app()
 
 if __name__ == "__main__":
+    port = int(os.environ.get("PORT", 8000))
     uvicorn.run(
         "application:_app",
         host="127.0.0.1",
-        port=8000,
+        port=port,
         log_level="info",
         reload=True,
     )
