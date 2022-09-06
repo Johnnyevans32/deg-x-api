@@ -9,7 +9,7 @@ from apps.blockchain.services.blockchain_service import BlockchainService
 from apps.user.interfaces.user_interface import User
 from apps.wallet.interfaces.wallet_interface import Wallet, WalletType
 from apps.wallet.interfaces.walletasset_interface import WalletAsset
-from core.utils.aes import KeystoreModel, encrypt_AES_GCM
+from core.utils.aes import KeystoreModel, AesEncryptionService
 
 # from core.db import client
 from core.depends.get_object_id import PyObjectId
@@ -20,6 +20,7 @@ from core.utils.utils_service import Utils
 class WalletService:
     blockchainService = BlockchainService()
     mnemo = Mnemonic("english")
+    aesEncryptionService = AesEncryptionService()
 
     async def get_user_default_wallet(self, user: User) -> Wallet:
         user_default_wallet = await ModelUtilityService.find_one(
@@ -50,7 +51,9 @@ class WalletService:
             {"isDefault": False},
         )
 
-        key_store_model = encrypt_AES_GCM(str(user.id), mnemonic, "password")
+        key_store_model = self.aesEncryptionService.encrypt_AES_GCM(
+            str(user.id), mnemonic
+        )
 
         wallet_obj = await ModelUtilityService.model_create(
             Wallet, dict_wallet, session
