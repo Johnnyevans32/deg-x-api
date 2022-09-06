@@ -6,7 +6,7 @@ from pytezos.client import PyTezosClient
 from apps.blockchain.interfaces.network_interface import Network
 from apps.blockchain.solana.solana_service import SolanaService
 from apps.blockchain.tezos.tezos_service import TezosService
-from apps.defi.interfaces.defi_provider_interface import DefiProvider
+from apps.defi.interfaces.defiprovider_interface import DefiProvider
 from apps.defi.lending.aave.aave_interface import IReserveTokens, IUserAcccountData
 from apps.defi.lending.interfaces.lending_request_interface import InterestRateMode
 from apps.defi.lending.services.lending_service_interface import ILendingService
@@ -26,7 +26,7 @@ class YupanaService(ILendingService):
     ) -> IUserAcccountData:
         pass
 
-    async def get_user_config(self, user_addr: str, defi_provider: DefiProvider):
+    async def get_user_config(self, user_addr: str, defi_provider: DefiProvider) -> Any:
         pass
 
     async def deposit(
@@ -36,10 +36,10 @@ class YupanaService(ILendingService):
         on_behalf_of: str,
         defi_provider: DefiProvider,
         mnemonic: str,
-        referral_code=0,
-        gas=80000,
-        gas_price=50,
-    ):
+        referral_code: int = 0,
+        gas: int = 80000,
+        gas_price: int = 50,
+    ) -> str:
         key = TezosService.get_key_from_mnemonic(mnemonic)
         network = cast(Network, defi_provider.network)
         tez_client: PyTezosClient = pytezos.using(network.providerUrl, key)
@@ -68,9 +68,9 @@ class YupanaService(ILendingService):
         to: str,
         defi_provider: DefiProvider,
         mnemonic: str,
-        gas=70000,
-        gas_price=50,
-    ) -> Any:
+        gas: int = 70000,
+        gas_price: int = 50,
+    ) -> str:
         key = TezosService.get_key_from_mnemonic(mnemonic)
         network = cast(Network, defi_provider.network)
         tez_client: PyTezosClient = pytezos.using(network.providerUrl, key)
@@ -107,10 +107,10 @@ class YupanaService(ILendingService):
         on_behalf_of: str,
         defi_provider: DefiProvider,
         mnemonic: str,
-        referral_code=0,
-        gas=70000,
-        gas_price=50,
-    ):
+        referral_code: int = 0,
+        gas: int = 70000,
+        gas_price: int = 50,
+    ) -> str:
         key = TezosService.get_key_from_mnemonic(mnemonic)
         network = cast(Network, defi_provider.network)
         tez_client: PyTezosClient = pytezos.using(network.providerUrl, key)
@@ -148,9 +148,9 @@ class YupanaService(ILendingService):
         on_behalf_of: str,
         defi_provider: DefiProvider,
         mnemonic: str,
-        gas=40000,
-        gas_price=50,
-    ) -> Any:
+        gas: int = 40000,
+        gas_price: int = 50,
+    ) -> str:
         key = TezosService.get_key_from_mnemonic(mnemonic)
         network = cast(Network, defi_provider.network)
         tez_client: PyTezosClient = pytezos.using(network.providerUrl, key)
@@ -183,7 +183,7 @@ class YupanaService(ILendingService):
         asset: str,
         rate_mode: int,
         defi_provider: DefiProvider,
-    ):
+    ) -> Any:
         pass
 
     async def set_user_use_reserve_as_collateral(
@@ -191,7 +191,7 @@ class YupanaService(ILendingService):
         asset: str,
         use_as_collateral: bool,
         defi_provider: DefiProvider,
-    ):
+    ) -> Any:
         pass
 
     @timed_cache(10, 10, asyncFunction=True)

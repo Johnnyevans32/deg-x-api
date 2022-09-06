@@ -10,7 +10,16 @@ from pydantic import EmailStr
 from application import _app as app
 from apps.user.services.user_service import UserService
 
+# from async_asgi_testclient import TestClient
+
 client = AsyncClient(app=app)
+
+
+# @pytest.mark.asyncio
+# async def test_create_post(client: TestClient):
+#     resp = await client.post("/posts")
+
+#     assert resp.status_code == 201
 
 
 class TestAuthModule(TestCase):
@@ -18,9 +27,9 @@ class TestAuthModule(TestCase):
     test_email = EmailStr("evans@demigod.com")
 
     # @pytest.mark.anyio
-    @classmethod
-    async def setUpClass(cls):
-        await cls.userService.hard_del_user(cls.test_email)
+    # @classmethod
+    # async def setUpClass(cls) -> None:
+    #     await cls.userService.hard_del_user(cls.test_email)
 
     async def test_register_user_with_no_payload(self) -> None:
         response = await client.post("/api/v1/account/register")
@@ -102,14 +111,14 @@ class TestAuthModule(TestCase):
         assert response.status_code == 200
         assert payload_response.data.token
 
-    @classmethod
-    async def tearDownClass(cls):
-        test_user_payload = {
-            "firstName": "evans",
-            "lastName": "demigod",
-            "email": cls.test_email,
-            "password": "password",
-            "username": "sss",
-            "country": "61689fc4dc4f8ba4c07f52e2",
-        }
-        await client.post("/api/v1/account/register", data=test_user_payload)
+    # @classmethod
+    # async def tearDownClass(cls) -> None:
+    #     test_user_payload = {
+    #         "firstName": "evans",
+    #         "lastName": "demigod",
+    #         "email": cls.test_email,
+    #         "password": "password",
+    #         "username": "sss",
+    #         "country": "61689fc4dc4f8ba4c07f52e2",
+    #     }
+    #     await client.post("/api/v1/account/register", data=test_user_payload)

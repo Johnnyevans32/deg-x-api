@@ -28,7 +28,7 @@ class HTTPRepository:
         generic_class: Type[T],
         data: Any = None,
         opts: Any = None,
-    ):
+    ) -> T:
         try:
 
             # req.add_header('User-agent', PYCOIN_AGENT)
@@ -38,7 +38,7 @@ class HTTPRepository:
                 method, url, data=data, **opts
             )
             req.raise_for_status()
-            return generic_class(**req.json())  # type: ignore [call-arg]
+            return generic_class(**req.json())
         except requests.exceptions.RequestException as e:
             logger.error(f"Error making request call - {str(e)}")
             self.slackService.send_formatted_message(

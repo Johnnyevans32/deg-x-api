@@ -5,7 +5,7 @@ from mnemonic import Mnemonic
 from solana.keypair import Keypair
 from solana.publickey import PublicKey
 from solana.rpc.async_api import AsyncClient
-from solana.rpc.types import TokenAccountOpts
+from solana.rpc.types import RPCResponse, TokenAccountOpts
 from solana.system_program import TransferParams, transfer
 from solana.transaction import Transaction
 from spl.token.constants import TOKEN_PROGRAM_ID, WRAPPED_SOL_MINT
@@ -14,8 +14,6 @@ from apps.blockchain.interfaces.blockchain_interface import ChainServiceName
 from apps.blockchain.interfaces.network_interface import Network
 from apps.blockchain.interfaces.tokenasset_interface import TokenAsset
 from apps.blockchain.solana.solana_utils import (
-    IRPCResponse,
-    IRPCValue,
     create_sync_native_instruction,
     get_or_create_assoc_token_acc,
 )
@@ -27,7 +25,8 @@ from core.utils.model_utility_service import ModelUtilityService
 from core.utils.request import HTTPRepository
 
 
-class SolanaService(IBlockchainService, HTTPRepository):
+class SolanaService(IBlockchainService):
+    httpRepository = HTTPRepository()
     mnemo = Mnemonic("english")
 
     def __init__(self) -> None:
@@ -38,7 +37,7 @@ class SolanaService(IBlockchainService, HTTPRepository):
     def name(self) -> ChainServiceName:
         return ChainServiceName.SOL
 
-    async def get_network_provider(self, network: Network):
+    async def get_network_provider(self, network: Network) -> AsyncClient:
         solana_client = AsyncClient(network.providerUrl)
         # res = await solana_client.is_connected()
         return solana_client
@@ -53,7 +52,7 @@ class SolanaService(IBlockchainService, HTTPRepository):
         keypair = Keypair.from_secret_key(seed)
         return keypair
 
-    async def get_txn_fee(self, client: AsyncClient, ACCOUNT_SIZE: int):
+    async def get_txn_fee(self, client: AsyncClient, ACCOUNT_SIZE: int) -> int:
         fees = 0
         # if (!payer):
         fee_calculator = (await client.get_recent_blockhash())["result"]["value"][
@@ -71,8 +70,8 @@ class SolanaService(IBlockchainService, HTTPRepository):
 
     async def check_if_payee_balance_cover_fees(
         self, client: AsyncClient, address: PublicKey
-    ):
-        lamports = await client.get_balance(address)
+    ) -> None:
+        lamports = int((await client.get_balance(address))["result"]["value"])
         fees = await self.get_txn_fee(client, 20)
         if lamports < fees:
             # // If current balance is not enough to pay for fees, request an airdrop
@@ -85,9 +84,9 @@ class SolanaService(IBlockchainService, HTTPRepository):
         value: float,
         token_asset: TokenAsset,
         mnemonic: str,
-        gas=2000000,
-        gas_price="50",
-    ):
+        gas: int = 2000000,
+        gas_price: int = 50,
+    ) -> str:
         try:
             sender = self.get_keypair_from_mnemonic(mnemonic)
             chain_network = cast(Network, token_asset.network)
@@ -131,21 +130,19 @@ class SolanaService(IBlockchainService, HTTPRepository):
             txn_build = Transaction().add(txn)
             resp = await solana_client.send_transaction(txn_build, sender)
 
-            transaction_id = resp["result"]
-            if transaction_id:
-                return transaction_id
-            else:
-                return None
+            return str(resp["result"])
 
         except Exception as e:
             print("error:", e)
-            return None
+            raise e
+        finally:
+            await solana_client.close()
 
     async def get_balance(
         self,
         address_obj: Address,
         token_asset: TokenAsset,
-    ):
+    ) -> float:
         try:
             address = address_obj.main
             chain_network = cast(Network, token_asset.network)
@@ -162,22 +159,17 @@ class SolanaService(IBlockchainService, HTTPRepository):
                 )
                 if "result" not in rpc_resp:
                     raise Exception(rpc_resp["error"])
-                resp = IRPCResponse(**rpc_resp)
-                resp_value = cast(IRPCValue, resp.result.value)
-                balance = resp_value.uiAmount
+                balance = float(rpc_resp["result"]["value"]["uiAmount"])
             else:
-                resp = IRPCResponse(
-                    **await solana_client.get_balance(PublicKey(address))
-                )
-                balance = cast(int, resp.result.value)
-                balance = float(self.format_num(balance, "from"))
+                resp = await solana_client.get_balance(PublicKey(address))
+                balance = float(self.format_num(resp["result"]["value"], "from"))
             resp2 = await solana_client.get_token_accounts_by_owner(
                 PublicKey(address),
                 TokenAccountOpts(program_id=TOKEN_PROGRAM_ID),
             )
             print(resp2, balance)
 
-            return str(balance)
+            return balance
         finally:
             print("always get here")
             await solana_client.close()
@@ -189,7 +181,7 @@ class SolanaService(IBlockchainService, HTTPRepository):
         delegate: PublicKey,
         token_account: PublicKey,
         amount: int,
-    ):
+    ) -> RPCResponse:
         appr_spl_del_txn = Transaction().add(
             spl_token.approve(
                 spl_token.ApproveParams(
@@ -221,7 +213,7 @@ class SolanaService(IBlockchainService, HTTPRepository):
         value: float,
         mnemonic: str,
         token_asset: TokenAsset,
-    ):
+    ) -> str:
         sender = self.get_keypair_from_mnemonic(mnemonic)
         chain_network = cast(Network, token_asset.network)
         solana_client = await self.get_network_provider(chain_network)
@@ -231,6 +223,7 @@ class SolanaService(IBlockchainService, HTTPRepository):
         account = await get_or_create_assoc_token_acc(
             solana_client, sender, sender.public_key, associated_token_account
         )
+        txn: Transaction
         if token_asset.contractAddress:
             txn = Transaction().add(
                 spl_token.close_account(
@@ -243,14 +236,10 @@ class SolanaService(IBlockchainService, HTTPRepository):
                 )
             )
 
-            res = await solana_client.send_transaction(
-                txn, sender, recent_blockhash=None
-            )
-            return res
         else:
             amount = int(self.format_num(value, "to"))
 
-            transfer_sol_txn = Transaction().add(
+            txn = Transaction().add(
                 transfer(
                     TransferParams(
                         from_pubkey=sender.public_key,
@@ -261,7 +250,7 @@ class SolanaService(IBlockchainService, HTTPRepository):
                 create_sync_native_instruction(associated_token_account),
             )
             if not account.is_initialized:
-                transfer_sol_txn.add(
+                txn.add(
                     spl_token.initialize_account(
                         spl_token.InitializeAccountParams(
                             account=associated_token_account,
@@ -271,14 +260,11 @@ class SolanaService(IBlockchainService, HTTPRepository):
                         )
                     ),
                 )
-            res = await solana_client.send_transaction(
-                transfer_sol_txn,
-                sender,
-            )
 
-            return res
+        res = await solana_client.send_transaction(txn, sender, recent_blockhash=None)
+        return str(res["result"])
 
-    async def get_test_token(self, to_address: str, amount: int):
+    async def get_test_token(self, to_address: str, amount: int) -> list[str]:
         try:
             network = await ModelUtilityService.find_one(Network, {"name": "solanadev"})
             if not network:
@@ -298,6 +284,6 @@ class SolanaService(IBlockchainService, HTTPRepository):
 
         except Exception as e:
             print("error:", e)
-            return None
+            raise e
         finally:
             await solana_client.close()

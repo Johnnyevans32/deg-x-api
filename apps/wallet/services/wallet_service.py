@@ -1,4 +1,4 @@
-from datetime import datetime
+from typing import cast
 
 from mnemonic import Mnemonic
 from pymongo.client_session import ClientSession
@@ -9,9 +9,9 @@ from apps.blockchain.services.blockchain_service import BlockchainService
 from apps.user.interfaces.user_interface import User
 from apps.wallet.interfaces.wallet_interface import Wallet, WalletType
 from apps.wallet.interfaces.walletasset_interface import WalletAsset
+from core.utils.aes import KeystoreModel, encrypt_AES_GCM
 
 # from core.db import client
-from core.db import db
 from core.depends.get_object_id import PyObjectId
 from core.utils.model_utility_service import ModelUtilityService
 from core.utils.utils_service import Utils
@@ -20,15 +20,6 @@ from core.utils.utils_service import Utils
 class WalletService:
     blockchainService = BlockchainService()
     mnemo = Mnemonic("english")
-
-    async def update_wallet_balance(
-        self, wallet_id, amount, session: ClientSession = None
-    ) -> None:
-        db.wallet.update_one(
-            {"_id": wallet_id},
-            {"$inc": {"balance": amount}, "$set": {"updatedAt": datetime.now()}},
-            session=session,
-        )
 
     async def get_user_default_wallet(self, user: User) -> Wallet:
         user_default_wallet = await ModelUtilityService.find_one(
@@ -44,18 +35,13 @@ class WalletService:
         user: User,
         session: ClientSession = None,
         walletType: WalletType = WalletType.MULTICHAIN,
-    ) -> Wallet:
-        # if not session:
-        #     session = client.start_session()
-        #     session.start_transaction()
+    ) -> tuple[Wallet, KeystoreModel]:
+        assert user.id, "user id not found"
         mnemonic = self.mnemo.generate(strength=256)
         dict_wallet = Wallet(
-            **{
-                "user": user.id,
-                "name": "multi-coin wallet",
-                "walletType": walletType,
-                "mnemonic": mnemonic,
-            }
+            user=user.id,
+            name="multi-coin wallet",
+            walletType=walletType,
         ).dict(by_alias=True, exclude_none=True)
 
         await ModelUtilityService.model_find_one_and_update(
@@ -63,6 +49,8 @@ class WalletService:
             {"user": user.id, "isDeleted": False, "isDefault": True},
             {"isDefault": False},
         )
+
+        key_store_model = encrypt_AES_GCM(str(user.id), mnemonic, "password")
 
         wallet_obj = await ModelUtilityService.model_create(
             Wallet, dict_wallet, session
@@ -85,7 +73,7 @@ class WalletService:
         for chain in blockchains:
             await self.create_wallet_assets(user, wallet_obj, mnemonic, chain, session)
 
-        return wallet_obj
+        return wallet_obj, key_store_model
 
     async def create_wallet_assets(
         self,
@@ -105,13 +93,11 @@ class WalletService:
         dict_wallet_assets = list(
             map(
                 lambda token_asset: WalletAsset(
-                    **{
-                        "user": user.id,
-                        "wallet": wallet.id,
-                        "tokenasset": token_asset.id,
-                        "address": address,
-                        "blockchain": chain.id,
-                    }
+                    user=cast(PyObjectId, user.id),
+                    wallet=cast(PyObjectId, wallet.id),
+                    tokenasset=cast(PyObjectId, token_asset.id),
+                    address=address,
+                    blockchain=cast(PyObjectId, chain.id),
                 ).dict(by_alias=True, exclude_none=True),
                 token_assets,
             )
@@ -136,14 +122,16 @@ class WalletService:
             raise Exception("wallets not found")
         return user_wallets
 
-    async def update_wallet_network(self, user: User, network_type: NetworkType):
+    async def update_wallet_network(
+        self, user: User, network_type: NetworkType
+    ) -> None:
         await ModelUtilityService.model_update(
             Wallet,
             {"user": user.id, "isDeleted": False, "isDefault": True},
             {"networkType": network_type},
         )
 
-    async def update_dafault_wallet(self, user: User, wallet_id: PyObjectId):
+    async def update_dafault_wallet(self, user: User, wallet_id: PyObjectId) -> None:
         await ModelUtilityService.model_find_one_and_update(
             Wallet,
             {"user": user.id, "isDeleted": False, "isDefault": True},

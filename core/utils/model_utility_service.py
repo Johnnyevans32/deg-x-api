@@ -1,6 +1,7 @@
 import math
 import re
 from datetime import datetime
+from enum import Enum
 from functools import lru_cache, partial
 from typing import Any, Type, TypeVar
 
@@ -18,6 +19,12 @@ from core.db import db
 from core.utils.loggly import logger
 from core.utils.response_service import MetaDataModel
 from core.utils.utils_service import Utils
+
+
+class UpdateAction(str, Enum):
+    SET = "$set"
+    PUSH = "$push"
+    PULL = "$pull"
 
 
 class ModelUtilityService:
@@ -42,7 +49,7 @@ class ModelUtilityService:
     @staticmethod
     async def paginate_data(
         generic_class: Type[T],
-        query: dict,
+        query: dict[str, Any],
         page_num: int,
         page_size: int,
     ) -> tuple[list[T], MetaDataModel]:
@@ -95,7 +102,7 @@ class ModelUtilityService:
     @staticmethod
     async def populate_and_paginate_data(
         generic_class: Type[T],
-        query: dict,
+        query: dict[str, Any],
         fields: list[str],
         page_num: int = 1,
         page_size: int = 10,
@@ -194,7 +201,7 @@ class ModelUtilityService:
     @staticmethod
     async def find_one_and_populate(
         generic_class: Type[T],
-        query: dict,
+        query: dict[str, Any],
         fields: list[str],
     ) -> T | None:
         model = db[generic_class.__name__.lower()]
@@ -230,16 +237,12 @@ class ModelUtilityService:
         if result:
             [aggregation_result] = result
 
-        return (
-            generic_class(**aggregation_result)  # type: ignore [call-arg]
-            if aggregation_result
-            else None
-        )
+        return generic_class(**aggregation_result) if aggregation_result else None
 
     @staticmethod
     async def find_and_populate(
         generic_class: Type[T],
-        query: dict,
+        query: dict[str, Any],
         fields: list[str],
     ) -> list[T]:
         model = db[generic_class.__name__.lower()]
@@ -275,21 +278,21 @@ class ModelUtilityService:
         )
 
     @staticmethod
-    async def find_one(generic_class: Type[T], query: dict) -> T | None:
+    async def find_one(generic_class: Type[T], query: dict[str, Any]) -> T | None:
         model = db[generic_class.__name__.lower()]
         result = model.find_one(query)
 
-        return generic_class(**result) if result else None  # type: ignore [call-arg]
+        return generic_class(**result) if result else None
 
     @staticmethod
-    def non_async_find_one(generic_class: Type[T], query: dict) -> T | None:
+    def non_async_find_one(generic_class: Type[T], query: dict[str, Any]) -> T | None:
         model = db[generic_class.__name__.lower()]
         result = model.find_one(query)
 
-        return generic_class(**result) if result else None  # type: ignore [call-arg]
+        return generic_class(**result) if result else None
 
     @staticmethod
-    async def find(generic_class: Type[T], query: dict) -> list[T]:
+    async def find(generic_class: Type[T], query: dict[str, Any]) -> list[T]:
         model = db[generic_class.__name__.lower()]
 
         results = model.find(query)
@@ -306,7 +309,7 @@ class ModelUtilityService:
     @staticmethod
     async def model_create(
         generic_class: Type[T],
-        record: dict,
+        record: dict[str, Any],
         session: ClientSession = None,
     ) -> T:
         model = db[generic_class.__name__.lower()]
@@ -315,13 +318,13 @@ class ModelUtilityService:
             {"_id": ObjectId(created_record.inserted_id)}, session=session
         )
 
-        return generic_class(**res)  # type: ignore
+        return generic_class(**res)
 
     @staticmethod
     async def model_update(
         generic_class: Type[T],
-        query: dict,
-        record: dict,
+        query: dict[str, Any],
+        record: dict[str, Any],
         session: ClientSession = None,
     ) -> UpdateResult:
         model = db[generic_class.__name__.lower()]
@@ -335,37 +338,38 @@ class ModelUtilityService:
     @staticmethod
     async def model_find_one_and_update(
         generic_class: Type[T],
-        query: dict,
-        record: dict,
-        upsert=False,
+        query: dict[str, Any],
+        record: dict[str, Any],
+        upsert: bool = False,
         session: ClientSession = None,
+        updateAction: UpdateAction = UpdateAction.SET,
     ) -> T | None:
         model = db[generic_class.__name__.lower()]
-        record["updatedAt"] = datetime.now()
+        update_payload = {"$set": {"updatedAt": datetime.now()}}
+        if updateAction == UpdateAction.SET:
+            update_payload["$set"] = {**record, **update_payload["$set"]}
+        else:
+            update_payload[updateAction.value] = record
         updated_record = model.find_one_and_update(
             query,
-            {"$set": record},
+            update_payload,
             upsert=upsert,
             return_document=ReturnDocument.AFTER,
             session=session,
         )
 
-        return (
-            generic_class(**updated_record)  # type: ignore [call-arg]
-            if updated_record
-            else None
-        )
+        return generic_class(**updated_record) if updated_record else None
 
     @staticmethod
     async def model_find_one_or_create(
-        generic_class: Type[T], query: dict, record: dict
+        generic_class: Type[T], query: dict[str, Any], record: dict[str, Any]
     ) -> T:
         model = db[generic_class.__name__.lower()]
         result = model.find_one(query)
         if not result:
             return await ModelUtilityService.model_create(generic_class, record)
 
-        return generic_class(**result)  # type: ignore [call-arg]
+        return generic_class(**result)
 
     @staticmethod
     async def model_create_many(
@@ -385,7 +389,9 @@ class ModelUtilityService:
             return None
 
     @staticmethod
-    async def model_hard_delete(generic_class: Type[T], query: dict) -> DeleteResult:
+    async def model_hard_delete(
+        generic_class: Type[T], query: dict[str, Any]
+    ) -> DeleteResult:
         model = db[generic_class.__name__.lower()]
         deleted_record: DeleteResult = model.delete_one(query)
 

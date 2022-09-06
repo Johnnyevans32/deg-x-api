@@ -1,15 +1,45 @@
-from typing import Any, Optional
+import json
+from typing import Any, Generic, Optional, TypeVar
 
 from fastapi import Response
 from pydantic import BaseModel
+from pydantic.generics import GenericModel
 
 
 def get_response_model(base: object, rep: str) -> Any:
-    class DynamicResponse(ResponseModel):
+    class DynamicResponse(ResponseModelT):
         data: Optional[base]  # type: ignore
         metaData: Optional[MetaDataModel]
 
     return type(rep, (DynamicResponse,), {})
+
+
+T = TypeVar("T")
+
+
+class ResponseModelT(BaseModel):
+    message: str
+
+
+class MetaDataModel(BaseModel):
+    page: Optional[int]
+    perPage: Optional[int]
+    total: Optional[int]
+    pageCount: Optional[int]
+    previousPage: Optional[int]
+    nextPage: Optional[int]
+
+
+class ResponseModel(GenericModel, Generic[T]):
+    message: str
+    data: T | None = None
+    metaData: MetaDataModel | None = None
+
+    def toJSON(self) -> str:
+        return json.dumps(self, default=lambda o: o.__dict__, sort_keys=True, indent=4)
+
+    class Config:
+        arbitrary_types_allowed = True
 
 
 class ResponseService:
@@ -33,28 +63,15 @@ class ResponseService:
         self,
         res: Response,
         status_code: int,
-        message: str = None,
-        data=None,
-        meta=None,
+        message: str,
+        data: T = None,
+        meta: MetaDataModel = None,
         use_class_message: bool = False,
-    ) -> Any:
+    ) -> ResponseModel[T]:
         res.status_code = status_code
         if use_class_message:
             message = self.status_code_message[status_code]
-        response = {"data": data, "message": message}
+        response = ResponseModel[T](message=message, data=data)
         if meta:
-            response["metaData"] = meta
+            response.metaData = meta
         return response
-
-
-class ResponseModel(BaseModel):
-    message: str
-
-
-class MetaDataModel(BaseModel):
-    page: Optional[int]
-    perPage: Optional[int]
-    total: Optional[int]
-    pageCount: Optional[int]
-    previousPage: Optional[int]
-    nextPage: Optional[int]

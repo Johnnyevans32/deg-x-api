@@ -1,3 +1,6 @@
+from typing import Any
+
+from fastapi import BackgroundTasks
 from pydantic import EmailStr
 
 from apps.featureconfig.services.featureconfig_service import FeatureConfigService
@@ -10,7 +13,9 @@ from apps.user.interfaces.user_interface import (
 from apps.user.interfaces.user_token_interface import UserRefreshToken
 from apps.wallet.services.wallet_service import WalletService
 from core.db import client
-from core.utils.model_utility_service import ModelUtilityService
+from core.depends.get_object_id import PyObjectId
+from core.utils.aes import KeystoreModel
+from core.utils.model_utility_service import ModelUtilityService, UpdateAction
 from core.utils.utils_service import Utils
 
 
@@ -18,17 +23,21 @@ class UserService:
     walletService = WalletService()
     slackService = SlackService()
     featureConfigService = FeatureConfigService()
+    backgroundTasks = BackgroundTasks()
 
-    async def create_user(self, user: User) -> User:
+    async def create_user(self, user: User) -> tuple[User, KeystoreModel]:
         session = client.start_session()
         session.start_transaction()
         try:
             await self.check_if_username_exist_and_fail(user.username)
             dict_user = user.dict(by_alias=True, exclude_none=True)
             user_obj = await ModelUtilityService.model_create(User, dict_user, session)
-            await self.walletService.create_wallet(user_obj, session)
+            # self.backgroundTasks.add_task(self.walletService.create_wallet, user_obj)
+            _, keystore_model = await self.walletService.create_wallet(
+                user_obj, session
+            )
             session.commit_transaction()
-            return user_obj
+            return user_obj, keystore_model
         except Exception as e:
             session.abort_transaction()
             raise e
@@ -46,7 +55,7 @@ class UserService:
             raise Exception("user not verified")
         return user_obj
 
-    async def get_user_by_query(self, query: dict) -> User:
+    async def get_user_by_query(self, query: dict[str, Any]) -> User:
         db_resp = await ModelUtilityService.find_one(User, query)
         if not db_resp:
             raise ValueError("user not found")
@@ -84,16 +93,17 @@ class UserService:
     async def hard_del_user(self, email: EmailStr) -> None:
         await ModelUtilityService.model_hard_delete(User, {"email": email})
 
-    async def create_user_refresh_token(self, user: User, refresh_token: str):
+    async def create_user_refresh_token(self, user: User, refresh_token: str) -> None:
         await ModelUtilityService.model_find_one_and_update(
             UserRefreshToken,
             {"user": user.id, "isDeleted": False},
             {"isDeleted": True},
         )
+        assert user.id, "user id not foun"
 
         await ModelUtilityService.model_create(
             UserRefreshToken,
-            UserRefreshToken(**{"user": user.id, "refreshToken": refresh_token}).dict(
+            UserRefreshToken(user=user.id, refreshToken=refresh_token).dict(
                 by_alias=True, exclude_none=True
             ),
         )
@@ -107,3 +117,22 @@ class UserService:
             raise Exception("refresh token not found")
 
         return user_refresh_token
+
+    async def get_user_socket_ids(self, user_id: PyObjectId) -> list[str]:
+        user = await self.get_user_by_query({"_id": user_id, "isDeleted": False})
+        socketIds = user.socketIds
+        return socketIds or []
+
+    async def update_user_socket_id(
+        self, user_id: PyObjectId, socket_id: str, socket_status: str
+    ) -> User:
+        updateAction = {"connect": UpdateAction.PUSH, "disconnect": UpdateAction.PULL}
+        user = await ModelUtilityService.model_find_one_and_update(
+            User,
+            {"_id": user_id, "isDeleted": False},
+            {"socketIds": socket_id},
+            updateAction=updateAction[socket_status],
+        )
+        assert user, "user not found"
+
+        return user

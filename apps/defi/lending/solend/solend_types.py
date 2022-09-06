@@ -1,4 +1,4 @@
-from typing import List, Optional
+from typing import Optional
 
 from pydantic import BaseModel
 
@@ -26,7 +26,7 @@ class SolendMarket(BaseModel):
     creator: str
     address: str
     authorityAddress: str
-    reserves: List[SolendReserve]
+    reserves: list[SolendReserve]
 
 
 class OracleAsset(BaseModel):
@@ -38,11 +38,11 @@ class OracleAsset(BaseModel):
 class SolendOracle(BaseModel):
     pythProgramID: str
     switchboardProgramID: str
-    assets: List[OracleAsset]
+    assets: list[OracleAsset]
 
 
 class ISolendMarketReserve(BaseModel):
     programID: str
-    assets: List[SolendAsset]
-    markets: List[SolendMarket]
+    assets: list[SolendAsset]
+    markets: list[SolendMarket]
     oracles: SolendOracle

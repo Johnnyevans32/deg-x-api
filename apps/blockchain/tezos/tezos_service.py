@@ -18,6 +18,7 @@ from core.utils.request import HTTPRepository
 
 
 class TezosService(IBlockchainService, HTTPRepository):
+    httpRepository = HTTPRepository()
     mnemo = Mnemonic("english")
 
     def __init__(self) -> None:
@@ -27,9 +28,6 @@ class TezosService(IBlockchainService, HTTPRepository):
 
     def name(self) -> ChainServiceName:
         return ChainServiceName.XTZ
-
-    def get_network_provider(self):
-        pass
 
     @staticmethod
     def get_key_from_mnemonic(mnemonic: str) -> Key:
@@ -48,9 +46,9 @@ class TezosService(IBlockchainService, HTTPRepository):
         value: float,
         token_asset: TokenAsset,
         mnemonic: str,
-        gas=2000000,
-        gas_price="50",
-    ):
+        gas: int = 2000000,
+        gas_price: int = 50,
+    ) -> str:
         from_address = address_obj.main
         network = cast(Network, token_asset.network)
         key = Key.from_mnemonic(mnemonic)
@@ -85,7 +83,7 @@ class TezosService(IBlockchainService, HTTPRepository):
         self,
         address_obj: Address,
         token_asset: TokenAsset,
-    ):
+    ) -> float:
         address = address_obj.main
         network = cast(Network, token_asset.network)
         tez_client: PyTezosClient = pytezos.using(shell=network.providerUrl)
@@ -99,8 +97,8 @@ class TezosService(IBlockchainService, HTTPRepository):
         else:
             balance_res = tez_client.account(address)
 
-        balance = self.format_num(int(balance_res["balance"]), "from")
-        return str(balance)
+        balance = float(self.format_num(int(balance_res["balance"]), "from"))
+        return balance
 
     async def get_transactions(
         self,
@@ -114,7 +112,7 @@ class TezosService(IBlockchainService, HTTPRepository):
 
     async def activate_and_reveal_acc(
         self, tez_client: PyTezosClient, activation_code: str, pkh: str, public_key: str
-    ):
+    ) -> Any:
         activate_op: OperationGroup = tez_client.activate_account(activation_code, pkh)
         activate_res = activate_op.fill().sign().inject()
         print("source", activate_res)
@@ -125,7 +123,7 @@ class TezosService(IBlockchainService, HTTPRepository):
 
         return reveal_res
 
-    async def fund_tezos_wallet(self, to_address: str, amount: float):
+    async def fund_tezos_wallet(self, to_address: str, amount: float) -> dict[str, Any]:
         network = await ModelUtilityService.find_one(Network, {"name": "tezosdev"})
         if not network:
             raise Exception("no test network set for tezos")

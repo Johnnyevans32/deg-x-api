@@ -3,9 +3,10 @@ from pydantic import BaseModel
 from apps.defi.lending.interfaces.lending_request_interface import InterestRateMode
 
 
-class DepositAssetDTO(BaseModel):
+class BaseLendingActionDTO(BaseModel):
     amount: float
     asset: str
+    mnemonic: str
 
     class Config:
         schema_extra = {
@@ -16,5 +17,5 @@ class DepositAssetDTO(BaseModel):
         }
 
 
-class BorrowAssetDTO(DepositAssetDTO, BaseModel):
+class BorrowAssetDTO(BaseLendingActionDTO):
     interestRateMode: InterestRateMode

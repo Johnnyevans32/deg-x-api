@@ -1,22 +1,22 @@
 # -*- coding: utf-8 -*-
-# import json
-# from types import SimpleNamespace
-# from typing import Any
-
 from fastapi import Response, status
-from fastapi.routing import APIRouter
+from fastapi_restful.cbv import cbv
+from fastapi_restful.inferring_router import InferringRouter
 
-from core.utils.response_service import ResponseService
+from core.utils.response_service import ResponseModel, ResponseService
 
-router = APIRouter(prefix="/api/v1/webhook", tags=["Webhook 🐞"])
-
-
-responseService = ResponseService()
+router = InferringRouter(prefix="/webhook", tags=["Webhook 🐞"])
 
 
-@router.post("/sentry")
-def sentry_webhook(res: Response):
-    # payload = json.loads(
-    #     sentry_payload.json(), object_hook=lambda d: SimpleNamespace(**d)
-    # )
-    return responseService.send_response(res, status.HTTP_200_OK, "all good here")
+@cbv(router)
+class WebhookController:
+    responseService = ResponseService()
+
+    @router.post("/sentry")
+    def sentry_webhook(self, res: Response) -> ResponseModel[None]:
+        # payload = json.loads(
+        #     sentry_payload.json(), object_hook=lambda d: SimpleNamespace(**d)
+        # )
+        return self.responseService.send_response(
+            res, status.HTTP_200_OK, "all good here"
+        )

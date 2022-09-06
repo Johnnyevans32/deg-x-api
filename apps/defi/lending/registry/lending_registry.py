@@ -17,7 +17,7 @@ class LendingRegistry:
     def __init__(self) -> None:
         self.register_services()
 
-    def set_service(self, key: str, service: ILendingService):
+    def set_service(self, key: str, service: ILendingService) -> None:
         logger.info(f"lending service registed key - {key}")
         self.registry[key] = service
 

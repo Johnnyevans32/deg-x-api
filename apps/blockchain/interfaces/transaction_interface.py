@@ -52,7 +52,7 @@ class BlockchainTransaction(BlockchainTransactionOut, SBaseModel):
     metaData: Any
 
     @staticmethod
-    def init():
+    def init() -> None:
         db.blockchaintransaction.create_index(
             [("transactionHash", ASCENDING)], unique=True
         )

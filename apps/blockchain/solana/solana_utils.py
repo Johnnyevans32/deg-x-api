@@ -79,7 +79,7 @@ async def get_or_create_assoc_token_acc(
     sender: Keypair,
     owner: PublicKey,
     associated_token_account: PublicKey,
-):
+) -> AccountInfo:
     try:
         account = await get_token_account(solana_client, associated_token_account)
         print("account", account)
@@ -138,7 +138,7 @@ async def get_token_account(client: AsyncClient, addr: PublicKey) -> AccountInfo
 
 async def sync_native(
     solana_client: AsyncClient, sender: Keypair, token_account: PublicKey
-):
+) -> None:
     sync_native_txn = Transaction().add(create_sync_native_instruction(token_account))
     await solana_client.send_transaction(
         sync_native_txn,
@@ -146,7 +146,7 @@ async def sync_native(
     )
 
 
-def create_sync_native_instruction(token_account: PublicKey):
+def create_sync_native_instruction(token_account: PublicKey) -> TransactionInstruction:
     data = INSTRUCTIONS_LAYOUT.build(
         dict(instruction_type=InstructionType.SYNCNATIVE, args=None)
     )

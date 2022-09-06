@@ -1,5 +1,7 @@
 # from pathlib import Path
 
+from typing import Any
+
 import emails as emails
 from emails.template import JinjaTemplate
 from pydantic import EmailStr
@@ -33,14 +35,14 @@ class EmailService:
         email_to: EmailStr = None,
         subject_template: str = "",
         html_template: str = "",
-        environment=None,
+        environment: dict[str, Any] = None,
     ) -> None:
+        assert settings.EMAILS_ENABLED, "Email is Disabled"
         if not email_to:
             raise Exception("email for mail sending cant be null")
 
         if not environment:
             environment = {}
-        assert settings.EMAILS_ENABLED, "Email is Disabled"
         message = emails.Message(
             subject=JinjaTemplate(subject_template),
             html=JinjaTemplate(html_template),

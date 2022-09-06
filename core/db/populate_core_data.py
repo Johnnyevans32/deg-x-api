@@ -1,9 +1,10 @@
+# type:ignore
 from typing import Any, Callable
 
 from apps.blockchain.interfaces.blockchain_interface import Blockchain
 from apps.blockchain.interfaces.network_interface import Network, NetworkType
 from apps.blockchain.interfaces.tokenasset_interface import TokenAsset
-from apps.defi.interfaces.defi_provider_interface import DefiProvider, DefiServiceType
+from apps.defi.interfaces.defiprovider_interface import DefiProvider, DefiServiceType
 from core.depends.get_object_id import PyObjectId
 from core.utils.loggly import logger
 from core.utils.model_utility_service import ModelUtilityService
@@ -13,7 +14,7 @@ id_or_none: Callable[[Any], PyObjectId | None] = (
 )
 
 
-async def populate_blockchains():
+async def populate_blockchains() -> None:
     data = [
         {"name": "ethereum", "registryName": "ethereum_service", "meta": {}},
         {"name": "bitcoin", "registryName": "bitcoin_service", "meta": {}},
@@ -33,7 +34,7 @@ async def populate_blockchains():
         ),
 
 
-async def populate_networks():
+async def populate_networks() -> None:
     data = [
         {
             "name": "kovan",
@@ -78,7 +79,7 @@ async def populate_networks():
         ),
 
 
-async def populate_tokenassets():
+async def populate_tokenassets() -> None:
     data = [
         {
             "blockchain": id_or_none(
@@ -167,7 +168,7 @@ async def populate_tokenassets():
         ),
 
 
-async def populate_defi_providers():
+async def populate_defi_providers() -> None:
     data = [
         {
             "name": "aave",
@@ -214,7 +215,7 @@ async def populate_defi_providers():
         ),
 
 
-async def seed_deg_x():
+async def seed_deg_x() -> None:
     logger.info("SEEDING BLOCKCHAINS.....")
     await populate_blockchains()
     logger.info("SEEDED BLOCKCHAINS!!!")

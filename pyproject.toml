@@ -9,9 +9,9 @@ python = "^3.9"
 black = "^22.6.0"
 mypy = "^0.971"
 
-
 [tool.poetry.dev-dependencies]
 black = "^22.6.0"
+pydantic = "^1.10.1"
 pytest = "^6.2.5"
 coverage = "^6.4"
 flake8 = "^5.0"

@@ -7,7 +7,7 @@ from solana.publickey import PublicKey
 from apps.appclient.services.beta_service import BetaService
 from apps.blockchain.interfaces.network_interface import Network, NetworkType
 from apps.blockchain.solana.solana_service import SolanaService
-from apps.defi.interfaces.defi_provider_interface import DefiProvider
+from apps.defi.interfaces.defiprovider_interface import DefiProvider
 from apps.defi.lending.aave.aave_interface import IReserveTokens, IUserAcccountData
 from apps.defi.lending.interfaces.lending_request_interface import InterestRateMode
 from apps.defi.lending.services.lending_service_interface import ILendingService
@@ -29,7 +29,7 @@ class SolendService(ILendingService):
     ) -> IUserAcccountData:
         pass
 
-    async def get_user_config(self, user_addr: str, defi_provider: DefiProvider):
+    async def get_user_config(self, user_addr: str, defi_provider: DefiProvider) -> Any:
         pass
 
     async def deposit(
@@ -39,10 +39,10 @@ class SolendService(ILendingService):
         on_behalf_of: str,
         defi_provider: DefiProvider,
         mnemonic: str,
-        referral_code=0,
-        gas=80000,
-        gas_price=50,
-    ):
+        referral_code: int = 0,
+        gas: int = 80000,
+        gas_price: int = 50,
+    ) -> str:
         chain_network = cast(Network, defi_provider.network)
         client = await self.solanaService.get_network_provider(chain_network)
 
@@ -87,9 +87,9 @@ class SolendService(ILendingService):
         to: str,
         defi_provider: DefiProvider,
         mnemonic: str,
-        gas=70000,
-        gas_price=50,
-    ) -> Any:
+        gas: int = 70000,
+        gas_price: int = 50,
+    ) -> str:
         chain_network = cast(Network, defi_provider.network)
 
         sender = self.solanaService.get_keypair_from_mnemonic(mnemonic)
@@ -121,10 +121,10 @@ class SolendService(ILendingService):
         on_behalf_of: str,
         defi_provider: DefiProvider,
         mnemonic: str,
-        referral_code=0,
-        gas=70000,
-        gas_price=50,
-    ):
+        referral_code: int = 0,
+        gas: int = 70000,
+        gas_price: int = 50,
+    ) -> str:
         chain_network = cast(Network, defi_provider.network)
 
         sender = self.solanaService.get_keypair_from_mnemonic(mnemonic)
@@ -156,8 +156,8 @@ class SolendService(ILendingService):
         on_behalf_of: str,
         defi_provider: DefiProvider,
         mnemonic: str,
-        gas=40000,
-        gas_price=50,
+        gas: int = 40000,
+        gas_price: int = 50,
     ) -> Any:
         chain_network = cast(Network, defi_provider.network)
         client = await self.solanaService.get_network_provider(chain_network)
@@ -201,7 +201,7 @@ class SolendService(ILendingService):
         asset: str,
         rate_mode: int,
         defi_provider: DefiProvider,
-    ):
+    ) -> Any:
         pass
 
     async def set_user_use_reserve_as_collateral(
@@ -209,7 +209,7 @@ class SolendService(ILendingService):
         asset: str,
         use_as_collateral: bool,
         defi_provider: DefiProvider,
-    ):
+    ) -> Any:
         pass
 
     @timed_cache(10, 10, asyncFunction=True)
