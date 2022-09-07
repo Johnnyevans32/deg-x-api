@@ -15,7 +15,7 @@ jobs:
     docker:
       - image: cimg/python:3.10.2
     environment:
-      DATABASE_URI: $DATABASE_URI
+      DATABASE_URI: ${DATABASE_URI}
     steps:
       - checkout
       - restore_cache:
