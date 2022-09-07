@@ -9,7 +9,7 @@ from apps.auth.services.auth_bearer import JWTBearer
 from apps.defi.lending.aave.aave_interface import IReserveTokens
 from apps.defi.lending.interfaces.lending_request_interface import LendingRequest
 from apps.defi.lending.services.lending_service import LendingService
-from apps.defi.lending.types.lending_types import BorrowAssetDTO, BaseLendingActionDTO
+from apps.defi.lending.types.lending_types import BaseLendingActionDTO, BorrowAssetDTO
 from core.utils.custom_exceptions import UnicornRequest
 from core.utils.response_service import ResponseModel, ResponseService
 

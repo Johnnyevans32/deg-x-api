@@ -9,10 +9,10 @@ from apps.blockchain.services.blockchain_service import BlockchainService
 from apps.user.interfaces.user_interface import User
 from apps.wallet.interfaces.wallet_interface import Wallet, WalletType
 from apps.wallet.interfaces.walletasset_interface import WalletAsset
-from core.utils.aes import KeystoreModel, AesEncryptionService
 
 # from core.db import client
 from core.depends.get_object_id import PyObjectId
+from core.utils.aes import AesEncryptionService, KeystoreModel
 from core.utils.model_utility_service import ModelUtilityService
 from core.utils.utils_service import Utils
 

@@ -11,7 +11,7 @@ from apps.defi.lending.interfaces.lending_request_interface import (
     LendingRequestType,
 )
 from apps.defi.lending.registry.lending_registry import LendingRegistry
-from apps.defi.lending.types.lending_types import BorrowAssetDTO, BaseLendingActionDTO
+from apps.defi.lending.types.lending_types import BaseLendingActionDTO, BorrowAssetDTO
 from apps.notification.slack.services.slack_service import SlackService
 from apps.user.interfaces.user_interface import User
 from apps.wallet.interfaces.wallet_interface import Wallet

@@ -16,10 +16,7 @@ from apps.user.interfaces.user_interface import (
 )
 from apps.user.services.user_service import UserService
 from core.utils.custom_exceptions import UnicornRequest
-from core.utils.response_service import (
-    ResponseModel,
-    ResponseService,
-)
+from core.utils.response_service import ResponseModel, ResponseService
 
 router = InferringRouter(prefix="/account", tags=["Auth 🔐"])
 

@@ -1,4 +1,5 @@
 from typing import Optional
+
 from pymongo import ASCENDING
 
 from core.db import db

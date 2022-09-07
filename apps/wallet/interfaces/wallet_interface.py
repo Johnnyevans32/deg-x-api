@@ -1,7 +1,7 @@
 from enum import Enum
 from typing import Optional, Union
 
-from pydantic import Field, BaseModel
+from pydantic import BaseModel, Field
 
 from apps.blockchain.interfaces.network_interface import NetworkType
 from apps.user.interfaces.user_interface import User

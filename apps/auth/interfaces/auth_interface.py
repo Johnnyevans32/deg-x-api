@@ -1,4 +1,5 @@
 from typing import Optional
+
 from pydantic import BaseModel
 
 from apps.user.interfaces.user_interface import UserBase
