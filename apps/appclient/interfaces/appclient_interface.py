@@ -23,5 +23,5 @@ class AppClient(SBaseModel):
         }
 
     @staticmethod
-    def init():
+    def init() -> None:
         db.appclient.create_index([("name", ASCENDING)], unique=True)

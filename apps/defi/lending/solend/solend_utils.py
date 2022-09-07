@@ -1,5 +1,5 @@
 from enum import IntEnum
-from typing import Any, List, cast
+from typing import Any, cast
 
 import spl.token.instructions as spl_token
 from construct import Bytes, Int8ul, Int32ul, Int64ul, Pass
@@ -8,17 +8,17 @@ from construct import Switch
 from pydantic import BaseModel
 from solana.publickey import PublicKey
 from solana.rpc.async_api import AsyncClient
-from solana.system_program import TransactionInstruction
 from solana.sysvar import SYSVAR_CLOCK_PUBKEY, SYSVAR_RENT_PUBKEY
-from solana.transaction import AccountMeta
+from solana.transaction import AccountMeta, TransactionInstruction
 from solana.utils.helpers import decode_byte_string
 from spl.token.constants import TOKEN_PROGRAM_ID
 
 from apps.blockchain.solana.solana_utils import get_token_account
-from apps.defi.interfaces.defi_provider_interface import DefiProvider
+from apps.defi.interfaces.defiprovider_interface import DefiProvider
 from apps.defi.lending.solend.solend_types import (
     ISolendMarketReserve,
     OracleAsset,
+    SolendAsset,
     SolendMarket,
     SolendReserve,
 )
@@ -48,7 +48,7 @@ class SolendInstructionType(IntEnum):
     UpdateReserveConfig = 16
 
 
-def get_token_info(mint_address: str, solend_info: ISolendMarketReserve):
+def get_token_info(mint_address: str, solend_info: ISolendMarketReserve) -> SolendAsset:
     token_info = list(
         filter(lambda asset: asset.mintAddress == mint_address, solend_info.assets)
     )[0]
@@ -60,7 +60,7 @@ def get_token_info(mint_address: str, solend_info: ISolendMarketReserve):
 @timed_cache(100, 10, asyncFunction=True)
 async def get_solend_info(
     defi_provider: DefiProvider,
-):
+) -> ISolendMarketReserve:
     assert defi_provider.meta, "solend metadata not found"
     url = (
         f"{defi_provider.meta['API_ENDPOINT']}/"
@@ -100,7 +100,7 @@ def get_deposit_reserve_keys(
     pythOracle: PublicKey,
     switchboardFeedAddress: PublicKey,
     transferAuthority: PublicKey,
-):
+) -> list[AccountMeta]:
     keys: list[dict[str, PublicKey | bool]] = [
         {"pubkey": sourceLiquidity, "is_signer": False, "is_writable": True},
         {
@@ -180,7 +180,7 @@ def get_withdraw_reserve_keys(
     reserveLiquiditySupply: PublicKey,
     obligationOwner: PublicKey,
     transferAuthority: PublicKey,
-):
+) -> list[AccountMeta]:
     keys: list[dict[str, PublicKey | bool]] = [
         {
             "pubkey": sourceCollateral,
@@ -255,7 +255,7 @@ def get_borrow_reserve_keys(
     lendingMarket: PublicKey,
     lendingMarketAuthority: PublicKey,
     obligationOwner: PublicKey,
-):
+) -> list[AccountMeta]:
     keys: list[dict[str, PublicKey | bool]] = [
         {"pubkey": sourceLiquidity, "is_signer": False, "is_writable": True},
         {
@@ -309,7 +309,7 @@ def get_repay_reserve_keys(
     obligation: PublicKey,
     lendingMarket: PublicKey,
     transferAuthority: PublicKey,
-):
+) -> list[AccountMeta]:
     keys: list[dict[str, PublicKey | bool]] = [
         {"pubkey": sourceLiquidity, "is_signer": False, "is_writable": True},
         {
@@ -354,7 +354,7 @@ def get_init_obligation_keys(
     lendingMarket: PublicKey,
     obligationOwner: PublicKey,
     solendProgramAddress: PublicKey,
-):
+) -> list[AccountMeta]:
 
     keys: list[dict[str, PublicKey | bool]] = [
         {"pubkey": obligation, "is_signer": False, "is_writable": True},
@@ -437,7 +437,7 @@ async def get_withdraw_instruction_keys(
     user_token_address: PublicKey,
     user_addr: PublicKey,
     martket_addr: str = None,
-):
+) -> list[AccountMeta]:
     (
         lending_market,
         obligation_address,
@@ -471,7 +471,7 @@ async def get_borrow_instruction_keys(
     user_token_address: PublicKey,
     user_addr: PublicKey,
     martket_addr: str = None,
-):
+) -> list[AccountMeta]:
     (
         lending_market,
         obligation_address,
@@ -499,7 +499,7 @@ async def get_deposit_instruction_keys(
     user_addr: PublicKey,
     solend_program_id: PublicKey,
     martket_addr: str = None,
-):
+) -> list[AccountMeta]:
     (
         lending_market,
         obligation_address,
@@ -512,22 +512,20 @@ async def get_deposit_instruction_keys(
         PublicKey(reserve.collateralMintAddress),
     )
 
-    return (
-        get_deposit_reserve_keys(
-            user_token_address,
-            user_collateral_address,
-            PublicKey(reserve.address),
-            PublicKey(reserve.liquidityAddress),
-            PublicKey(reserve.collateralMintAddress),
-            PublicKey(lending_market.address),
-            PublicKey(lending_market.authorityAddress),
-            PublicKey(reserve.collateralSupplyAddress),
-            obligation_address,
-            user_addr,
-            PublicKey(oracle_info.priceAddress),
-            PublicKey(oracle_info.switchboardFeedAddress),
-            user_addr,
-        ),
+    return get_deposit_reserve_keys(
+        user_token_address,
+        user_collateral_address,
+        PublicKey(reserve.address),
+        PublicKey(reserve.liquidityAddress),
+        PublicKey(reserve.collateralMintAddress),
+        PublicKey(lending_market.address),
+        PublicKey(lending_market.authorityAddress),
+        PublicKey(reserve.collateralSupplyAddress),
+        obligation_address,
+        user_addr,
+        PublicKey(oracle_info.priceAddress),
+        PublicKey(oracle_info.switchboardFeedAddress),
+        user_addr,
     )
 
 
@@ -552,7 +550,7 @@ async def init_obligation_instruction(
     lending_market_addr: PublicKey,
     user_addr: PublicKey,
     solend_program_id: PublicKey,
-):
+) -> TransactionInstruction:
 
     obligation_acc = await get_token_account(client, obligation_addr)
     print("obligation_acc", obligation_acc)
@@ -564,7 +562,7 @@ async def init_obligation_instruction(
     data_layout = SOLEND_INSTRUCTION_LAYOUT.build(
         dict(instruction_type=SolendInstructionType.InitObligation, args=None)
     )
-    txn_key = await get_init_obligation_keys(
+    txn_key = get_init_obligation_keys(
         obligation_addr, lending_market_addr, user_addr, solend_program_id
     )
 
@@ -607,8 +605,8 @@ class Obligation(BaseModel):
     lastUpdate: LastUpdate
     lendingMarket: PublicKey
     owner: PublicKey
-    deposits: List[ObligationCollateral]
-    borrows: List[ObligationLiquidity]
+    deposits: list[ObligationCollateral]
+    borrows: list[ObligationLiquidity]
     depositedValue: float
     borrowedValue: float
     allowedBorrowValue: float
@@ -666,7 +664,7 @@ class ProtoObligation(BaseModel):
         arbitrary_types_allowed = True
 
 
-def parse_obligation(info: Any):
+def parse_obligation(info: Any) -> Any:
     bytes_data = decode_byte_string(info["result"]["value"]["data"][0])
     if len(bytes_data) != OBLIGATION_LAYOUT.sizeof():
         raise ValueError("Invalid account size")

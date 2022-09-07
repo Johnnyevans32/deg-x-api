@@ -1,5 +1,5 @@
 from enum import Enum
-from typing import Union
+from typing import Any, Union
 
 from pymongo import ASCENDING
 
@@ -23,8 +23,8 @@ class WalletTransaction(SBaseModel):
     previousBalance: int
     ref: str
     paymentMethod: PaymentMethod
-    metaData: dict
+    metaData: dict[str, Any]
 
     @staticmethod
-    def init():
+    def init() -> None:
         db.wallettransaction.create_index([("ref", ASCENDING)], unique=True)

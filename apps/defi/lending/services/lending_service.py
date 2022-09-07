@@ -1,13 +1,17 @@
+from typing import Any, Optional, cast
+
 from apps.blockchain.interfaces.tokenasset_interface import TokenAsset
 from apps.blockchain.services.blockchain_service import BlockchainService
-from apps.defi.interfaces.defi_provider_interface import DefiProvider, DefiServiceType
+from apps.defi.interfaces.defiprovider_interface import DefiProvider, DefiServiceType
+from apps.defi.lending.aave.aave_interface import IReserveTokens
 from apps.defi.lending.interfaces.lending_request_interface import (
+    InterestRateMode,
     LendingRequest,
     LendingRequestStatus,
     LendingRequestType,
 )
 from apps.defi.lending.registry.lending_registry import LendingRegistry
-from apps.defi.lending.types.lending_types import BorrowAssetDTO, DepositAssetDTO
+from apps.defi.lending.types.lending_types import BaseLendingActionDTO, BorrowAssetDTO
 from apps.notification.slack.services.slack_service import SlackService
 from apps.user.interfaces.user_interface import User
 from apps.wallet.interfaces.wallet_interface import Wallet
@@ -55,7 +59,7 @@ class LendingService:
 
     async def get_wallet_asset(
         self, user: User, user_wallet: Wallet, defi_provider: DefiProvider
-    ):
+    ) -> WalletAsset:
         user_wallet_asset = await ModelUtilityService.find_one(
             WalletAsset,
             {
@@ -74,7 +78,7 @@ class LendingService:
         self,
         user: User,
         defi_provider_id: PyObjectId = None,
-    ):
+    ) -> Any:
         defi_provider = await self.get_defi_provider(defi_provider_id)
         user_wallet = await self.walletService.get_user_default_wallet(user)
         user_wallet_asset = await self.get_wallet_asset(
@@ -82,14 +86,14 @@ class LendingService:
         )
         user_lending_data = await self.lendingRegistry.get_service(
             defi_provider.serviceName
-        ).get_user_account_data(user_wallet_asset.address, defi_provider)
+        ).get_user_account_data(user_wallet_asset.address.main, defi_provider)
 
         return user_lending_data
 
     async def get_reserve_assets(
         self,
         defi_provider_id: PyObjectId = None,
-    ):
+    ) -> list[IReserveTokens]:
         defi_provider = await self.get_defi_provider(defi_provider_id)
         reserve_assets = await self.lendingRegistry.get_service(
             defi_provider.serviceName
@@ -101,7 +105,7 @@ class LendingService:
         self,
         user: User,
         defi_provider_id: PyObjectId = None,
-    ):
+    ) -> Any:
         defi_provider = await self.get_defi_provider(defi_provider_id)
         user_wallet = await self.walletService.get_user_default_wallet(user)
         user_wallet_asset = await self.get_wallet_asset(
@@ -109,7 +113,7 @@ class LendingService:
         )
         user_config_data = await self.lendingRegistry.get_service(
             defi_provider.serviceName
-        ).get_user_config(user_wallet_asset.address, defi_provider)
+        ).get_user_config(user_wallet_asset.address.main, defi_provider)
 
         return user_config_data
 
@@ -118,7 +122,7 @@ class LendingService:
         user: User,
         payload: BorrowAssetDTO,
         defi_provider_id: PyObjectId = None,
-    ):
+    ) -> LendingRequest:
         defi_provider = await self.get_defi_provider(defi_provider_id)
         user_wallet = await self.walletService.get_user_default_wallet(user)
         user_wallet_asset = await self.get_wallet_asset(
@@ -130,29 +134,53 @@ class LendingService:
             payload.asset,
             payload.amount,
             payload.interestRateMode,
-            user_wallet_asset.address,
+            user_wallet_asset.address.main,
             defi_provider,
-            user_wallet.mnemonic,
+            user_wallet.mnemonic or payload.mnemonic,
         )
         print("protocol_borrow_res", protocol_borrow_res)
         token_asset = await BlockchainService.get_token_asset_by_query(
             {"contractAddress": payload.asset}
         )
 
+        lending_req = await self.create_lending_request(
+            user,
+            user_wallet,
+            LendingRequestType.BORROW,
+            defi_provider,
+            token_asset,
+            protocol_borrow_res,
+            payload.amount,
+            payload.asset,
+            payload.interestRateMode,
+        )
+
+        return lending_req
+
+    async def create_lending_request(
+        self,
+        user: User,
+        user_wallet: Wallet,
+        lending_type: LendingRequestType,
+        defi_provider: DefiProvider,
+        token_asset: Optional[TokenAsset],
+        provider_res: str,
+        amount: float,
+        asset: str,
+        interest_rate_mode: InterestRateMode = None,
+    ) -> LendingRequest:
         lending_req = await ModelUtilityService.model_create(
             LendingRequest,
             LendingRequest(
-                **{
-                    "user": user.id,
-                    "wallet": user_wallet.id,
-                    "amount": payload.amount,
-                    "interestRateMode": payload.interestRateMode,
-                    "defiProvider": defi_provider.id,
-                    "requestType": LendingRequestType.BORROW,
-                    "status": LendingRequestStatus.OPEN,
-                    "tokenAsset": (token_asset.id if token_asset else payload.asset),
-                    "providerResponse": protocol_borrow_res,
-                }
+                user=cast(PyObjectId, user.id),
+                wallet=cast(PyObjectId, user_wallet.id),
+                amount=amount,
+                interestRateMode=interest_rate_mode,
+                defiProvider=cast(PyObjectId, defi_provider.id),
+                requestType=lending_type,
+                status=LendingRequestStatus.OPEN,
+                tokenAsset=(cast(PyObjectId, token_asset.id) if token_asset else asset),
+                providerResponse=provider_res,
             ).dict(by_alias=True, exclude_none=True),
         )
         return lending_req
@@ -160,9 +188,9 @@ class LendingService:
     async def deposit(
         self,
         user: User,
-        payload: DepositAssetDTO,
+        payload: BaseLendingActionDTO,
         defi_provider_id: PyObjectId = None,
-    ):
+    ) -> LendingRequest:
         defi_provider = await self.get_defi_provider(defi_provider_id)
         user_wallet = await self.walletService.get_user_default_wallet(user)
         user_wallet_asset = await self.get_wallet_asset(
@@ -174,9 +202,9 @@ class LendingService:
             ).deposit(
                 payload.asset,
                 payload.amount,
-                user_wallet_asset.address,
+                user_wallet_asset.address.main,
                 defi_provider,
-                user_wallet.mnemonic,
+                user_wallet.mnemonic or payload.mnemonic,
             )
         except Exception as e:
             self.slackService.send_formatted_message(
@@ -189,20 +217,15 @@ class LendingService:
         token_asset = await ModelUtilityService.find_one(
             TokenAsset, {"contractAddress": payload.asset, "isDeleted": False}
         )
-        lending_req = await ModelUtilityService.model_create(
-            LendingRequest,
-            LendingRequest(
-                **{
-                    "user": user.id,
-                    "wallet": user_wallet.id,
-                    "amount": payload.amount,
-                    "defiProvider": defi_provider.id,
-                    "requestType": LendingRequestType.DEPOSIT,
-                    "status": LendingRequestStatus.OPEN,
-                    "tokenAsset": (token_asset.id if token_asset else payload.asset),
-                    "providerResponse": protocol_deposit_res,
-                }
-            ).dict(by_alias=True, exclude_none=True),
+        lending_req = await self.create_lending_request(
+            user,
+            user_wallet,
+            LendingRequestType.DEPOSIT,
+            defi_provider,
+            token_asset,
+            protocol_deposit_res,
+            payload.amount,
+            payload.asset,
         )
         return lending_req
 
@@ -211,7 +234,7 @@ class LendingService:
         user: User,
         payload: BorrowAssetDTO,
         defi_provider_id: PyObjectId = None,
-    ):
+    ) -> LendingRequest:
         defi_provider = await self.get_defi_provider(defi_provider_id)
         user_wallet = await self.walletService.get_user_default_wallet(user)
         user_wallet_asset = await self.get_wallet_asset(
@@ -223,28 +246,23 @@ class LendingService:
             payload.asset,
             payload.amount,
             payload.interestRateMode,
-            user_wallet_asset.address,
+            user_wallet_asset.address.main,
             defi_provider,
-            user_wallet.mnemonic,
+            user_wallet.mnemonic or payload.mnemonic,
         )
         print("protocol_repay_res", protocol_repay_res)
         token_asset = await BlockchainService.get_token_asset_by_query(
             {"contractAddress": payload.asset}
         )
-        lending_req = await ModelUtilityService.model_create(
-            LendingRequest,
-            LendingRequest(
-                **{
-                    "user": user.id,
-                    "wallet": user_wallet.id,
-                    "amount": payload.amount,
-                    "defiProvider": defi_provider.id,
-                    "interestRateMode": payload.interestRateMode,
-                    "requestType": LendingRequestType.DEPOSIT,
-                    "status": LendingRequestStatus.OPEN,
-                    "tokenAsset": (token_asset.id if token_asset else payload.asset),
-                    "providerResponse": protocol_repay_res,
-                }
-            ).dict(by_alias=True, exclude_none=True),
+        lending_req = await self.create_lending_request(
+            user,
+            user_wallet,
+            LendingRequestType.REPAY,
+            defi_provider,
+            token_asset,
+            protocol_repay_res,
+            payload.amount,
+            payload.asset,
+            payload.interestRateMode,
         )
         return lending_req

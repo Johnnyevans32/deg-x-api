@@ -15,24 +15,13 @@ class SlackService:
         channel: str = "error-report",
         attachments: Any = None,
     ) -> None:
-        try:
-            body = {
-                "text": f">*{title}* \n {msg}",
-                "channel": channel,
-                "username": "lexi",
-            }
-
-            if attachments:
-                body["attachments"] = attachments
-
-            requests.post(settings.SLACK_HOOK, data=json.dumps(body))
-        except Exception as e:
-            logger.info(f"Error sending message to slack - {e}")
+        self.send_message(f">*{title}* \n {msg}", channel, attachments)
 
     def send_message(
         self, text: str, channel: str = "error-report", attachments: Any = None
     ) -> None:
         try:
+            assert settings.SLACKING_ENABLED, "slacking is disabled"
             body = {"text": text, "channel": channel, "username": "lexi"}
 
             if attachments:

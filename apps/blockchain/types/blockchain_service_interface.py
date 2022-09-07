@@ -11,7 +11,7 @@ from apps.wallet.interfaces.walletasset_interface import Address
 
 class IBlockchainService(metaclass=abc.ABCMeta):
     @classmethod
-    def __subclasshook__(cls, subclass):
+    def __subclasshook__(cls, subclass: Any) -> Any:
         return (
             hasattr(subclass, "create_address")
             and callable(subclass.load_data_source)
@@ -33,12 +33,12 @@ class IBlockchainService(metaclass=abc.ABCMeta):
         to: str,
         value: float,
         token_asset: TokenAsset,
-        private_key: str,
+        mnemonic: str,
     ) -> Any:
         raise NotImplementedError
 
     @abc.abstractmethod
-    async def get_balance(self, address: Address, token_asset: TokenAsset) -> str:
+    async def get_balance(self, address: Address, token_asset: TokenAsset) -> float:
         raise NotImplementedError
 
     @abc.abstractmethod
@@ -57,5 +57,5 @@ class IBlockchainService(metaclass=abc.ABCMeta):
         value: float,
         mnemonic: str,
         token_asset: TokenAsset,
-    ):
+    ) -> str:
         pass

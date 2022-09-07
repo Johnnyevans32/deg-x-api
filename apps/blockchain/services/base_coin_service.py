@@ -16,7 +16,8 @@ from apps.wallet.interfaces.walletasset_interface import Address
 from core.utils.request import HTTPRepository
 
 
-class BasecoinService(IBlockchainService, HTTPRepository):
+class BasecoinService(IBlockchainService):
+    httpRepository = HTTPRepository()
     mnemo = Mnemonic("english")
     network_map = {
         "XTN": "testnet",
@@ -44,9 +45,6 @@ class BasecoinService(IBlockchainService, HTTPRepository):
 
     def name(self) -> ChainServiceName:
         return self.service_name
-
-    def get_network_provider(self):
-        pass
 
     def get_wallet_from_mnemonic(
         self, mnemonic: str, network: NetworkType = NetworkType.TESTNET
@@ -79,9 +77,9 @@ class BasecoinService(IBlockchainService, HTTPRepository):
         value: float,
         token_asset: TokenAsset,
         mnemonic: str,
-        gas=2000000,
-        gas_price="50",
-    ):
+        gas: int = 2000000,
+        gas_price: int = 50,
+    ) -> str:
         network = cast(Network, token_asset.network)
         wallet = self.get_wallet_from_mnemonic(mnemonic)
         amount = int(self.format_num(value, "to"))
@@ -97,7 +95,7 @@ class BasecoinService(IBlockchainService, HTTPRepository):
         self,
         address_obj: Address,
         token_asset: TokenAsset,
-    ):
+    ) -> float:
         network = cast(Network, token_asset.network)
 
         address = (
@@ -109,8 +107,7 @@ class BasecoinService(IBlockchainService, HTTPRepository):
         balance = Service(
             network=self.network_map[self.coin_network(network.networkType)]
         ).getbalance(address)
-        print(balance)
-        return str(self.format_num(balance, "from"))
+        return float(self.format_num(balance, "from"))
 
     async def get_transactions(
         self,

@@ -2,7 +2,7 @@ from enum import Enum
 from typing import Any, Optional, Union
 
 from apps.blockchain.interfaces.tokenasset_interface import TokenAsset
-from apps.defi.interfaces.defi_provider_interface import DefiProvider
+from apps.defi.interfaces.defiprovider_interface import DefiProvider
 from apps.user.interfaces.user_interface import User
 from apps.wallet.interfaces.wallet_interface import Wallet
 from core.depends.get_object_id import PyObjectId
@@ -18,6 +18,8 @@ class LendingRequestStatus(str, Enum):
 class LendingRequestType(str, Enum):
     DEPOSIT = "deposit"
     BORROW = "borrow"
+    REPAY = "repay"
+    WITHDRAW = "withdraw"
 
 
 class InterestRateMode(str, Enum):

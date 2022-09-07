@@ -12,11 +12,10 @@ from io import BytesIO
 from pathlib import Path
 from typing import Any, Callable, Type, TypeVar
 
-import eth_utils
-import frozendict
 import qrcode
 from async_lru import alru_cache
 from boto3 import client
+from frozendict.core import frozendict
 from itsdangerous import URLSafeTimedSerializer
 from pydantic import EmailStr
 from qrcode.image.styledpil import StyledPilImage
@@ -24,13 +23,14 @@ from qrcode.image.styles.colormasks import RadialGradiantColorMask
 from qrcode.image.styles.moduledrawers import RoundedModuleDrawer
 from requests import request
 from solcx import compile_standard, install_solc
+from web3 import Web3
 
-from core.config import SECRET_KEY, settings
+from core.config import settings
 from core.utils.loggly import logger
 
 
-def timed_cache(
-    timeout: int, maxsize: int = 128, typed: bool = False, asyncFunction=False
+def timed_cache(  # type: ignore
+    timeout: int, maxsize: int = 128, typed: bool = False, asyncFunction: bool = False
 ):
     """
     timed_cache: give lru cache time expiration ability
@@ -41,7 +41,7 @@ def timed_cache(
         typed (bool, optional): _description_. Defaults to False.
     """
 
-    def wrapper_cache(func):
+    def wrapper_cache(func):  # type: ignore
         func = (
             alru_cache(maxsize=maxsize, typed=typed)(func)
             if asyncFunction
@@ -51,16 +51,13 @@ def timed_cache(
         func.expiration = time.monotonic_ns() + func.delta
 
         @wraps(func)
-        def wrapped_func(*args, **kwargs):
+        def wrapped_func(*args, **kwargs):  # type: ignore
 
             args = tuple(
-                [
-                    frozendict.frozendict(arg) if isinstance(arg, dict) else arg
-                    for arg in args
-                ]
+                [frozendict(arg) if isinstance(arg, dict) else arg for arg in args]
             )
             kwargs = {
-                k: frozendict.frozendict(v) if isinstance(v, dict) else v
+                k: frozendict(v) if isinstance(v, dict) else v
                 for k, v in kwargs.items()
             }
             if time.monotonic_ns() >= func.expiration:
@@ -69,14 +66,14 @@ def timed_cache(
 
             return func(*args, **kwargs)
 
-        wrapped_func.cache_info = func.cache_info
-        wrapped_func.cache_clear = func.cache_clear
+        wrapped_func.cache_info = func.cache_info  # type: ignore
+        wrapped_func.cache_clear = func.cache_clear  # type: ignore
         return wrapped_func
 
     return wrapper_cache
 
 
-def timer_func(func: Callable):
+def timer_func(func: Callable[[Any, Any], Any]) -> Any:
     """
     timer_func This function shows the execution time of the function object passed
 
@@ -84,7 +81,7 @@ def timer_func(func: Callable):
         func (Callable): the function in question
     """
 
-    def wrap_func(*args, **kwargs):
+    def wrap_func(*args: Any, **kwargs: Any) -> Any:
         t1 = time.time()
         result = func(*args, **kwargs)
         t2 = time.time()
@@ -99,7 +96,7 @@ class Utils:
 
     @staticmethod
     def generate_random(
-        length: int = 12, chars=string.ascii_letters + string.digits
+        length: int = 12, chars: str = string.ascii_letters + string.digits
     ) -> str:
         return "".join(random.choice(chars) for _ in range(length))
 
@@ -124,14 +121,14 @@ class Utils:
 
     @staticmethod
     def generate_confirmation_token(email: EmailStr) -> str | bytes:
-        serializer = URLSafeTimedSerializer(SECRET_KEY)
+        serializer = URLSafeTimedSerializer(settings.SECRET_KEY)
         return serializer.dumps(email, salt=settings.SECURITY_PASSWORD_SALT)
 
     @staticmethod
     def confirm_token(
-        token: str, expiration=settings.SERIALIZER_TOKEN_EXPIRATION_IN_SEC
-    ):
-        serializer = URLSafeTimedSerializer(SECRET_KEY)
+        token: str, expiration: int = settings.SERIALIZER_TOKEN_EXPIRATION_IN_SEC
+    ) -> Any:
+        serializer = URLSafeTimedSerializer(settings.SECRET_KEY)
         email = serializer.loads(
             token, salt=settings.SECURITY_PASSWORD_SALT, max_age=expiration
         )
@@ -139,7 +136,7 @@ class Utils:
 
     @lru_cache(10)
     @staticmethod
-    def get_compiled_sol(contract_file_name: str, version: str):
+    def get_compiled_sol(contract_file_name: str, version: str) -> Any:
         with open(Path(f"./solidity/{contract_file_name}.sol"), "r") as file:
             contract_file = file.read()
 
@@ -170,16 +167,16 @@ class Utils:
         return abi
 
     @staticmethod
-    def get_evm_reverted_reason(err: Any):
+    def get_evm_reverted_reason(err: Any) -> str:
         code = str(err["data"]).replace("Reverted ", "")
         if code == "Reverted":
             return err
 
-        reason = eth_utils.to_text("0x" + code)
+        reason = Web3.toText(text="0x" + code)
         return reason
 
     @staticmethod
-    def get_abi_network_explorer(contract_address: str):
+    def get_abi_network_explorer(contract_address: str) -> Any:
         try:
             response = request(
                 "GET",
@@ -196,7 +193,7 @@ class Utils:
     @staticmethod
     def to_class_object(
         genericClass: Type[T],
-        _dict: dict,
+        _dict: dict[str, Any],
     ) -> T:
         """
         to_class_object: convert to dict to class object
@@ -208,10 +205,10 @@ class Utils:
         Returns:
             T: converted object result
         """
-        return genericClass(**_dict)  # type: ignore [call-arg]
+        return genericClass(**_dict)
 
     @staticmethod
-    async def create_qr_image(data_to_encode: Any):
+    async def create_qr_image(data_to_encode: Any) -> str:
         # Creating an instance of QRCode class
         qr = qrcode.QRCode(
             version=2, box_size=10, border=4, error_correction=qrcode.ERROR_CORRECT_L
@@ -233,7 +230,7 @@ class Utils:
         return image_url
 
     @staticmethod
-    def upload_file(file_name: str, base64_data: str):
+    def upload_file(file_name: str, base64_data: str) -> str:
         if settings.IS_DEV:
             return (
                 "https://s3-us-west-2.amazonaws.com/verifi-app-bucket/"
@@ -257,11 +254,11 @@ class Utils:
         return object_url
 
     @staticmethod
-    def generate_unique_file_name(file_name: str):
+    def generate_unique_file_name(file_name: str) -> str:
         return "{}{}".format(uuid.uuid4(), file_name)
 
     @staticmethod
-    def get_file_url_location(s3_client, file_name: str) -> str:
+    def get_file_url_location(s3_client: Any, file_name: str) -> str:
         if settings.IS_DEV:
             return "{}/{}/{}".format(
                 settings.AWS_S3_URL, settings.S3_BUCKET_NAME, file_name

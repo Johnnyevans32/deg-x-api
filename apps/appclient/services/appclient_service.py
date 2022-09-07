@@ -1,6 +1,6 @@
 from enum import Enum
 from functools import wraps
-from typing import Callable
+from typing import Any, Callable
 
 from apps.appclient.interfaces.appclient_interface import AppClient
 from core.utils.custom_exceptions import UnicornException, UnicornRequest
@@ -13,9 +13,9 @@ class Apps(str, Enum):
 
 
 class AppClientService:
-    def client_auth(self, func: Callable):
+    def client_auth(self, func: Callable[[UnicornRequest, Any, Any], Any]) -> Any:
         @wraps(func)
-        async def wrapper(request: UnicornRequest, *args, **kwargs):
+        async def wrapper(request: UnicornRequest, *args: Any, **kwargs: Any) -> Any:
             client_id = request.headers.get("clientID")
             client_secret = request.headers.get("clientSecret")
 
@@ -38,7 +38,7 @@ class AppClientService:
 
         return wrapper
 
-    async def get_client_by_query(self, query: dict) -> AppClient:
+    async def get_client_by_query(self, query: dict[str, Any]) -> AppClient:
         app_client = await ModelUtilityService.find_one(
             AppClient,
             query,

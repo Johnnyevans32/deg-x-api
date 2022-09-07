@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
-
-from fastapi.routing import APIRouter
+from fastapi_restful.inferring_router import InferringRouter
 
 from apps.appclient.controllers.appclient_controller import router as router_client
 from apps.auth.controllers.auth_controller import router as router_auth
@@ -20,8 +19,7 @@ from apps.healthcheck.controllers.healthcheck_controller import (
 from apps.wallet.controllers.wallet_controller import router as router_wallet
 from apps.webhook.controllers.webhook_controller import router as router_webhook
 
-router = APIRouter()
-# router = InferringRouter()
+router = InferringRouter()
 router.include_router(router_health_check)
 router.include_router(router_auth)
 router.include_router(router_wallet)

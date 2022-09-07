@@ -1,24 +1,19 @@
 # -*- coding: utf-8 -*-
-
 from fastapi import Response, status
-from fastapi.routing import APIRouter
+from fastapi_restful.cbv import cbv
+from fastapi_restful.inferring_router import InferringRouter
 
-from apps.appclient.services.appclient_service import AppClientService
-from apps.notification.telegram.services.telegram_service import TelegramService
-from core.utils.response_service import ResponseService
+from core.utils.response_service import ResponseModel, ResponseService
 
-router = APIRouter(prefix="/api/v1/health-check", tags=["Health Check 🩺"])
-
-
-appClientService = AppClientService()
-telegramService = TelegramService()
-responseService = ResponseService()
-
-client_auth = appClientService.client_auth
+router = InferringRouter(prefix="/health-check", tags=["Health Check 🩺"])
 
 
-@router.get("")
-def health_check(res: Response):
-    return responseService.send_response(
-        res, status.HTTP_200_OK, "all good here, works"
-    )
+@cbv(router)
+class HealthController:
+    responseService = ResponseService()
+
+    @router.get("/")
+    def health_check(self, res: Response) -> ResponseModel[None]:
+        return self.responseService.send_response(
+            res, status.HTTP_200_OK, "all good here, works"
+        )

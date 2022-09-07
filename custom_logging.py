@@ -1,13 +1,15 @@
 # Custom Logger Using Loguru
-
 import json
 import logging
 import sys
 from pathlib import Path
+from types import FrameType
+from typing import Any, cast
 
 # noinspection PyPackageRequirements
 import loggly.handlers
 from loguru import logger
+from loguru._logger import Logger
 
 from core.config import settings
 
@@ -22,7 +24,7 @@ class InterceptHandler(logging.Handler):
         0: "NOTSET",
     }
 
-    def emit(self, record):
+    def emit(self, record: logging.LogRecord) -> None:
         try:
             level = logger.level(record.levelname).name
         except AttributeError:
@@ -30,7 +32,7 @@ class InterceptHandler(logging.Handler):
 
         frame, depth = logging.currentframe(), 2
         while frame.f_code.co_filename == logging.__file__:
-            frame = frame.f_back
+            frame = cast(FrameType, frame.f_back)
             depth += 1
 
         log = logger.bind(request_id="app")
@@ -39,7 +41,7 @@ class InterceptHandler(logging.Handler):
 
 class CustomizeLogger:
     @classmethod
-    def make_logger(cls, config_path: Path):
+    def make_logger(cls, config_path: Path) -> Logger:
         config = cls.load_logging_config(config_path)
         logging_config = config.get("logger")
 
@@ -55,7 +57,7 @@ class CustomizeLogger:
     @classmethod
     def customize_logging(
         cls, filepath: Path, level: str, rotation: str, retention: str, format_type: str
-    ):
+    ) -> Logger:
         logger.remove()
         logger.add(
             sys.stdout,
@@ -89,10 +91,10 @@ class CustomizeLogger:
             _logger = logging.getLogger(_log)
             _logger.handlers = [InterceptHandler()]
 
-        return logger.bind(request_id=None, method=None)
+        return logger.bind(request_id=None, method=None)  # type: ignore[return-value]
 
     @classmethod
-    def load_logging_config(cls, config_path):
+    def load_logging_config(cls, config_path: Any) -> Any:
         with open(config_path) as config_file:
             config = json.load(config_file)
         return config

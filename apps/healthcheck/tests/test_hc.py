@@ -11,7 +11,7 @@ client = TestClient(app)
 
 
 class TestHealthCheckModule(TestCase):
-    def test_health_check(self):
+    def test_health_check(self) -> None:
         response = client.get("/api/v1/health-check")
         payload_response = json.loads(
             json.dumps(response.json()), object_hook=lambda d: SimpleNamespace(**d)

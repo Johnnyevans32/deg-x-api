@@ -1,5 +1,3 @@
-from typing import Any
-
 from fastapi import status
 
 from apps.featureconfig.interfaces.featureconfig_interface import (
@@ -23,7 +21,7 @@ class FeatureConfigService:
         if not feature_config:
             return await ModelUtilityService.model_create(
                 FeatureConfig,
-                FeatureConfig(**{"name": name, "isEnabled": False}).dict(
+                FeatureConfig(name=name, isEnabled=False).dict(
                     by_alias=True, exclude_none=True
                 ),
             )
@@ -34,7 +32,7 @@ class FeatureConfigService:
         feature_config = await self.get_feature_by_name(name)
         return feature_config.isEnabled and not feature_config.isDeleted
 
-    def check_feature_enabled_or_fail(self, name: FeatureName) -> Any:
+    def check_feature_enabled_or_fail(self, name: FeatureName) -> None:
         feature_enabled = self.is_feature_enabled(name)
         if not feature_enabled:
             raise UnicornException(

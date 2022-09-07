@@ -1,3 +1,4 @@
+# type:ignore
 import math
 from collections import deque
 from time import time

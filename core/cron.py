@@ -4,7 +4,7 @@ from apps.notification.slack.services.slack_service import SlackService
 from core.utils.loggly import logger
 
 
-def test_job():
+def test_job() -> None:
     logger.info("CRON JOB BOT HERE")
 
 

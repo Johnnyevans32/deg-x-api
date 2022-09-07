@@ -35,7 +35,7 @@ class BlockchainRegistry:
     def __init__(self) -> None:
         self.register_services()
 
-    def set_service(self, key: ChainServiceName, service: IBlockchainService):
+    def set_service(self, key: ChainServiceName, service: IBlockchainService) -> None:
         logger.info(f"network chain registed key - {key}")
         self.registry[key] = service
 
