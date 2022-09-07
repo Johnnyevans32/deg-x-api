@@ -23,7 +23,6 @@ jobs:
       - run:
           name: Building libsodium
           command: |
-            echo 'expport DATABASE_URI=$DATABASE_URI' >> $BASH_ENV
             sudo apt-get update
             sudo apt-get install libtool
             sudo apt-get install autoconf
