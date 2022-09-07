@@ -35,8 +35,8 @@ class Settings(BaseSettings):
     MAIL_PASSWORD: str = "test"
     MAIL_PORT: int = 587
     MAIL_SERVER: str = "test"
-    MAIL_TLS: bool
-    MAIL_SSL: bool
+    MAIL_TLS: bool = True
+    MAIL_SSL: bool = False
     MAIL_SENDER: str = "test"
 
     # ~~~~~ DATA_BASE ~~~~~

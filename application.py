@@ -66,8 +66,8 @@ def custom_openapi(app: FastAPI) -> dict[str, Any]:
         contact={"twitter": "https://twitter.com/degxFi"},
     )
     openapi_schema["info"]["x-logo"] = {
-        "url": "https://api.typedream.com/v0/document/public"
-        "/2E7bNs9xrGNYzVd2gtrfgXs9r6l_degx-removebg-preview.png?bucket=document"
+        "url": "https://api.typedream.com/v0/document/public/2E7bNs9xrG"
+        "NYzVd2gtrfgXs9r6l_degx-removebg-preview.png?bucket=document"
     }
 
     app.openapi_schema = openapi_schema
