@@ -1,4 +1,5 @@
 import os
+from typing import Any
 
 import socketio
 import uvicorn
@@ -11,6 +12,7 @@ from fastapi.exception_handlers import http_exception_handler
 # from fastapi.middleware.trustedhost import TrustedHostMiddleware
 from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.openapi.utils import get_openapi
 from pymongo import monitoring
 from scout_apm.api import Config
 
@@ -49,6 +51,29 @@ responseService = ResponseService()
 # CORS
 origins = ["*"]
 
+#  servers=[{"url": settings.base_path}],
+
+
+def custom_openapi(app: FastAPI) -> dict[str, Any]:
+    if app.openapi_schema:
+        return app.openapi_schema
+    openapi_schema = get_openapi(
+        title=settings.PROJECT_NAME,
+        description=settings.PROJECT_DESCRIPTION,
+        version=settings.PROJECT_VERSION,
+        routes=app.routes,
+        terms_of_service="https://twitter.com/degxFi",
+        contact={"twitter": "https://twitter.com/degxFi"},
+    )
+    openapi_schema["info"]["x-logo"] = {
+        "url": "https://api.typedream.com/v0/document/public"
+        "/2E7bNs9xrGNYzVd2gtrfgXs9r6l_degx-removebg-preview.png?bucket=document"
+    }
+
+    app.openapi_schema = openapi_schema
+
+    return app.openapi_schema
+
 
 def create_app() -> FastAPI:
     Config.set(
@@ -61,16 +86,10 @@ def create_app() -> FastAPI:
     #     # track all requests
     #     Middleware(ScoutMiddleware),
     # ]
-
     openapi_url = "/api/v1/openapi.json" if settings.IS_DEV else None
     app = FastAPI(
-        title=settings.PROJECT_NAME,
-        description=settings.PROJECT_DESCRIPTION,
         debug=False,
         openapi_url=openapi_url,
-        terms_of_service="https://twitter.com/0xjevan",
-        contact={"twitter": "https://twitter.com/0xjevan"},
-        # middleware=middleware,
     )
 
     app.logger = logger  # type: ignore[attr-defined]
@@ -99,7 +118,7 @@ def create_app() -> FastAPI:
     # socket_manager = SocketManager(app=app)
     socket_app = socketio.ASGIApp(sio, app)
     app.mount("/socket", socket_app, name="socket")
-
+    app.openapi = lambda: custom_openapi(app)  # type: ignore[assignment]
     # app.add_middleware(
     #     TrustedHostMiddleware, allowed_hosts=["example.com", "*.example.com"]
     # )

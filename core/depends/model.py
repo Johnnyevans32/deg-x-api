@@ -38,7 +38,7 @@ class SBaseInModel(HashableBaseModel):
 
 
 class SBaseOutModel(HashableBaseModel, BaseModel):
-    id: Optional[PyObjectId] = Field(default=None, alias="_id")
+    id: Optional[PyObjectId] = Field(default=None)
     createdAt: datetime = Field(default=datetime.now())
     updatedAt: datetime = Field(default=datetime.now())
 
@@ -50,6 +50,7 @@ class SBaseOutModel(HashableBaseModel, BaseModel):
             logger.error(f"Error while mapping the id to record - {e}")
 
     class Config:
+        # fields = {"id": "_id"}
         arbitrary_types_allowed = True
         json_encoders = {datetime: datetime.isoformat, ObjectId: str}
         allow_population_by_field_name = True

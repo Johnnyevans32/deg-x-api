@@ -10,6 +10,7 @@ class Settings(BaseSettings):
     # ~~~~~ APP ~~~~~
     PROJECT_NAME: str = "X"
     PROJECT_DESCRIPTION: str = "X's origin is unknown!!!"
+    PROJECT_VERSION: str = "1.0.0"
 
     # ~~~~~ PATH ~~~~~
     BASE_DIR: Any = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
