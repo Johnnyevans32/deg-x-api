@@ -29,6 +29,16 @@ from core.config import settings
 from core.utils.loggly import logger
 
 
+class NotFoundInRecord(Exception):
+    def __init__(self, model: str = None, message: str = "payload not found") -> None:
+        self.model = model
+        self.message = message
+        super().__init__(self.message)
+
+    def __str__(self) -> str:
+        return f"{self.model} -> {self.message}"
+
+
 def timed_cache(  # type: ignore
     timeout: int, maxsize: int = 128, typed: bool = False, asyncFunction: bool = False
 ):

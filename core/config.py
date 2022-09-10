@@ -80,7 +80,7 @@ class Settings(BaseSettings):
     CRON_ENABLED: bool = True
 
     # ~~~ Google oauth ~~~~
-    GOOGLE_CLIENT_ID: str = (
+    WEB_GOOGLE_CLIENT_ID: str = (
         "211971759182-bvjf8k5etbn2cj9hitmfi315aaurur6i.apps.googleusercontent.com"
     )
 

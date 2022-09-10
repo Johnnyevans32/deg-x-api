@@ -15,6 +15,7 @@ class AuthService:
     jwtService = JWTService()
 
     async def create_account(self, user: User) -> AuthResponse:
+        assert user.password, "password is required"
         user.password = Utils.hash_password(user.password)
         user_reg_res = await self.userService.create_user(user)
         user_created, keystore = user_reg_res
