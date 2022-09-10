@@ -16,7 +16,7 @@ from core.db import client
 from core.depends.get_object_id import PyObjectId
 from core.utils.aes import KeystoreModel
 from core.utils.model_utility_service import ModelUtilityService, UpdateAction
-from core.utils.utils_service import Utils
+from core.utils.utils_service import NotFoundInRecord, Utils
 
 
 class UserService:
@@ -32,7 +32,6 @@ class UserService:
             await self.check_if_username_exist_and_fail(user.username)
             dict_user = user.dict(by_alias=True, exclude_none=True)
             user_obj = await ModelUtilityService.model_create(User, dict_user, session)
-            # self.backgroundTasks.add_task(self.walletService.create_wallet, user_obj)
             _, keystore_model = await self.walletService.create_wallet(
                 user_obj, session
             )
@@ -49,6 +48,7 @@ class UserService:
             {"email": login_user_input.email, "isDeleted": False}
         )
 
+        assert user_obj.password, "invalid credentails"
         if not Utils.verify_password(user_obj.password, login_user_input.password):
             raise Exception("wrong credentials")
         if not user_obj.isVerified:
@@ -58,7 +58,7 @@ class UserService:
     async def get_user_by_query(self, query: dict[str, Any]) -> User:
         db_resp = await ModelUtilityService.find_one(User, query)
         if not db_resp:
-            raise ValueError("user not found")
+            raise NotFoundInRecord(message="user not found")
         return db_resp
 
     async def check_if_username_exist_and_fail(self, username: str) -> None:

@@ -48,8 +48,8 @@ class UserBase(SBaseOutModel):
 
 
 class User(UserBase, SBaseModel):
-    password: str = Field(hidden_from_schema=True)
-    socketIds: list[str] = Field(default=[])
+    password: Optional[str] = Field(hidden_from_schema=True)
+    socketIds: list[str] = Field(default=[], hidden_from_schema=True)
     isVerified: bool = Field(default=False, hidden_from_schema=True)
     signUpMethod: SignUpMethod = Field(
         default=SignUpMethod.EMAIL, hidden_from_schema=True
