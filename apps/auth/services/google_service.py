@@ -4,6 +4,7 @@ from google.auth.transport import requests
 from google.oauth2 import id_token
 
 from apps.auth.interfaces.auth_interface import AuthResponse
+from apps.auth.services.jwt_service import JWTService
 from apps.user.interfaces.user_interface import SignUpMethod, User
 from apps.user.services.user_service import UserService
 from core.config import settings
@@ -13,6 +14,7 @@ from core.utils.utils_service import NotFoundInRecord
 
 class GoogleService:
     userService = UserService()
+    jwtService = JWTService()
 
     async def verify_oauth_sign_in(self, user_id_token: str) -> AuthResponse:
         try:
@@ -25,7 +27,15 @@ class GoogleService:
             # userid = idinfo.sub
 
             user = await self.userService.get_user_by_query({"email": email})
-            return AuthResponse(user=user)
+            assert user.id
+            access_token = self.jwtService.sign_jwt(user.id, "ACCESS_TOKEN")
+            refresh_token = self.jwtService.sign_jwt(user.id, "REFRESH_TOKEN")
+            await self.userService.create_user_refresh_token(user, refresh_token)
+            return AuthResponse(
+                user=user,
+                accessToken=access_token,
+                refreshToken=refresh_token,
+            )
         except NotFoundInRecord:
             return await self.verify_oauth_sign_up(user_id_token)
         except Exception as e:
@@ -57,7 +67,16 @@ class GoogleService:
             user_res = await self.userService.create_user(user_obj)
 
             user, keystore = user_res
-            return AuthResponse(user=user, keystore=keystore)
+            assert user.id
+            access_token = self.jwtService.sign_jwt(user.id, "ACCESS_TOKEN")
+            refresh_token = self.jwtService.sign_jwt(user.id, "REFRESH_TOKEN")
+            await self.userService.create_user_refresh_token(user, refresh_token)
+            return AuthResponse(
+                user=user,
+                keystore=keystore,
+                accessToken=access_token,
+                refreshToken=refresh_token,
+            )
         except Exception as e:
             # Invalid token
             logger.error(f"Error verifing google auth token - {str(e)}")
