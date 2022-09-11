@@ -81,7 +81,7 @@ class Settings(BaseSettings):
 
     # ~~~ Google oauth ~~~~
     WEB_GOOGLE_CLIENT_ID: str = (
-        "211971759182-bvjf8k5etbn2cj9hitmfi315aaurur6i.apps.googleusercontent.com"
+        "211971759182-cmu5id6tmr9nk5hq29u7eri7ctdicsja.apps.googleusercontent.com"
     )
 
     class Config:
