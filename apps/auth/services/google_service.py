@@ -27,7 +27,7 @@ class GoogleService:
             # userid = idinfo.sub
 
             user = await self.userService.get_user_by_query({"email": email})
-            assert user.id
+            assert user.id, "id is null"
             access_token = self.jwtService.sign_jwt(user.id, "ACCESS_TOKEN")
             refresh_token = self.jwtService.sign_jwt(user.id, "REFRESH_TOKEN")
             await self.userService.create_user_refresh_token(user, refresh_token)
@@ -67,7 +67,7 @@ class GoogleService:
             user_res = await self.userService.create_user(user_obj)
 
             user, keystore = user_res
-            assert user.id
+            assert user.id, "id is null"
             access_token = self.jwtService.sign_jwt(user.id, "ACCESS_TOKEN")
             refresh_token = self.jwtService.sign_jwt(user.id, "REFRESH_TOKEN")
             await self.userService.create_user_refresh_token(user, refresh_token)

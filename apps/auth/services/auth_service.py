@@ -23,7 +23,7 @@ class AuthService:
 
     async def login_user(self, user: UserLoginInput) -> AuthResponse:
         user_logged_in = await self.userService.login_user(user)
-        assert user_logged_in.id
+        assert user_logged_in.id, "id is null"
         access_token = self.jwtService.sign_jwt(user_logged_in.id, "ACCESS_TOKEN")
         refresh_token = self.jwtService.sign_jwt(user_logged_in.id, "REFRESH_TOKEN")
         await self.userService.create_user_refresh_token(user_logged_in, refresh_token)
