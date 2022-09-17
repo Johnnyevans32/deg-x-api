@@ -31,7 +31,7 @@ pendulum==2.1.2
 async_lru==1.0.3
 construct==2.10.67
 solana==0.25.1
-# pymongo==4.2.0
+pymongo==4.2.0
 bitcoinlib==0.6.5
 scout_apm==2.26.1
 qrcode==7.3.1
