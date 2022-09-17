@@ -33,7 +33,6 @@ class BaseAaveService(ILendingService):
         addr: str = None,
         crt_name: str = "ILendingPool",
     ) -> tuple[AsyncContract, Web3]:
-        print("get_shwtift")
         str_address = addr if addr else defi_provider.contractAddress
         address = Web3.toBytes(hexstr=HexStr(str_address))
         network = cast(Network, defi_provider.network)
@@ -283,7 +282,6 @@ class BaseAaveService(ILendingService):
         self, defi_provider: DefiProvider
     ) -> list[IReserveTokens]:
         meta: Any = defi_provider.meta
-        print("get_shwtiftsssss")
         (aave_contract, _) = await BaseAaveService.get_contract_obj(
             defi_provider,
             meta["ProtocolDataProvider"]["address"],

@@ -1,8 +1,8 @@
 pytezos==3.6.1
 pydantic==1.10.1
 PyJWT==2.3.0
-fastapi==0.70.1
-starlette==0.16.0
+fastapi==0.84.0
+starlette==0.19.1
 emails==0.6
 requests==2.28.1
 itsdangerous==2.0.1
@@ -31,7 +31,7 @@ pendulum==2.1.2
 async_lru==1.0.3
 construct==2.10.67
 solana==0.25.1
-pymongo==4.2.0
+# pymongo==4.2.0
 bitcoinlib==0.6.5
 scout_apm==2.26.1
 qrcode==7.3.1
@@ -40,3 +40,6 @@ python-socketio==5.7.1
 boto3==1.17.54
 fastapi_restful==0.4.3
 scrypt==0.8.20
+google_api_python_client==2.60.0
+google-auth-httplib2==0.1.0
+google-auth-oauthlib==0.5.2

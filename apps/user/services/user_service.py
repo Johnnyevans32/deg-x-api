@@ -12,6 +12,7 @@ from apps.user.interfaces.user_interface import (
 )
 from apps.user.interfaces.user_token_interface import UserRefreshToken
 from apps.wallet.services.wallet_service import WalletService
+from apps.wallet.interfaces.wallet_interface import Wallet
 from core.db import client
 from core.depends.get_object_id import PyObjectId
 from core.utils.aes import KeystoreModel
@@ -25,18 +26,18 @@ class UserService:
     featureConfigService = FeatureConfigService()
     backgroundTasks = BackgroundTasks()
 
-    async def create_user(self, user: User) -> tuple[User, KeystoreModel]:
+    async def create_user(self, user: User) -> tuple[User, Wallet, KeystoreModel]:
         session = client.start_session()
         session.start_transaction()
         try:
             await self.check_if_username_exist_and_fail(user.username)
             dict_user = user.dict(by_alias=True, exclude_none=True)
             user_obj = await ModelUtilityService.model_create(User, dict_user, session)
-            _, keystore_model = await self.walletService.create_wallet(
+            wallet, keystore_model = await self.walletService.create_wallet(
                 user_obj, session
             )
             session.commit_transaction()
-            return user_obj, keystore_model
+            return user_obj, wallet, keystore_model
         except Exception as e:
             session.abort_transaction()
             raise e

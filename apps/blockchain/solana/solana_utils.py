@@ -14,7 +14,8 @@ from solana.rpc.types import RPCResponse
 from solana.transaction import AccountMeta, Transaction, TransactionInstruction
 from solana.utils.helpers import decode_byte_string
 from spl.token._layouts import ACCOUNT_LAYOUT
-from spl.token.async_client import AsyncToken
+
+# from spl.token.async_client import AsyncToken
 from spl.token.constants import TOKEN_PROGRAM_ID, WRAPPED_SOL_MINT
 from spl.token.core import AccountInfo
 
@@ -82,17 +83,15 @@ async def get_or_create_assoc_token_acc(
 ) -> AccountInfo:
     try:
         account = await get_token_account(solana_client, associated_token_account)
-        print("account", account)
+
     except (ValueError, AttributeError) as e:
         err = str(e).strip().lower()
-        print("err", err)
         if err == "invalid account owner" or err == "invalid account owner":
-            balance_needed = (
-                await AsyncToken.get_min_balance_rent_for_exempt_for_account(
-                    solana_client
-                )
-            )
-            print("balance_needed", balance_needed)
+            # balance_needed = (
+            #     await AsyncToken.get_min_balance_rent_for_exempt_for_account(
+            #         solana_client
+            #     )
+            # )
             ata_txn = Transaction().add(
                 # sp.create_account(
                 #     sp.CreateAccountParams(
@@ -132,7 +131,6 @@ async def get_token_account(client: AsyncClient, addr: PublicKey) -> AccountInfo
         The parsed `AccountInfo` of the token account.
     """
     depositor_acc_info_raw = await client.get_account_info(addr)
-    print("depositor_acc_info_raw", depositor_acc_info_raw)
     return parse_token_account(depositor_acc_info_raw)
 
 

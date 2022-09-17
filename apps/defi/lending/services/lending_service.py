@@ -138,7 +138,6 @@ class LendingService:
             defi_provider,
             user_wallet.mnemonic or payload.mnemonic,
         )
-        print("protocol_borrow_res", protocol_borrow_res)
         token_asset = await BlockchainService.get_token_asset_by_query(
             {"contractAddress": payload.asset}
         )
@@ -250,7 +249,6 @@ class LendingService:
             defi_provider,
             user_wallet.mnemonic or payload.mnemonic,
         )
-        print("protocol_repay_res", protocol_repay_res)
         token_asset = await BlockchainService.get_token_asset_by_query(
             {"contractAddress": payload.asset}
         )

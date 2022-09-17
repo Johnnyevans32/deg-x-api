@@ -18,7 +18,7 @@ from apps.blockchain.interfaces.transaction_interface import (
     TxnStatus,
     TxnType,
 )
-from apps.blockchain.types.blockchain_service_interface import IBlockchainService
+from apps.blockchain.interfaces.blockchain_service_interface import IBlockchainService
 from apps.blockchain.types.ethereum_types import (
     EtherscanBaseResponse,
     IEtherscanNormalTxns,
@@ -143,7 +143,6 @@ class BaseEvmService(IBlockchainService):
         # sign the transaction
         account = self.get_account_by_mmenonic(mnemonic)
         signed_tx = account.sign_transaction(txn_build)
-        print("txn_build", txn_build)
 
         # send transaction
         tx_hash = web3.eth.send_raw_transaction(signed_tx.rawTransaction)

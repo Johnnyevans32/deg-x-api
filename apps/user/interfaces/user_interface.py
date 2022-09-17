@@ -12,7 +12,7 @@ from core.depends.model import SBaseModel, SBaseOutModel
 
 class Name(BaseModel):
     first: str
-    last: str
+    last: Optional[str]
 
     class Config:
         anystr_strip_whitespace = True
@@ -48,7 +48,7 @@ class UserBase(SBaseOutModel):
 
 
 class User(UserBase, SBaseModel):
-    password: Optional[str] = Field(hidden_from_schema=True)
+    password: Optional[str] = Field(default=None, hidden_from_schema=True)
     socketIds: list[str] = Field(default=[], hidden_from_schema=True)
     isVerified: bool = Field(default=False, hidden_from_schema=True)
     signUpMethod: SignUpMethod = Field(

@@ -54,14 +54,13 @@ class SolendService(ILendingService):
         token_account = spl_token.get_associated_token_address(
             sender.public_key, PublicKey(asset)
         )
-        appr_res = await self.solanaService.approve_spl_token_delegate(
+        await self.solanaService.approve_spl_token_delegate(
             client,
             sender,
             solend_program_id,
             token_account,
             amount,
         )
-        print(appr_res)
         # create txn of approval request
         solend_info = await get_solend_info(defi_provider)
         token_info = get_token_info(asset, solend_info)
@@ -170,14 +169,13 @@ class SolendService(ILendingService):
         token_account = spl_token.get_associated_token_address(
             sender.public_key, PublicKey(asset)
         )
-        appr_res = await self.solanaService.approve_spl_token_delegate(
+        await self.solanaService.approve_spl_token_delegate(
             client,
             sender,
             solend_program_id,
             token_account,
             amount,
         )
-        print(appr_res)
         # create txn of approval request
         solend_info = await get_solend_info(defi_provider)
         token_info = get_token_info(asset, solend_info)

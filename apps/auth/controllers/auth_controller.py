@@ -7,7 +7,8 @@ from starlette import status
 
 from apps.auth.interfaces.auth_interface import AuthResponse
 from apps.auth.services.auth_service import AuthService
-from apps.auth.services.google_service import GoogleService
+from apps.cloudplatform.interfaces.cloud_interface import CloudProvider
+from apps.cloudplatform.services.cloud_service import CloudService
 from apps.notification.email.services.email_service import EmailService
 from apps.user.interfaces.user_interface import (
     User,
@@ -27,7 +28,7 @@ class AuthController:
     userService = UserService()
     authService = AuthService()
     responseService = ResponseService()
-    googleService = GoogleService()
+    cloudService = CloudService()
 
     @router.post(
         "/register",
@@ -208,19 +209,21 @@ class AuthController:
             )
 
     @router.post(
-        "/oauth",
+        "/oauth-signin",
         status_code=status.HTTP_201_CREATED,
         response_model_by_alias=False,
     )
-    async def oauth_sign_in(
-        self, request: UnicornRequest, res: Response, user_id: str
+    async def oauth_signin(
+        self,
+        request: UnicornRequest,
+        res: Response,
+        cloud_provider: CloudProvider,
+        auth_token: str,
     ) -> ResponseModel[AuthResponse]:
         try:
-            request.app.logger.info(f"authenticating user with oauth id - {user_id}")
-            user_resp = await self.googleService.verify_oauth_sign_in(user_id)
-            request.app.logger.info(
-                f"done authenticating user with oauth id - {user_id}"
-            )
+            request.app.logger.info("authenticating user with oauth")
+            user_resp = await self.cloudService.oauth_signin(cloud_provider, auth_token)
+            request.app.logger.info("done authenticating user with oauth")
             return self.responseService.send_response(
                 res,
                 status.HTTP_201_CREATED,
@@ -228,6 +231,7 @@ class AuthController:
                 user_resp,
             )
         except Exception as e:
+            raise e
             request.app.logger.error(f"Error authenticating user {str(e)}")
             return self.responseService.send_response(
                 res,

@@ -54,7 +54,6 @@ class WalletService:
         key_store_model = self.aesEncryptionService.encrypt_AES_GCM(
             str(user.id), mnemonic
         )
-
         wallet_obj = await ModelUtilityService.model_create(
             Wallet, dict_wallet, session
         )
