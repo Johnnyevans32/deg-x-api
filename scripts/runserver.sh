@@ -1,1 +1,1 @@
-uvicorn application:app --host 0.0.0.0 --access-log --reload
+python application.py

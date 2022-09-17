@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Any, Optional
 
 from pydantic import Field
 from pymongo import ASCENDING
@@ -12,8 +12,8 @@ class Country(SBaseModel):
     code: str
     callingCode: str
     flag: str
-    metaData: Optional[dict] = Field(hidden_from_schema=True)
+    metaData: Optional[dict[str, Any]] = Field(hidden_from_schema=True)
 
     @staticmethod
-    def init():
+    def init() -> None:
         db.country.create_index([("name", ASCENDING)], unique=True)

@@ -1,35 +1,40 @@
 # -*- coding: utf-8 -*-
 from fastapi import Response, status
-from fastapi.routing import APIRouter
+from fastapi_restful.cbv import cbv
+from fastapi_restful.inferring_router import InferringRouter
 
 from apps.appclient.interfaces.appclient_interface import AppClient
 from apps.appclient.services.appclient_service import AppClientService
 from core.utils.custom_exceptions import UnicornRequest
-from core.utils.response_service import ResponseService
+from core.utils.response_service import ResponseModel, ResponseService
 
-router = APIRouter(prefix="/api/v1/appclient", tags=["App Client 🌈"])
-
-
-appClientService = AppClientService()
-responseService = ResponseService()
+router = InferringRouter(prefix="/appclient", tags=["App Client 🌈"])
 
 
-@router.post("/create")
-async def create_app_client(
-    request: UnicornRequest, response: Response, app_client: AppClient
-):
-    try:
-        request.app.logger.info(f"creating application client - {app_client}")
-        client_obj = await appClientService.create_client(app_client)
-        request.app.logger.info("done creating application client")
-        return responseService.send_response(
-            response, status.HTTP_201_CREATED, "app client created", client_obj
-        )
+@cbv(router)
+class AppClientController:
+    appClientService = AppClientService()
+    responseService = ResponseService()
 
-    except Exception as e:
-        request.app.logger.error(f" - {str(e)}")
-        return responseService.send_response(
-            response,
-            status.HTTP_400_BAD_REQUEST,
-            f"Error in creating app client: {str(e)}",
-        )
+    @router.post("/create")
+    async def create_app_client(
+        self,
+        request: UnicornRequest,
+        response: Response,
+        app_client: AppClient,
+    ) -> ResponseModel[AppClient]:
+        try:
+            request.app.logger.info(f"creating application client - {app_client}")
+            client_obj = await self.appClientService.create_client(app_client)
+            request.app.logger.info("done creating application client")
+            return self.responseService.send_response(
+                response, status.HTTP_201_CREATED, "app client created", client_obj
+            )
+
+        except Exception as e:
+            request.app.logger.error(f" - {str(e)}")
+            return self.responseService.send_response(
+                response,
+                status.HTTP_400_BAD_REQUEST,
+                f"Error in creating app client: {str(e)}",
+            )

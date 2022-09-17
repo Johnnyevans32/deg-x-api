@@ -1,5 +1,5 @@
 from fastapi import Request
-from fastapi.security import HTTPBearer
+from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from jwt import DecodeError
 
 from apps.auth.services.jwt_service import JWTService
@@ -16,7 +16,7 @@ class JWTBearer(HTTPBearer):
     def __init__(self, auto_error: bool = True):
         super(JWTBearer, self).__init__(auto_error=auto_error)
 
-    async def __call__(self, request: Request):
+    async def __call__(self, request: Request) -> HTTPAuthorizationCredentials | None:
         try:
             credentials = await super(JWTBearer, self).__call__(request)
             if credentials:
@@ -37,7 +37,7 @@ class JWTBearer(HTTPBearer):
                         {"_id": user_decoded_jwt.user, "isDeleted": False}
                     )
 
-                    return credentials.credentials
+                    return credentials
             else:
                 raise UnicornException(
                     status_code=403, message="Invalid authorization code."

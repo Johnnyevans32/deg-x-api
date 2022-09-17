@@ -22,35 +22,41 @@ import nox
 #                 pass
 
 
-@nox.session(python=["3.10"])
-def test_build(session: nox.Session):
+def setup(session: nox.Session) -> None:
     session.install("poetry")
+    session.run("poetry", "lock", "--no-update")
     session.run("poetry", "install")
+
+
+@nox.session(python=["3.10"])
+def test_build(session: nox.Session) -> None:
+    setup(session)
     session.install("-r", "requirements.txt")
+    session.run("python", "-m", "pip", "uninstall", "bson", "--yes")
+    session.run("python", "-m", "pip", "uninstall", "pymongo", "--yes")
+    session.install("pymongo")
     session.run("python", "-m", "coverage", "run", "-m", "pytest")
     session.run("coverage", "report")
     # session.notify('shared_venv', posargs=['tests'])
 
 
 @nox.session
-def lint_build(session: nox.Session):
-    session.install("poetry")
-    session.run("poetry", "install")
-    session.run("black", "--check", ".")
-    session.run("flake8", ".")
+def lint_build(session: nox.Session) -> None:
+    setup(session)
+    session.run("black", "--check", ".", "--extend-exclude=libsodium")
+    session.run("flake8", "--import-order-style", "google", ".")
     # session.notify('shared_venv', posargs=['lint'])
 
 
 @nox.session
-def typing_build(session: nox.Session):
-    session.install("poetry")
-    session.run("poetry", "install")
+def typing_build(session: nox.Session) -> None:
+    setup(session)
     session.run("mypy", "--config-file", "mypy.ini", ".")
     # session.notify('shared_venv', posargs=['typing'])
 
 
 @nox.session
-def safety_build(session: nox.Session):
+def safety_build(session: nox.Session) -> None:
     with tempfile.NamedTemporaryFile() as requirements:
         session.run(
             "poetry",

@@ -1,9 +1,10 @@
 import random
+from typing import Any
 
 import sentry_sdk
 
 
-def traces_sampler(sampling_context):
+def traces_sampler(sampling_context: Any) -> int:
     return random.randint(0, 1)
     # return a number between 0 and 1 or a boolean
 

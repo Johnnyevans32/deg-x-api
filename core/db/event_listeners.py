@@ -1,17 +1,19 @@
+from typing import Any
+
 from pymongo import monitoring
 
 from core.utils.loggly import logger
 
 
 class CommandLogger(monitoring.CommandListener):
-    def started(self, event):
+    def started(self, event: Any) -> None:
         logger.info(
             "Command {0.command_name} with request id "
             "{0.request_id} started on server "
             "{0.connection_id}".format(event)
         )
 
-    def succeeded(self, event):
+    def succeeded(self, event: Any) -> None:
         logger.info(
             "Command {0.command_name} with request id "
             "{0.request_id} on server {0.connection_id} "
@@ -19,7 +21,7 @@ class CommandLogger(monitoring.CommandListener):
             "microseconds".format(event)
         )
 
-    def failed(self, event):
+    def failed(self, event: Any) -> None:
         logger.info(
             "Command {0.command_name} with request id "
             "{0.request_id} on server {0.connection_id} "

@@ -18,6 +18,3 @@ class TelegramService:
 
         except Exception as e:
             logger.info(f"Error sending message to slack - {e}")
-
-    def update_buy_action(self, amount: int):
-        pass

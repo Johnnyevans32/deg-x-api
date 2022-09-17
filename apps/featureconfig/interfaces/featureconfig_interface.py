@@ -21,5 +21,5 @@ class FeatureConfig(SBaseModel):
     isEnabled: bool = Field(default=False)
 
     @staticmethod
-    def init():
+    def init() -> None:
         db.featureconfig.create_index([("name", ASCENDING)], unique=True)
