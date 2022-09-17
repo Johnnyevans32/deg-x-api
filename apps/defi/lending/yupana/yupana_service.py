@@ -44,7 +44,6 @@ class YupanaService(ILendingService):
         network = cast(Network, defi_provider.network)
         tez_client: PyTezosClient = pytezos.using(network.providerUrl, key)
         yupana = tez_client.contract(defi_provider.contractAddress)
-        print("yupana", yupana)
         # proxy = tez_client.contract("")
         amount = int(self.solanaService.format_num(value, "to"))
         token_id = 1

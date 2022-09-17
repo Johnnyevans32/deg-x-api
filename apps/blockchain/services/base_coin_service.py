@@ -9,7 +9,7 @@ from mnemonic import Mnemonic
 from apps.blockchain.interfaces.blockchain_interface import ChainServiceName
 from apps.blockchain.interfaces.network_interface import Network, NetworkType
 from apps.blockchain.interfaces.tokenasset_interface import TokenAsset
-from apps.blockchain.types.blockchain_service_interface import IBlockchainService
+from apps.blockchain.interfaces.blockchain_service_interface import IBlockchainService
 from apps.user.interfaces.user_interface import User
 from apps.wallet.interfaces.wallet_interface import Wallet
 from apps.wallet.interfaces.walletasset_interface import Address
@@ -62,7 +62,6 @@ class BasecoinService(IBlockchainService):
         test_wallet = self.get_wallet_from_mnemonic(mnemonic)
         main_wallet = self.get_wallet_from_mnemonic(mnemonic, NetworkType.MAINNET)
         # Construct from seed
-        print(test_wallet.addresslist(), main_wallet.get_key())
         return Address(
             **{
                 "main": main_wallet.get_key().address,

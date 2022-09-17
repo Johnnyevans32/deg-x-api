@@ -18,6 +18,8 @@ from apps.healthcheck.controllers.healthcheck_controller import (
 )
 from apps.wallet.controllers.wallet_controller import router as router_wallet
 from apps.webhook.controllers.webhook_controller import router as router_webhook
+from apps.cloudplatform.controllers.cloud_controller import router as router_cloud
+
 
 router = InferringRouter()
 router.include_router(router_health_check)
@@ -29,3 +31,4 @@ router.include_router(router_client)
 router.include_router(router_defi_lending)
 router.include_router(router_blockchain)
 router.include_router(router_defi)
+router.include_router(router_cloud)

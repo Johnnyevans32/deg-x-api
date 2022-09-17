@@ -3,13 +3,11 @@ from typing import Any
 
 import socketio
 import uvicorn
-from fastapi import FastAPI, Request
+from fastapi import FastAPI, Request, Response
 
 # from fastapi.concurrency import run_in_threadpool
 from fastapi.exception_handlers import http_exception_handler
 
-# from fastapi.middleware.httpsredirect import HTTPSRedirectMiddleware
-# from fastapi.middleware.trustedhost import TrustedHostMiddleware
 from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.openapi.utils import get_openapi
@@ -94,8 +92,6 @@ def create_app() -> FastAPI:
 
     app.logger = logger  # type: ignore[attr-defined]
 
-    # app.include_router(CRUDRouter(schema=WalletAsset))
-
     # FASTAPI ADMIN
     # app.mount("/admin", admin_app)
 
@@ -115,13 +111,9 @@ def create_app() -> FastAPI:
         )
 
     app.include_router(urls.router, prefix="/api/v1")
-    # socket_manager = SocketManager(app=app)
     socket_app = socketio.ASGIApp(sio, app)
     app.mount("/socket", socket_app, name="socket")
     app.openapi = lambda: custom_openapi(app)  # type: ignore[assignment]
-    # app.add_middleware(
-    #     TrustedHostMiddleware, allowed_hosts=["example.com", "*.example.com"]
-    # )
     app.add_middleware(ExceptionMiddleware, handlers=app.exception_handlers)
 
     @app.on_event("startup")
@@ -158,7 +150,7 @@ def create_app() -> FastAPI:
     @app.exception_handler(StarletteHTTPException)
     async def custom_http_exception_handler(
         request: Request, exc: StarletteHTTPException
-    ) -> JSONResponse:
+    ) -> JSONResponse | Response:
         if exc.status_code in [404, 405, 500]:
             return JSONResponse(
                 {
@@ -190,7 +182,6 @@ def create_app() -> FastAPI:
 
 
 _app = create_app()
-
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 8000))

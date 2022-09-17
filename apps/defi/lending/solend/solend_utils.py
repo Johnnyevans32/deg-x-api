@@ -553,7 +553,6 @@ async def init_obligation_instruction(
 ) -> TransactionInstruction:
 
     obligation_acc = await get_token_account(client, obligation_addr)
-    print("obligation_acc", obligation_acc)
     try:
         obligation_details = parse_obligation(obligation_acc)
     except Exception as e:
@@ -670,7 +669,6 @@ def parse_obligation(info: Any) -> Any:
         raise ValueError("Invalid account size")
 
     decoded_data = OBLIGATION_LAYOUT.parse(bytes_data)
-    print(decoded_data)
     details = {
         "account": info,
         "info": decoded_data,

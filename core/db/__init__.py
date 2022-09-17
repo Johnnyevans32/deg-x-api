@@ -20,7 +20,6 @@ def get_db() -> tuple[MongoClient[Any], Database[Any], DatabaseChangeStream[Any]
 
     client = MongoClient[Any](uri, tlsCAFile=certifi.where(), appname="deg-x")
     db = client[db_name]
-    print("OKKKKKK", settings.DATABASE_URI)
     cursor = db.watch()
     return client, db, cursor
 
@@ -59,7 +58,5 @@ def mongo_data_streaming() -> None:
 
     doc = next(cursor)
     document = CursorModel[WalletAssetOut](**doc)
-
-    print(type(document.clusterTime))
 
     print("document", document, doc)

@@ -9,7 +9,7 @@ from pytezos.operation.group import OperationGroup
 from apps.blockchain.interfaces.blockchain_interface import ChainServiceName
 from apps.blockchain.interfaces.network_interface import Network
 from apps.blockchain.interfaces.tokenasset_interface import TokenAsset
-from apps.blockchain.types.blockchain_service_interface import IBlockchainService
+from apps.blockchain.interfaces.blockchain_service_interface import IBlockchainService
 from apps.user.interfaces.user_interface import User
 from apps.wallet.interfaces.wallet_interface import Wallet
 from apps.wallet.interfaces.walletasset_interface import Address
@@ -72,11 +72,10 @@ class TezosService(IBlockchainService, HTTPRepository):
                     }
                 ]
             ).operation_group
-            print(transfer_op)
         else:
             transfer_op = tez_client.transaction(destination=to_address, amount=amount)
         txn = transfer_op.fill().sign().inject()
-        print(txn)
+
         return txn
 
     async def get_balance(
@@ -115,13 +114,11 @@ class TezosService(IBlockchainService, HTTPRepository):
     ) -> Any:
         activate_op: OperationGroup = tez_client.activate_account(activation_code, pkh)
         activate_res = activate_op.fill().sign().inject()
-        print("source", activate_res)
 
         reveal_op: OperationGroup = tez_client.reveal(public_key, pkh)
         reveal_res = reveal_op.fill().sign().inject()
-        print("reveal_res", reveal_res)
 
-        return reveal_res
+        return reveal_res, activate_res
 
     async def fund_tezos_wallet(self, to_address: str, amount: float) -> dict[str, Any]:
         network = await ModelUtilityService.find_one(Network, {"name": "tezosdev"})
@@ -155,16 +152,16 @@ class TezosService(IBlockchainService, HTTPRepository):
         key = Key.from_mnemonic(
             source["mnemonic"], str(source["password"]), str(source["email"])
         )
-        print(key.public_key_hash())
         tez_client: PyTezosClient = pytezos.using(network.providerUrl, key)
 
         balance_res = tez_client.account(source["pkh"])
         balance = self.format_num(int(balance_res["balance"]), "from")
-        print("baa", balance_res, balance)
+
+        if balance < amount:
+            raise Exception("insufficient balance")
 
         transfer_op: OperationGroup = tez_client.transaction(
             destination=to_address, amount=int(self.format_num(amount, "to"))
         )
         txn = transfer_op.fill().sign().inject()
-        print(txn)
         return txn

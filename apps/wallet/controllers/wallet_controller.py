@@ -5,9 +5,10 @@ from fastapi import Depends, Response, status
 from fastapi_restful.cbv import cbv
 from fastapi_restful.inferring_router import InferringRouter
 
+from apps.auth.interfaces.auth_interface import AuthResponse
 from apps.auth.services.auth_bearer import JWTBearer
 from apps.blockchain.interfaces.network_interface import NetworkType
-from apps.wallet.interfaces.wallet_interface import CreateWalletResponse, WalletOut
+from apps.wallet.interfaces.wallet_interface import WalletOut
 from apps.wallet.interfaces.walletasset_interface import WalletAssetOut
 from apps.wallet.services.wallet_service import WalletService
 from core.depends.get_object_id import PyObjectId
@@ -55,7 +56,7 @@ class WalletController:
     )
     async def create_user_wallet(
         self, request: UnicornRequest, response: Response
-    ) -> ResponseModel[CreateWalletResponse]:
+    ) -> ResponseModel[AuthResponse]:
         try:
             user = request.state.user
             request.app.logger.info(f"creating wallet for - {user.id}")
@@ -65,7 +66,7 @@ class WalletController:
                 response,
                 status.HTTP_201_CREATED,
                 "user wallet created successfully",
-                CreateWalletResponse(wallet=user_wallet, keystore=key_store_model),
+                AuthResponse(wallet=user_wallet, keystore=key_store_model),
             )
         except Exception as e:
             return self.responseService.send_response(

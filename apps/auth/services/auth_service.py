@@ -18,8 +18,8 @@ class AuthService:
         assert user.password, "password is required"
         user.password = Utils.hash_password(user.password)
         user_reg_res = await self.userService.create_user(user)
-        user_created, keystore = user_reg_res
-        return AuthResponse(user=user_created, keystore=keystore)
+        user_created, wallet, keystore = user_reg_res
+        return AuthResponse(user=user_created, wallet=wallet, keystore=keystore)
 
     async def login_user(self, user: UserLoginInput) -> AuthResponse:
         user_logged_in = await self.userService.login_user(user)

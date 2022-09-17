@@ -5,7 +5,7 @@ from mnemonic import Mnemonic
 from solana.keypair import Keypair
 from solana.publickey import PublicKey
 from solana.rpc.async_api import AsyncClient
-from solana.rpc.types import RPCResponse, TokenAccountOpts
+from solana.rpc.types import RPCResponse
 from solana.system_program import TransferParams, transfer
 from solana.transaction import Transaction
 from spl.token.constants import TOKEN_PROGRAM_ID, WRAPPED_SOL_MINT
@@ -17,7 +17,7 @@ from apps.blockchain.solana.solana_utils import (
     create_sync_native_instruction,
     get_or_create_assoc_token_acc,
 )
-from apps.blockchain.types.blockchain_service_interface import IBlockchainService
+from apps.blockchain.interfaces.blockchain_service_interface import IBlockchainService
 from apps.user.interfaces.user_interface import User
 from apps.wallet.interfaces.wallet_interface import Wallet
 from apps.wallet.interfaces.walletasset_interface import Address
@@ -102,14 +102,12 @@ class SolanaService(IBlockchainService):
                     PublicKey(to_address),
                     PublicKey(token_asset.contractAddress),
                 )
-                acc1 = await get_or_create_assoc_token_acc(
-                    solana_client, sender, sender.public_key, from_token_account
-                )
-                print(acc1)
-                acc2 = await get_or_create_assoc_token_acc(
-                    solana_client, sender, PublicKey(to_address), to_token_account
-                )
-                print(acc2)
+                # acc1 = await get_or_create_assoc_token_acc(
+                #     solana_client, sender, sender.public_key, from_token_account
+                # )
+                # acc2 = await get_or_create_assoc_token_acc(
+                #     solana_client, sender, PublicKey(to_address), to_token_account
+                # )
                 txn = spl_token.transfer(
                     spl_token.TransferParams(
                         program_id=TOKEN_PROGRAM_ID,
@@ -132,9 +130,6 @@ class SolanaService(IBlockchainService):
 
             return str(resp["result"])
 
-        except Exception as e:
-            print("error:", e)
-            raise e
         finally:
             await solana_client.close()
 
@@ -163,15 +158,13 @@ class SolanaService(IBlockchainService):
             else:
                 resp = await solana_client.get_balance(PublicKey(address))
                 balance = float(self.format_num(resp["result"]["value"], "from"))
-            resp2 = await solana_client.get_token_accounts_by_owner(
-                PublicKey(address),
-                TokenAccountOpts(program_id=TOKEN_PROGRAM_ID),
-            )
-            print(resp2, balance)
+            # resp2 = await solana_client.get_token_accounts_by_owner(
+            #     PublicKey(address),
+            #     TokenAccountOpts(program_id=TOKEN_PROGRAM_ID),
+            # )
 
             return balance
         finally:
-            print("always get here")
             await solana_client.close()
 
     async def approve_spl_token_delegate(
@@ -282,8 +275,5 @@ class SolanaService(IBlockchainService):
                     txn_hashes + [transaction_id]
             return txn_hashes
 
-        except Exception as e:
-            print("error:", e)
-            raise e
         finally:
             await solana_client.close()
