@@ -138,7 +138,7 @@ class GoogleService(ICloudService):
 
     def get_file_or_folder_id(
         self, auth_token: str, folder_name: str, service: Resource = None
-    ) -> str:
+    ) -> str | None:
         """Search file in drive location
 
         Load pre-authorized user credentials from the environment.
@@ -172,7 +172,8 @@ class GoogleService(ICloudService):
 
         except HttpError as e:
             logger.error(f"Error getting folder - {str(e)}")
-
+        if not files:
+            return None
         return files[0].get("id", None)
 
     def upload_file(self, auth_token: str, file_name: str, data: Any) -> str:
