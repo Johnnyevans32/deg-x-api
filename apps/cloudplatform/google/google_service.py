@@ -16,12 +16,14 @@ from apps.cloudplatform.interfaces.cloud_interface import CloudProvider
 from apps.cloudplatform.interfaces.cloud_service_interface import ICloudService
 from apps.user.interfaces.user_interface import SignUpMethod, User, Name
 from apps.user.services.user_service import UserService
+from apps.wallet.services.wallet_service import WalletService
 from core.utils.loggly import logger
 from core.utils.utils_service import NotFoundInRecord
 
 
 class GoogleService(ICloudService):
     userService = UserService()
+    walletService = WalletService()
     jwtService = JWTService()
     folder_name = "Deg X"
 
@@ -36,7 +38,6 @@ class GoogleService(ICloudService):
             service: Resource = build("oauth2", "v2", credentials=creds)
 
             idinfo = service.userinfo().get().execute()
-            print("idinfo", idinfo)
             # idinfo = id_token.verify_oauth2_token(creds, requests.Request())
             email, name = itemgetter("email", "name")(idinfo)
             # if aud not in [settings.WEB_GOOGLE_CLIENT_ID]:
@@ -46,12 +47,14 @@ class GoogleService(ICloudService):
             # userid = idinfo.sub
 
             user = await self.userService.get_user_by_query({"email": email})
+            wallet = await self.walletService.get_user_default_wallet(user)
             assert user.id, "id is null"
             access_token = self.jwtService.sign_jwt(user.id, "ACCESS_TOKEN")
             refresh_token = self.jwtService.sign_jwt(user.id, "REFRESH_TOKEN")
             await self.userService.create_user_refresh_token(user, refresh_token)
             return AuthResponse(
                 user=user,
+                wallet=wallet,
                 accessToken=access_token,
                 refreshToken=refresh_token,
             )
