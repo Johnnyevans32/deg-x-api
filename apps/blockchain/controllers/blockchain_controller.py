@@ -150,10 +150,10 @@ class BlockchainController:
     ) -> ResponseModel[list[str]]:
         try:
             request.app.logger.info(
-                f"sending airdrop token balance to address - {payload.toAddress}"
+                f"sending airdrop token balance to address - {payload.receipient}"
             )
             user_token_balance = await self.solanaService.get_test_token(
-                payload.toAddress, int(payload.amount)
+                payload.receipient, int(payload.amount)
             )
             request.app.logger.info("done sending airdrop token balance to address")
             return self.responseService.send_response(
@@ -178,10 +178,10 @@ class BlockchainController:
     ) -> ResponseModel[Any]:
         try:
             request.app.logger.info(
-                f"sending airdrop token balance to address - {payload.toAddress}"
+                f"sending airdrop token balance to address - {payload.receipient}"
             )
             user_token_balance = await self.tezosService.fund_tezos_wallet(
-                payload.toAddress, int(payload.amount)
+                payload.receipient, int(payload.amount)
             )
             request.app.logger.info("done sending airdrop token balance to address")
             return self.responseService.send_response(

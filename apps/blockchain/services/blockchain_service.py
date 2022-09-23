@@ -20,7 +20,7 @@ from core.utils.response_service import MetaDataModel
 
 
 class GetTokenBalance(BaseModel):
-    tokenSymbol: str
+    asset: str
 
 
 class BaseTxnSendDTO(BaseModel):
@@ -29,7 +29,7 @@ class BaseTxnSendDTO(BaseModel):
 
 
 class SendTokenDTO(GetTokenBalance, BaseTxnSendDTO):
-    toAddress: str
+    receipient: str
 
 
 class SwapTokenDTO(GetTokenBalance, BaseTxnSendDTO):
@@ -128,7 +128,7 @@ class BlockchainService:
 
         token_asset = await ModelUtilityService.find_one_and_populate(
             TokenAsset,
-            {"symbol": payload.tokenSymbol, "isDeleted": False},
+            {"symbol": payload.asset, "isDeleted": False},
             ["blockchain", "network"],
         )
         if not token_asset:
@@ -155,7 +155,7 @@ class BlockchainService:
             blockchain.registryName
         ).send(
             user_asset.address,
-            payload.toAddress,
+            payload.receipient,
             payload.amount,
             token_asset,
             user_default_wallet.mnemonic or payload.mnemonic,
@@ -171,7 +171,7 @@ class BlockchainService:
 
         token_asset = await ModelUtilityService.find_one_and_populate(
             TokenAsset,
-            {"symbol": payload.tokenSymbol, "isDeleted": False},
+            {"symbol": payload.asset, "isDeleted": False},
             ["blockchain", "network"],
         )
         if not token_asset:
@@ -198,7 +198,7 @@ class BlockchainService:
         )
 
         return BalanceRes(
-            symbol=payload.tokenSymbol,
+            symbol=payload.asset,
             balance=asset_balance,
         )
 
@@ -293,7 +293,7 @@ class BlockchainService:
 
         token_asset = await ModelUtilityService.find_one_and_populate(
             TokenAsset,
-            {"symbol": payload.tokenSymbol, "isDeleted": False},
+            {"symbol": payload.asset, "isDeleted": False},
             ["blockchain", "network"],
         )
         if not token_asset:
