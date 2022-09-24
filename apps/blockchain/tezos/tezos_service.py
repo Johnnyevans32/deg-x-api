@@ -120,7 +120,7 @@ class TezosService(IBlockchainService, HTTPRepository):
 
         return reveal_res, activate_res
 
-    async def fund_tezos_wallet(self, to_address: str, amount: float) -> dict[str, Any]:
+    async def get_test_token(self, to_address: str, amount: float) -> str:
         network = await ModelUtilityService.find_one(Network, {"name": "tezosdev"})
         if not network:
             raise Exception("no test network set for tezos")

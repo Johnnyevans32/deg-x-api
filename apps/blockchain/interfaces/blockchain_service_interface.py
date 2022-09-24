@@ -34,7 +34,7 @@ class IBlockchainService(metaclass=abc.ABCMeta):
         value: float,
         token_asset: TokenAsset,
         mnemonic: str,
-    ) -> Any:
+    ) -> str:
         raise NotImplementedError
 
     @abc.abstractmethod
@@ -58,4 +58,11 @@ class IBlockchainService(metaclass=abc.ABCMeta):
         mnemonic: str,
         token_asset: TokenAsset,
     ) -> str:
+        pass
+
+    async def get_test_token(
+        self,
+        to_address: str,
+        value: float,
+    ) -> str | list[str]:
         pass

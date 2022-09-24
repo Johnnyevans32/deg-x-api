@@ -257,14 +257,14 @@ class SolanaService(IBlockchainService):
         res = await solana_client.send_transaction(txn, sender, recent_blockhash=None)
         return str(res["result"])
 
-    async def get_test_token(self, to_address: str, amount: int) -> list[str]:
+    async def get_test_token(self, to_address: str, amount: float) -> list[str]:
         try:
             network = await ModelUtilityService.find_one(Network, {"name": "solanadev"})
             if not network:
                 raise Exception("no test network set for solana")
             solana_client = await self.get_network_provider(network)
             txn_hashes: list[str] = []
-            for _ in range(amount):
+            for _ in range(int(amount)):
                 amount = int(self.format_num(1, "to"))
                 resp = await solana_client.request_airdrop(
                     PublicKey(to_address), amount

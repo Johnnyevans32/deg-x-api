@@ -8,15 +8,16 @@ from fastapi_restful.inferring_router import InferringRouter
 from apps.auth.services.auth_bearer import JWTBearer
 from apps.blockchain.interfaces.transaction_interface import BlockchainTransactionOut
 from apps.blockchain.services.blockchain_service import (
-    BalanceRes,
     BlockchainService,
-    GetTokenBalance,
+)
+from apps.blockchain.types.blockchain_type import (
     SendTokenDTO,
     SendTxnRes,
+    GetTokenBalance,
+    BalanceRes,
+    GetTestTokenDTO,
     SwapTokenDTO,
 )
-from apps.blockchain.solana.solana_service import SolanaService
-from apps.blockchain.tezos.tezos_service import TezosService
 from core.utils.custom_exceptions import UnicornRequest
 from core.utils.response_service import ResponseModel, ResponseService
 
@@ -27,8 +28,6 @@ router = InferringRouter(prefix="/blockchain", tags=["Blockchain 💸"])
 class BlockchainController:
     blockchainService = BlockchainService()
     responseService = ResponseService()
-    solanaService = SolanaService()
-    tezosService = TezosService()
 
     @router.get(
         "/get-transaction",
@@ -143,52 +142,22 @@ class BlockchainController:
             )
 
     @router.post(
-        "/fund-solana-account-devnet",
+        "/get-test-token",
+        dependencies=[Depends(JWTBearer())],
     )
-    async def fund_my_solana_account(
-        self, request: UnicornRequest, response: Response, payload: SendTokenDTO
-    ) -> ResponseModel[list[str]]:
-        try:
-            request.app.logger.info(
-                f"sending airdrop token balance to address - {payload.receipient}"
-            )
-            user_token_balance = await self.solanaService.get_test_token(
-                payload.receipient, int(payload.amount)
-            )
-            request.app.logger.info("done sending airdrop token balance to address")
-            return self.responseService.send_response(
-                response,
-                status.HTTP_200_OK,
-                "airdrop token balance sent",
-                user_token_balance,
-            )
-
-        except Exception as e:
-            return self.responseService.send_response(
-                response,
-                status.HTTP_400_BAD_REQUEST,
-                f"Error in sending airdrop token balance - {str(e)}",
-            )
-
-    @router.post(
-        "/fund-tezos-account-devnet",
-    )
-    async def fund_my_tezos_account(
-        self, request: UnicornRequest, response: Response, payload: SendTokenDTO
+    async def get_test_token(
+        self, request: UnicornRequest, response: Response, payload: GetTestTokenDTO
     ) -> ResponseModel[Any]:
         try:
-            request.app.logger.info(
-                f"sending airdrop token balance to address - {payload.receipient}"
-            )
-            user_token_balance = await self.tezosService.fund_tezos_wallet(
-                payload.receipient, int(payload.amount)
-            )
+            user = request.state.user
+            request.app.logger.info("sending airdrop token balance ")
+            txn_res = await self.blockchainService.get_test_token(user, payload)
             request.app.logger.info("done sending airdrop token balance to address")
             return self.responseService.send_response(
                 response,
                 status.HTTP_200_OK,
                 "airdrop token balance sent",
-                user_token_balance,
+                txn_res,
             )
 
         except Exception as e:

@@ -19,7 +19,7 @@ from apps.blockchain.interfaces.transaction_interface import (
     TxnType,
 )
 from apps.blockchain.interfaces.blockchain_service_interface import IBlockchainService
-from apps.blockchain.types.ethereum_types import (
+from apps.blockchain.types.ethereum_type import (
     EtherscanBaseResponse,
     IEtherscanNormalTxns,
 )
