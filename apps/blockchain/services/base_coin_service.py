@@ -63,10 +63,7 @@ class BasecoinService(IBlockchainService):
         main_wallet = self.get_wallet_from_mnemonic(mnemonic, NetworkType.MAINNET)
         # Construct from seed
         return Address(
-            **{
-                "main": main_wallet.get_key().address,
-                "test": test_wallet.get_key().address,
-            }
+            main=main_wallet.get_key().address, test=test_wallet.get_key().address
         )
 
     async def send(

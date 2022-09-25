@@ -776,6 +776,30 @@ def multipliers():
     return [lambda x: i * x for i in range(4)]
 
 
+def rands(input_data: list[int]) -> int:
+    initsum = 0
+    for input in input_data:
+        initsum += input**2
+
+    return initsum
+
+
+def candle_crush(data: str):
+    hashmap = {}
+    stack = []
+    for d in data:
+        stack.append(d)
+        print(stack)
+        if not hashmap.get(d):
+            hashmap[d] = 0
+        hashmap[d] += 1
+
+        if hashmap[d] == 3:
+            del stack[-3:]
+    return stack
+
+
+print(candle_crush("abcaaabbb"))
 # print [m(2) for m in multipliers()]
 
 

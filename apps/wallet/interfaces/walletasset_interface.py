@@ -1,4 +1,4 @@
-from typing import Optional, Union
+from typing import Union
 
 from pydantic import BaseModel
 
@@ -12,7 +12,7 @@ from core.depends.model import SBaseModel, SBaseOutModel
 
 class Address(BaseModel):
     main: str
-    test: Optional[str]
+    test: str
 
 
 class WalletAssetOut(SBaseOutModel):

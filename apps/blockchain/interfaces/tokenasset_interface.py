@@ -29,3 +29,4 @@ class TokenAsset(TokenOut, SBaseModel):
     network: Optional[Union[PyObjectId, Network]]
     blockchain: Union[PyObjectId, Blockchain]
     isLayerOne: bool = Field(default=False)
+    hasTestToken: bool = Field(default=False)

@@ -68,7 +68,8 @@ class BaseEvmService(IBlockchainService):
 
     async def create_address(self, mnemonic: str) -> Address:
         account = self.get_account_by_mmenonic(mnemonic)
-        return Address(**{"main": account.address})
+        address = account.address
+        return Address(main=address, test=address)
 
     async def send(
         self,

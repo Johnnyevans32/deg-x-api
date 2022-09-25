@@ -44,8 +44,8 @@ class SolanaService(IBlockchainService):
 
     async def create_address(self, mnemonic: str) -> Address:
         keypair = self.get_keypair_from_mnemonic(mnemonic)
-
-        return Address(**{"main": str(keypair.public_key)})
+        address = str(keypair.public_key)
+        return Address(main=address, test=address)
 
     def get_keypair_from_mnemonic(self, mnemonic: str) -> Keypair:
         seed = self.mnemo.to_seed(mnemonic)

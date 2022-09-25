@@ -1,10 +1,9 @@
 from typing import Any, cast
 
-
 from pymongo import DESCENDING
 
 from apps.blockchain.interfaces.blockchain_interface import Blockchain, ChainServiceName
-from apps.blockchain.interfaces.network_interface import Network
+from apps.blockchain.interfaces.network_interface import Network, NetworkType
 from apps.blockchain.interfaces.tokenasset_interface import TokenAsset
 from apps.blockchain.interfaces.transaction_interface import BlockchainTransaction
 
@@ -20,12 +19,15 @@ from apps.blockchain.types.blockchain_type import (
     GetTestTokenDTO,
     BalanceRes,
     SwapTokenDTO,
+    ReceipientType,
 )
 from core.db import db
 from core.utils.loggly import logger
 from core.utils.model_utility_service import ModelUtilityService
 from core.utils.request import HTTPRepository
 from core.utils.response_service import MetaDataModel
+from core.depends.get_object_id import PyObjectId
+from core.utils.utils_service import NotFoundInRecord
 
 
 class BlockchainService:
@@ -91,6 +93,39 @@ class BlockchainService:
             blockchain_provider
         ).create_address(mnemonic)
 
+    async def get_user_wallet_data(
+        self,
+        wallet_asset: PyObjectId,
+    ) -> tuple[Wallet, WalletAsset, Blockchain, TokenAsset]:
+        user_asset = await ModelUtilityService.find_one_and_populate(
+            WalletAsset,
+            {"_id": wallet_asset, "isDeleted": False},
+            ["blockchain", "tokenasset", "wallet"],
+        )
+        if not user_asset:
+            raise Exception("user asset not found")
+
+        blockchain = cast(Blockchain, user_asset.blockchain)
+        user_wallet = cast(Wallet, user_asset.wallet)
+
+        token_asset = await ModelUtilityService.find_one_and_populate(
+            TokenAsset,
+            {"_id": user_asset.tokenasset, "isDeleted": False},
+            [
+                "network",
+            ],
+        )
+        if not token_asset:
+            raise Exception("token asset not found")
+
+        return user_wallet, user_asset, blockchain, token_asset
+
+    async def get_user_by_query(self, query: dict[str, Any]) -> User:
+        user = await ModelUtilityService.find_one(User, query)
+        if not user:
+            raise NotFoundInRecord(message="user not found")
+        return user
+
     async def verify_mnemonic_and_fail(
         self,
         blockchain_provider: ChainServiceName,
@@ -100,24 +135,17 @@ class BlockchainService:
         generated_address = await self.create_address(blockchain_provider, mnemonic)
 
         if user_asset.address.main != generated_address.main:
-            raise Exception("wallet mnemonic mismatch ")
+            raise Exception("wallet mnemonic mismatch")
 
-    async def send(self, user: User, payload: SendTokenDTO) -> SendTxnRes:
+    async def get_receipient_address(
+        self, username: str, blockchain: Blockchain, network: Network
+    ) -> str:
+        user = await self.get_user_by_query({"username": username})
         user_default_wallet = await ModelUtilityService.find_one(
             Wallet, {"user": user.id, "isDeleted": False, "isDefault": True}
         )
         if not user_default_wallet:
             raise Exception("no default wallet set")
-
-        token_asset = await ModelUtilityService.find_one_and_populate(
-            TokenAsset,
-            {"symbol": payload.asset, "isDeleted": False},
-            ["blockchain", "network"],
-        )
-        if not token_asset:
-            raise Exception("token symbol not recongized")
-
-        blockchain = cast(Blockchain, token_asset.blockchain)
 
         user_asset = await ModelUtilityService.find_one(
             WalletAsset,
@@ -130,51 +158,54 @@ class BlockchainService:
         if not user_asset:
             raise Exception("user asset not found")
 
-        await self.verify_mnemonic_and_fail(
-            blockchain.registryName, payload.mnemonic, user_asset
+        return (
+            user_asset.address.main
+            if network.networkType == NetworkType.MAINNET
+            else user_asset.address.test
         )
 
+    async def send(self, user: User, payload: SendTokenDTO) -> SendTxnRes:
+        (
+            user_wallet,
+            user_asset,
+            blockchain,
+            token_asset,
+        ) = await self.get_user_wallet_data(payload.walletasset)
+
         network = cast(Network, token_asset.network)
+
+        match payload.receipientType:
+            case ReceipientType.ADDRESS:
+                receipient = payload.receipient
+            case ReceipientType.USERNAME:
+                receipient = await self.get_receipient_address(
+                    payload.receipient, blockchain, network
+                )
+            case _:
+                pass
+
+        if not receipient:
+            raise Exception("receipient not set")
 
         send_txn = await self.blockchainRegistry.get_service(
             blockchain.registryName
         ).send(
             user_asset.address,
-            payload.receipient,
+            receipient,
             payload.amount,
             token_asset,
-            user_default_wallet.mnemonic or payload.mnemonic,
+            user_wallet.mnemonic or payload.mnemonic,
         )
         txn_url = str(network.blockExplorerUrl) + send_txn
         return SendTxnRes(transactionHash=txn_url)
 
     async def get_balance(self, user: User, payload: GetTokenBalance) -> BalanceRes:
-        user_default_wallet = await ModelUtilityService.find_one(
-            Wallet, {"user": user.id, "isDeleted": False, "isDefault": True}
-        )
-        if not user_default_wallet:
-            raise Exception("no default wallet set")
-
-        token_asset = await ModelUtilityService.find_one_and_populate(
-            TokenAsset,
-            {"symbol": payload.asset, "isDeleted": False},
-            ["blockchain", "network"],
-        )
-        if not token_asset:
-            raise Exception("token symbol not recongized")
-
-        blockchain = cast(Blockchain, token_asset.blockchain)
-
-        user_asset = await ModelUtilityService.find_one(
-            WalletAsset,
-            {
-                "blockchain": blockchain.id,
-                "wallet": user_default_wallet.id,
-                "isDeleted": False,
-            },
-        )
-        if not user_asset:
-            raise Exception("user asset not found")
+        (
+            _,
+            user_asset,
+            blockchain,
+            token_asset,
+        ) = await self.get_user_wallet_data(payload.walletasset)
 
         asset_balance = await self.blockchainRegistry.get_service(
             blockchain.registryName
@@ -184,7 +215,7 @@ class BlockchainService:
         )
 
         return BalanceRes(
-            symbol=payload.asset,
+            symbol=token_asset.symbol,
             balance=asset_balance,
         )
 
@@ -279,7 +310,7 @@ class BlockchainService:
 
         token_asset = await ModelUtilityService.find_one_and_populate(
             TokenAsset,
-            {"symbol": payload.asset, "isDeleted": False},
+            {"symbol": payload.asset, "hasTestToken": True, "isDeleted": False},
             ["blockchain", "network"],
         )
         if not token_asset:
@@ -308,38 +339,18 @@ class BlockchainService:
         return txn_res
 
     async def swap_between_wraps(self, user: User, payload: SwapTokenDTO) -> str:
-        user_default_wallet = await ModelUtilityService.find_one(
-            Wallet, {"user": user.id, "isDeleted": False, "isDefault": True}
-        )
-        if not user_default_wallet:
-            raise Exception("no default wallet set")
-
-        token_asset = await ModelUtilityService.find_one_and_populate(
-            TokenAsset,
-            {"symbol": payload.asset, "isDeleted": False},
-            ["blockchain", "network"],
-        )
-        if not token_asset:
-            raise Exception("token symbol not recongized")
-
-        blockchain = cast(Blockchain, token_asset.blockchain)
-
-        user_asset = await ModelUtilityService.find_one(
-            WalletAsset,
-            {
-                "blockchain": blockchain.id,
-                "wallet": user_default_wallet.id,
-                "isDeleted": False,
-            },
-        )
-        if not user_asset:
-            raise Exception("user asset not found")
+        (
+            user_wallet,
+            _,
+            blockchain,
+            token_asset,
+        ) = await self.get_user_wallet_data(payload.walletasset)
 
         swap_txn = await self.blockchainRegistry.get_service(
             blockchain.registryName
         ).swap_between_wraps(
             payload.amount,
-            user_default_wallet.mnemonic or payload.mnemonic,
+            user_wallet.mnemonic or payload.mnemonic,
             token_asset,
         )
 

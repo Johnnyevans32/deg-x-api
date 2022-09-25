@@ -57,10 +57,10 @@ class UserService:
         return user_obj
 
     async def get_user_by_query(self, query: dict[str, Any]) -> User:
-        db_resp = await ModelUtilityService.find_one(User, query)
-        if not db_resp:
+        user = await ModelUtilityService.find_one(User, query)
+        if not user:
             raise NotFoundInRecord(message="user not found")
-        return db_resp
+        return user
 
     async def check_if_username_exist_and_fail(self, username: str) -> None:
         user = await ModelUtilityService.find_one(

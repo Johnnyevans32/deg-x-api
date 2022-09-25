@@ -1,23 +1,23 @@
 from enum import Enum
 from pydantic import BaseModel
+from core.depends.get_object_id import PyObjectId
 
 
 class ReceipientType(str, Enum):
     USERNAME = "username"
-    WALLET = "wallet"
     ADDRESS = "address"
 
 
 class GetTokenBalance(BaseModel):
-    asset: str
+    walletasset: PyObjectId
 
 
 class BaseTxnSendDTO(BaseModel):
     amount: float
 
 
-class GetTestTokenDTO(GetTokenBalance, BaseTxnSendDTO):
-    pass
+class GetTestTokenDTO(BaseTxnSendDTO):
+    asset: str
 
 
 class SwapTokenDTO(GetTokenBalance, BaseTxnSendDTO):

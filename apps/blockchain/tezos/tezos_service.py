@@ -37,7 +37,8 @@ class TezosService(IBlockchainService, HTTPRepository):
     async def create_address(self, mnemonic: str) -> Address:
         # Generate seed from mnemonic
         key = TezosService.get_key_from_mnemonic(mnemonic)
-        return Address(**{"main": key.public_key_hash()})
+        address = key.public_key_hash()
+        return Address(main=address, test=address)
 
     async def send(
         self,

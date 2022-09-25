@@ -18,8 +18,8 @@ from core.utils.utils_service import Utils
 
 
 class WalletService:
-    blockchainService = BlockchainService()
     mnemo = Mnemonic("english")
+    blockchainService = BlockchainService()
     aesEncryptionService = AesEncryptionService()
 
     async def get_user_default_wallet(self, user: User) -> Wallet:
@@ -57,7 +57,7 @@ class WalletService:
         wallet_obj = await ModelUtilityService.model_create(
             Wallet, dict_wallet, session
         )
-        qr_code_image = await Utils.create_qr_image(wallet_obj.id)
+        qr_code_image = await Utils.create_qr_image(user.username)
 
         wallet_obj = (
             await ModelUtilityService.model_find_one_and_update(
@@ -111,10 +111,10 @@ class WalletService:
 
     async def retrieve_wallet_assets(self, user: User) -> list[WalletAsset]:
         user_wallet = await self.get_user_default_wallet(user)
-        res = await ModelUtilityService.find_and_populate(
+        user_assets = await ModelUtilityService.find_and_populate(
             WalletAsset, {"wallet": user_wallet.id, "isDeleted": False}, ["tokenasset"]
         )
-        return res
+        return user_assets
 
     async def retrieve_user_wallets(self, user: User) -> list[Wallet]:
         user_wallets = await ModelUtilityService.find(
