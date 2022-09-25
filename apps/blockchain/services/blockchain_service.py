@@ -107,10 +107,11 @@ class BlockchainService:
 
         blockchain = cast(Blockchain, user_asset.blockchain)
         user_wallet = cast(Wallet, user_asset.wallet)
+        tokenasset = cast(TokenAsset, user_asset.tokenasset)
 
         token_asset = await ModelUtilityService.find_one_and_populate(
             TokenAsset,
-            {"_id": user_asset.tokenasset, "isDeleted": False},
+            {"_id": tokenasset.id, "isDeleted": False},
             [
                 "network",
             ],
