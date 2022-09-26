@@ -263,3 +263,5 @@ class GoogleService(ICloudService):
         except HttpError as e:
             logger.error(f"Error downloading file - {str(e)}")
             raise e
+        finally:
+            service.close()
