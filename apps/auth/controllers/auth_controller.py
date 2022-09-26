@@ -7,7 +7,7 @@ from starlette import status
 
 from apps.auth.interfaces.auth_interface import AuthResponse
 from apps.auth.services.auth_service import AuthService
-from apps.cloudplatform.interfaces.cloud_interface import CloudProvider
+from apps.cloudplatform.interfaces.cloud_interface import CloudProvider, IDType
 from apps.cloudplatform.services.cloud_service import CloudService
 from apps.notification.email.services.email_service import EmailService
 from apps.user.interfaces.user_interface import (
@@ -219,10 +219,13 @@ class AuthController:
         res: Response,
         cloud_provider: CloudProvider,
         auth_token: str,
+        token_type: IDType = IDType.AccessToken,
     ) -> ResponseModel[AuthResponse]:
         try:
             request.app.logger.info("authenticating user with oauth")
-            user_resp = await self.cloudService.oauth_signin(cloud_provider, auth_token)
+            user_resp = await self.cloudService.oauth_signin(
+                cloud_provider, auth_token, token_type
+            )
             request.app.logger.info("done authenticating user with oauth")
             return self.responseService.send_response(
                 res,
@@ -231,7 +234,6 @@ class AuthController:
                 user_resp,
             )
         except Exception as e:
-            raise e
             request.app.logger.error(f"Error authenticating user {str(e)}")
             return self.responseService.send_response(
                 res,

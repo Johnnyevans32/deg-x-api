@@ -3,8 +3,8 @@ import json
 from operator import itemgetter
 from typing import Any
 
-# from google.auth.transport import requests
-# from google.oauth2 import id_token
+from google.auth.transport import requests
+from google.oauth2 import id_token
 from google.oauth2.credentials import Credentials
 from googleapiclient.errors import HttpError
 from googleapiclient.discovery import build, Resource
@@ -12,13 +12,14 @@ from googleapiclient.http import MediaIoBaseUpload
 
 from apps.auth.interfaces.auth_interface import AuthResponse
 from apps.auth.services.jwt_service import JWTService
-from apps.cloudplatform.interfaces.cloud_interface import CloudProvider
+from apps.cloudplatform.interfaces.cloud_interface import CloudProvider, IDType
 from apps.cloudplatform.interfaces.cloud_service_interface import ICloudService
 from apps.user.interfaces.user_interface import SignUpMethod, User, Name
 from apps.user.services.user_service import UserService
 from apps.wallet.services.wallet_service import WalletService
 from core.utils.loggly import logger
 from core.utils.utils_service import NotFoundInRecord
+from core.config import settings
 
 
 class GoogleService(ICloudService):
@@ -30,18 +31,23 @@ class GoogleService(ICloudService):
     def name(self) -> CloudProvider:
         return CloudProvider.GOOGLE
 
-    async def oauth_sign_in(self, auth_token: str) -> AuthResponse:
+    async def oauth_sign_in(self, auth_token: str, token_type: IDType) -> AuthResponse:
         try:
-            creds = Credentials(
-                auth_token,
-            )
-            service: Resource = build("oauth2", "v2", credentials=creds)
+            match token_type:
+                case IDType.AccessToken:
+                    creds = Credentials(
+                        auth_token,
+                    )
+                    service: Resource = build("oauth2", "v2", credentials=creds)
+                    idinfo = service.userinfo().get().execute()
+                case IDType.IDToken:
+                    idinfo = id_token.verify_oauth2_token(creds, requests.Request())
+                    if idinfo["aud"] not in [settings.WEB_GOOGLE_CLIENT_ID]:
+                        raise ValueError("Could not verify audience.")
+                case _:
+                    pass
 
-            idinfo = service.userinfo().get().execute()
-            # idinfo = id_token.verify_oauth2_token(creds, requests.Request())
             email, name = itemgetter("email", "name")(idinfo)
-            # if aud not in [settings.WEB_GOOGLE_CLIENT_ID]:
-            #     raise ValueError("Could not verify audience.")
 
             # ID token is valid. Get the user's Google Account ID from the decoded token.
             # userid = idinfo.sub

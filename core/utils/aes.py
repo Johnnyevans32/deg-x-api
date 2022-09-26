@@ -33,7 +33,7 @@ class KeystoreModel(BaseModel):
     crypto: CryptoModel
     version: int
     id: str
-    format: str = "base64"
+    format: str = "hex"
 
 
 T = TypeVar("T")
