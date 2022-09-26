@@ -165,4 +165,4 @@ class TezosService(IBlockchainService, HTTPRepository):
             destination=to_address, amount=int(self.format_num(amount, "to"))
         )
         txn = transfer_op.fill().sign().inject()
-        return txn
+        return txn["hash"]

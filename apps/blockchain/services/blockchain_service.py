@@ -302,7 +302,7 @@ class BlockchainService:
 
         return res, meta
 
-    async def get_test_token(self, user: User, payload: GetTestTokenDTO) -> Any:
+    async def get_test_token(self, user: User, payload: GetTestTokenDTO) -> SendTxnRes:
         user_default_wallet = await ModelUtilityService.find_one(
             Wallet, {"user": user.id, "isDeleted": False, "isDefault": True}
         )
@@ -318,7 +318,7 @@ class BlockchainService:
             raise Exception("token symbol not recongized")
 
         blockchain = cast(Blockchain, token_asset.blockchain)
-
+        network = cast(Network, token_asset.network)
         user_asset = await ModelUtilityService.find_one(
             WalletAsset,
             {
@@ -337,7 +337,8 @@ class BlockchainService:
             payload.amount,
         )
 
-        return txn_res
+        txn_url = str(network.blockExplorerUrl) + txn_res
+        return SendTxnRes(transactionHash=txn_url)
 
     async def swap_between_wraps(self, user: User, payload: SwapTokenDTO) -> str:
         (

@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from typing import Any, Sequence
+from typing import Sequence
 
 from fastapi import Depends, Response, status
 from fastapi_restful.cbv import cbv
@@ -147,7 +147,7 @@ class BlockchainController:
     )
     async def get_test_token(
         self, request: UnicornRequest, response: Response, payload: GetTestTokenDTO
-    ) -> ResponseModel[Any]:
+    ) -> ResponseModel[SendTxnRes]:
         try:
             user = request.state.user
             request.app.logger.info("sending airdrop token balance ")

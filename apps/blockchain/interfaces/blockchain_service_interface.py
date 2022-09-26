@@ -64,5 +64,5 @@ class IBlockchainService(metaclass=abc.ABCMeta):
         self,
         to_address: str,
         value: float,
-    ) -> str | list[str]:
+    ) -> str:
         pass
