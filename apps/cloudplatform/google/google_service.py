@@ -40,8 +40,11 @@ class GoogleService(ICloudService):
                     )
                     service: Resource = build("oauth2", "v2", credentials=creds)
                     idinfo = service.userinfo().get().execute()
+                    service.close()
                 case IDType.IDToken:
-                    idinfo = id_token.verify_oauth2_token(creds, requests.Request())
+                    idinfo = id_token.verify_oauth2_token(
+                        auth_token, requests.Request()
+                    )
                     if idinfo["aud"] not in [settings.WEB_GOOGLE_CLIENT_ID]:
                         raise ValueError("Could not verify audience.")
                 case _:
@@ -65,28 +68,35 @@ class GoogleService(ICloudService):
                 refreshToken=refresh_token,
             )
         except NotFoundInRecord:
-            return await self.oauth_sign_up(auth_token, idinfo)
+            return await self.oauth_sign_up(auth_token, token_type, idinfo)
         except Exception as e:
             # Invalid token
             logger.error(f"Error verifing google auth token - {str(e)}")
             raise Exception(f"Error verifing google auth token - {str(e)}")
-        finally:
-            service.close()
 
-    async def oauth_sign_up(self, auth_token: str, idinfo: Any = None) -> AuthResponse:
+    async def oauth_sign_up(
+        self, auth_token: str, token_type: IDType, idinfo: Any = None
+    ) -> AuthResponse:
         try:
             if not idinfo:
-                creds = Credentials(auth_token)
-                service: Resource = build("oauth2", "v2", credentials=creds)
-
-                idinfo = service.userinfo().get().execute()
-                # idinfo = id_token.verify_oauth2_token(
-                #     creds.id_token, requests.Request()
-                # )
+                match token_type:
+                    case IDType.AccessToken:
+                        creds = Credentials(
+                            auth_token,
+                        )
+                        service: Resource = build("oauth2", "v2", credentials=creds)
+                        idinfo = service.userinfo().get().execute()
+                        service.close()
+                    case IDType.IDToken:
+                        idinfo = id_token.verify_oauth2_token(
+                            auth_token, requests.Request()
+                        )
+                        if idinfo["aud"] not in [settings.WEB_GOOGLE_CLIENT_ID]:
+                            raise ValueError("Could not verify audience.")
+                    case _:
+                        pass
 
             email, name = itemgetter("email", "name")(idinfo)
-            # if aud not in [settings.WEB_GOOGLE_CLIENT_ID]:
-            #     raise ValueError("Could not verify audience")
 
             first_name, other_name, *_ = name.split() + [None]
             user_obj = User(
