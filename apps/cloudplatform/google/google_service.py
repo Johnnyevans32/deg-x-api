@@ -8,7 +8,7 @@ from google.oauth2 import id_token
 from google.oauth2.credentials import Credentials
 from googleapiclient.errors import HttpError
 from googleapiclient.discovery import build, Resource
-from googleapiclient.http import MediaIoBaseUpload
+from googleapiclient.http import MediaIoBaseUpload, MediaIoBaseDownload
 
 from apps.auth.interfaces.auth_interface import AuthResponse
 from apps.auth.services.jwt_service import JWTService
@@ -156,7 +156,11 @@ class GoogleService(ICloudService):
         return file.get("id", None)
 
     def get_file_or_folder_id(
-        self, auth_token: str, folder_name: str, service: Resource = None
+        self,
+        auth_token: str,
+        folder_name: str,
+        service: Resource = None,
+        custom_query: str = None,
     ) -> str | None:
         """Search file in drive location
 
@@ -171,13 +175,18 @@ class GoogleService(ICloudService):
                 service = build("drive", "v3", credentials=creds)
             files = []
             page_token = None
+            query = (
+                custom_query
+                if custom_query
+                else "mimeType = 'application/vnd.google-apps.folder'"
+                f"and name = '{folder_name}'"
+            )
             while True:
                 # pylint: disable=maybe-no-member
                 response = (
                     service.files()
                     .list(
-                        q="mimeType = 'application/vnd.google-apps.folder'"
-                        f"and name = '{folder_name}'",
+                        q=query,
                         spaces="drive",
                         fields="nextPageToken, " "files(id, name)",
                         pageToken=page_token,
@@ -224,3 +233,33 @@ class GoogleService(ICloudService):
             raise e
         finally:
             service.close()
+
+    def recover_file(self, auth_token: str, file_name: str) -> Any:
+        try:
+            creds = Credentials(auth_token)
+            service: Resource = build("drive", "v3", credentials=creds)
+
+            # create drive api client
+            service = build("drive", "v3", credentials=creds)
+
+            file_id = self.get_file_or_folder_id(
+                auth_token,
+                self.folder_name,
+                service,
+                f"fullText contains '{file_name}'",
+            )
+
+            if not file_id:
+                raise Exception("file not found")
+
+            request = service.files().get_media(fileId=file_id)
+            file = io.BytesIO()
+            downloader = MediaIoBaseDownload(file, request)
+            done = False
+            while done is False:
+                status, done = downloader.next_chunk()
+
+            return json.loads(file.getvalue().decode())
+        except HttpError as e:
+            logger.error(f"Error downloading file - {str(e)}")
+            raise e

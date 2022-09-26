@@ -1,3 +1,4 @@
+from typing import Any
 from apps.auth.interfaces.auth_interface import AuthResponse
 from apps.cloudplatform.interfaces.cloud_interface import CloudProvider, IDType
 from apps.cloudplatform.services.cloud_registry import CloudPlatformRegistry
@@ -20,3 +21,11 @@ class CloudService:
         cloud_service = self.cloudPlatformRegistry.get_service(cloud_provider)
 
         return await cloud_service.oauth_sign_in(auth_token, token_type)
+
+    def recover_file_from_cloud(self, payload: UploadFileDTO) -> Any:
+        cloud_service = self.cloudPlatformRegistry.get_service(payload.cloudProvider)
+
+        return cloud_service.recover_file(
+            payload.authToken,
+            payload.fileName,
+        )

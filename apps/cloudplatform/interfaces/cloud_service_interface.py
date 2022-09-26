@@ -24,3 +24,11 @@ class ICloudService(metaclass=abc.ABCMeta):
     @abc.abstractmethod
     def upload_file(self, auth_token: str, file_name: str, data: Any) -> str:
         raise NotImplementedError
+
+    @abc.abstractmethod
+    def recover_file(
+        self,
+        auth_token: str,
+        file_name: str,
+    ) -> Any:
+        raise NotImplementedError

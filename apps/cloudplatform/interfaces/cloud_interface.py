@@ -1,5 +1,5 @@
 from enum import Enum
-from typing import Any
+from typing import Any, Optional
 from pydantic import BaseModel
 
 
@@ -14,6 +14,6 @@ class IDType(str, Enum):
 
 class UploadFileDTO(BaseModel):
     fileName: str
-    data: Any
+    data: Optional[Any]
     authToken: str
     cloudProvider: CloudProvider
