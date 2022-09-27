@@ -11,7 +11,7 @@ from solana.transaction import Transaction
 from spl.token.constants import TOKEN_PROGRAM_ID, WRAPPED_SOL_MINT
 
 from apps.blockchain.interfaces.blockchain_interface import ChainServiceName
-from apps.blockchain.interfaces.network_interface import Network
+from apps.blockchain.interfaces.network_interface import Network, NetworkType
 from apps.blockchain.interfaces.tokenasset_interface import TokenAsset
 from apps.blockchain.solana.solana_utils import (
     create_sync_native_instruction,
@@ -127,8 +127,12 @@ class SolanaService(IBlockchainService):
                 )
             txn_build = Transaction().add(txn)
             resp = await solana_client.send_transaction(txn_build, sender)
-
-            return str(resp["result"])
+            cluster = (
+                "?cluster=devnet"
+                if chain_network.networkType == NetworkType.TESTNET
+                else ""
+            )
+            return str(resp["result"]) + cluster
 
         finally:
             await solana_client.close()
