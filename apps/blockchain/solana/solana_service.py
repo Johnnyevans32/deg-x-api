@@ -271,7 +271,7 @@ class SolanaService(IBlockchainService):
             amount = int(self.format_num(1, "to"))
             resp = await solana_client.request_airdrop(PublicKey(to_address), amount)
 
-            return resp["result"]
+            return resp["result"] + "?cluster=devnet"
 
         finally:
             await solana_client.close()
