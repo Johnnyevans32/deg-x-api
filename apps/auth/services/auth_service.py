@@ -51,4 +51,4 @@ class AuthService:
         refresh_token_obj = await self.userService.get_user_refresh_token(refresh_token)
         self.jwtService.decode_jwt(refresh_token_obj.refreshToken, "REFRESH_TOKEN")
         token = self.jwtService.sign_jwt(refresh_token_obj.user, "ACCESS_TOKEN")
-        return AuthResponse(*{"accessToken": token, "refreshToken": refresh_token})
+        return AuthResponse(accessToken=token, refreshToken=refresh_token)
