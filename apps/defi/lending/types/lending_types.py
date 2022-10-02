@@ -1,10 +1,13 @@
+from typing import Optional
 from pydantic import BaseModel
 
 from apps.defi.lending.interfaces.lending_request_interface import InterestRateMode
+from core.depends.get_object_id import PyObjectId
 
 
 class BaseLendingActionDTO(BaseModel):
     amount: float
+    provider: Optional[PyObjectId]
     asset: str
     mnemonic: str
 

@@ -121,9 +121,8 @@ class LendingService:
         self,
         user: User,
         payload: BorrowAssetDTO,
-        defi_provider_id: PyObjectId = None,
     ) -> LendingRequest:
-        defi_provider = await self.get_defi_provider(defi_provider_id)
+        defi_provider = await self.get_defi_provider(payload.provider)
         user_wallet = await self.walletService.get_user_default_wallet(user)
         user_wallet_asset = await self.get_wallet_asset(
             user, user_wallet, defi_provider
@@ -188,9 +187,8 @@ class LendingService:
         self,
         user: User,
         payload: BaseLendingActionDTO,
-        defi_provider_id: PyObjectId = None,
     ) -> LendingRequest:
-        defi_provider = await self.get_defi_provider(defi_provider_id)
+        defi_provider = await self.get_defi_provider(payload.provider)
         user_wallet = await self.walletService.get_user_default_wallet(user)
         user_wallet_asset = await self.get_wallet_asset(
             user, user_wallet, defi_provider
@@ -232,9 +230,8 @@ class LendingService:
         self,
         user: User,
         payload: BorrowAssetDTO,
-        defi_provider_id: PyObjectId = None,
     ) -> LendingRequest:
-        defi_provider = await self.get_defi_provider(defi_provider_id)
+        defi_provider = await self.get_defi_provider(payload.provider)
         user_wallet = await self.walletService.get_user_default_wallet(user)
         user_wallet_asset = await self.get_wallet_asset(
             user, user_wallet, defi_provider

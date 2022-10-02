@@ -16,6 +16,8 @@ class DefiServiceType(str, Enum):
 
 class DefiProviderOut(SBaseOutModel):
     name: str
+    desc: Optional[str]
+    category: Optional[str]
     contractAddress: str
     isDefault: bool = Field(default=False)
     serviceType: DefiServiceType

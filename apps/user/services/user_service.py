@@ -9,6 +9,7 @@ from apps.user.interfaces.user_interface import (
     User,
     UserLoginInput,
     UserResetPasswordInput,
+    UserUpdateDTO,
 )
 from apps.user.interfaces.user_token_interface import UserRefreshToken
 from apps.wallet.services.wallet_service import WalletService
@@ -137,3 +138,10 @@ class UserService:
         assert user, "user not found"
 
         return user
+
+    async def update_user_details(self, user: User, payload: UserUpdateDTO) -> None:
+
+        query = {"_id": user.id, "isDeleted": False}
+        record_to_update = payload.dict(by_alias=True, exclude_none=True)
+
+        await ModelUtilityService.model_update(User, query, record_to_update)

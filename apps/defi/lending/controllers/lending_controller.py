@@ -95,7 +95,6 @@ class LendingController:
             )
 
         except Exception as e:
-            raise e
             return self.responseService.send_response(
                 response,
                 status.HTTP_400_BAD_REQUEST,
