@@ -21,7 +21,7 @@ class UserController:
     responseService = ResponseService()
 
     @router.get(
-        "/",
+        "/details",
         dependencies=[Depends(JWTBearer())],
         response_model_by_alias=False,
     )
