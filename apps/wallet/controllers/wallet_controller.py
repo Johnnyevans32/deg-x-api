@@ -101,7 +101,7 @@ class WalletController:
                 f"Error in getting user wallets: {str(e)}",
             )
 
-    @router.patch(
+    @router.put(
         "/set-wallet-network-type",
         dependencies=[Depends(JWTBearer())],
     )
@@ -125,7 +125,7 @@ class WalletController:
                 f"Error in setting user wallet network: {str(e)}",
             )
 
-    @router.patch(
+    @router.put(
         "/set-default-user-wallet",
         dependencies=[Depends(JWTBearer())],
     )

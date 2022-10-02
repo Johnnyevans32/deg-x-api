@@ -77,7 +77,7 @@ class EmailService:
             """
                 + self.email_sigx
             )
-
+            assert user.name, "name can not be null"
             self.send_template_email(
                 email_to=user.email,
                 subject_template=subject,
@@ -119,6 +119,7 @@ class EmailService:
             """
                 + self.email_sigx
             )
+            assert user.name, "name can not be null"
             self.send_template_email(
                 email_to=user.email,
                 subject_template=subject,

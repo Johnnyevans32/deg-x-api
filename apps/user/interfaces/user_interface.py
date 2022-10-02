@@ -38,8 +38,8 @@ class UserResetPasswordInput(BaseModel):
 
 
 class UserUpdateDTO(BaseModel):
-    name: Name
-    username: str
+    name: Optional[Name]
+    username: Optional[str]
 
     class Config:
         anystr_strip_whitespace = True

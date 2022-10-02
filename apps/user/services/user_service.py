@@ -31,6 +31,7 @@ class UserService:
         session = client.start_session()
         session.start_transaction()
         try:
+            assert user.username, "username can not be null"
             await self.check_if_username_exist_and_fail(user.username)
             dict_user = user.dict(by_alias=True, exclude_none=True)
             user_obj = await ModelUtilityService.model_create(User, dict_user, session)
@@ -63,13 +64,20 @@ class UserService:
             raise NotFoundInRecord(message="user not found")
         return user
 
-    async def check_if_username_exist_and_fail(self, username: str) -> None:
+    async def check_if_username_exist_and_fail(
+        self, username: str, return_status: bool = False
+    ) -> None | bool:
         user = await ModelUtilityService.find_one(
             User, {"username": username, "isDeleted": False}
         )
 
+        if return_status:
+            return user is None
+
         if user:
             raise ValueError("username already exist")
+
+        return None
 
     async def update_user_password(
         self, email: EmailStr, password_reset_dto: UserResetPasswordInput
