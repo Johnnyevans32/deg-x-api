@@ -21,7 +21,7 @@ class UserController:
     responseService = ResponseService()
 
     @router.get(
-        "",
+        "/",
         dependencies=[Depends(JWTBearer())],
         response_model_by_alias=False,
     )
@@ -29,7 +29,6 @@ class UserController:
         self,
         request: UnicornRequest,
         res: Response,
-        update_payload: UserUpdateDTO,
     ) -> ResponseModel[AuthResponse]:
         try:
             user = request.state.user
