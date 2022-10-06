@@ -1,9 +1,8 @@
-from fastapi import BackgroundTasks, Response
+from fastapi import BackgroundTasks, Response, status
 from fastapi_restful.cbv import cbv
 from fastapi_restful.inferring_router import InferringRouter
 from pydantic import EmailStr
 from pymongo.errors import DuplicateKeyError
-from starlette import status
 
 from apps.auth.interfaces.auth_interface import AuthResponse
 from apps.auth.services.auth_service import AuthService

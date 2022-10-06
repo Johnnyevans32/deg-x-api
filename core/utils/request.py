@@ -16,8 +16,9 @@ class HTTPRepository:
     slackService = SlackService()
     T = TypeVar("T")
 
-    def __init__(self, base_url: Optional[str] = None) -> None:
+    def __init__(self, base_url: Optional[str] = None, headers: Any = None) -> None:
         self.base_url = base_url
+        self.headers = headers
         self.session = requests.Session()
         # self.http_method = {"POST": self.session.post, "GET": self.session.get}
 
@@ -35,7 +36,7 @@ class HTTPRepository:
             url = self.base_url + url if self.base_url else url
             # req: requests.Response = self.http_method[method](url, data)
             req: requests.Response = self.session.request(
-                method, url, data=data, **opts
+                method, url, data=data, headers=self.headers, **opts
             )
             req.raise_for_status()
             return generic_class(**req.json())

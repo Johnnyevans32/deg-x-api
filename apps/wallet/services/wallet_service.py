@@ -1,4 +1,4 @@
-from typing import cast
+from typing import Any, cast
 
 from mnemonic import Mnemonic
 from pymongo.client_session import ClientSession
@@ -21,6 +21,18 @@ class WalletService:
     mnemo = Mnemonic("english")
     blockchainService = BlockchainService()
     aesEncryptionService = AesEncryptionService()
+
+    async def get_wallet_by_query(self, query: dict[str, Any]) -> Wallet:
+        wallet = await ModelUtilityService.find_one(Wallet, query)
+        if wallet is None:
+            raise Exception("wallet not found")
+        return wallet
+
+    async def get_walletasset_by_query(self, query: dict[str, Any]) -> WalletAsset:
+        wallet_asset = await ModelUtilityService.find_one(WalletAsset, query)
+        if wallet_asset is None:
+            raise Exception("wallet not found")
+        return wallet_asset
 
     async def get_user_default_wallet(self, user: User) -> Wallet:
         user_default_wallet = await ModelUtilityService.find_one(

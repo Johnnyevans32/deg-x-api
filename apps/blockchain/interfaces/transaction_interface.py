@@ -1,6 +1,6 @@
 from datetime import datetime
 from enum import Enum
-from typing import Any, Union
+from typing import Any, Optional, Union
 
 from pydantic import Field
 from pymongo import ASCENDING
@@ -21,6 +21,7 @@ class TxnType(str, Enum):
 class TxnSource(str, Enum):
     EXPLORER = "explorer"
     MANUAL = "manual"
+    STREAM = "stream"
 
 
 class TxnStatus(str, Enum):
@@ -31,12 +32,13 @@ class TxnStatus(str, Enum):
 
 class BlockchainTransactionOut(SBaseOutModel):
     user: Union[PyObjectId, User]
+    otherUser: Optional[Union[PyObjectId, User]]
     wallet: Union[PyObjectId, Wallet]
     network: Union[PyObjectId, Network]
     fromAddress: str
     toAddress: str
     transactionHash: str
-    blockConfirmations: int
+    blockConfirmations: Optional[int]
     blockNumber: int
     gasPrice: int
     gasUsed: int

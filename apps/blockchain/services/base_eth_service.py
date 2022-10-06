@@ -192,37 +192,54 @@ class BaseEvmService(IBlockchainService):
         )
         txns_result = res.result
 
-        txn_obj = list(
-            map(
-                lambda txn: BlockchainTransaction(
-                    id=None,
-                    transactionHash=txn.hash,
-                    fromAddress=cast(str, txn.fromAddress),
-                    toAddress=cast(str, txn.to or txn.contractAddress),
-                    gasPrice=cast(int, txn.gasPrice),
-                    blockNumber=txn.blockNumber or 0,
-                    gasUsed=cast(int, txn.gasUsed),
-                    blockConfirmations=int(txn.confirmations or 0),
-                    network=cast(PyObjectId, chain_network.id),
-                    wallet=cast(PyObjectId, wallet.id),
-                    amount=float(Web3.fromWei(int(txn.value or 0), "ether")),
-                    status=(
-                        TxnStatus.FAILED if (txn.isError == "1") else TxnStatus.SUCCESS
-                    ),
-                    isContractExecution=txn.contractAddress != "",
-                    txnType=(
-                        TxnType.DEBIT
-                        if (txn.fromAddress == address.lower())
-                        else TxnType.CREDIT
-                    ),
-                    user=cast(PyObjectId, user.id),
-                    transactedAt=pendulum.from_timestamp(int(txn.timeStamp)),
-                    source=TxnSource.EXPLORER,
-                    metaData=txn.dict(by_alias=True),
-                ).dict(by_alias=True, exclude_none=True),
-                txns_result,
+        txn_obj = []
+        for txn in txns_result:
+            txn_type = (
+                TxnType.DEBIT if txn.fromAddress == address.lower() else TxnType.CREDIT
             )
-        )
+            # other_user_address = (
+            #     txn.fromAddress if txn_type == TxnType.CREDIT else txn.to
+            # )
+            # other_user_walletasset = (
+            #     await self.walletService.get_walletasset_by_query(
+            #         {
+            #             "$or": [
+            #                 {"address.main": other_user_address},
+            #                 {"address.test": other_user_address},
+            #             ],
+            #             "isDeleted": False,
+            #         }
+            #     )
+            #     if other_user_address
+            #     else None
+            # )
+            chain_txn = BlockchainTransaction(
+                id=None,
+                transactionHash=txn.hash,
+                fromAddress=cast(str, txn.fromAddress),
+                toAddress=cast(str, txn.to or txn.contractAddress),
+                gasPrice=cast(int, txn.gasPrice),
+                blockNumber=txn.blockNumber or 0,
+                gasUsed=cast(int, txn.gasUsed),
+                blockConfirmations=int(txn.confirmations or 0),
+                network=cast(PyObjectId, chain_network.id),
+                wallet=cast(PyObjectId, wallet.id),
+                amount=float(Web3.fromWei(int(txn.value or 0), "ether")),
+                status=(
+                    TxnStatus.FAILED if (txn.isError == "1") else TxnStatus.SUCCESS
+                ),
+                isContractExecution=txn.contractAddress != "",
+                txnType=txn_type,
+                user=cast(PyObjectId, user.id),
+                # otherUser=other_user_walletasset.user
+                # if other_user_walletasset
+                # else None,
+                transactedAt=pendulum.from_timestamp(int(txn.timeStamp)),
+                source=TxnSource.EXPLORER,
+                metaData=txn.dict(by_alias=True),
+            ).dict(by_alias=True, exclude_none=True)
+            txn_obj.append(chain_txn)
+
         return txn_obj
 
     async def swap_between_wraps(

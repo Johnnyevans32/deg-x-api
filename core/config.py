@@ -53,6 +53,8 @@ class Settings(BaseSettings):
 
     UI_URL: str = "https://degx.com"
 
+    BASE_URL: str = ""
+
     # ~~~~~ AWS S3 ~~~~~
     S3_BUCKET_NAME: str = "demo-bucket"
     AWS_ACCESS_KEY_ID: str = "your-access-key-id"

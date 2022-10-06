@@ -60,6 +60,15 @@ class BlockchainService:
 
         return chain_network
 
+    @staticmethod
+    async def get_networks_by_query(query: dict[str, Any]) -> list[Network]:
+        logger.info("retrieving network chain")
+        chain_networks = await ModelUtilityService.find(Network, query)
+        if not chain_networks:
+            raise Exception("network chains not found")
+
+        return chain_networks
+
     # @timed_cache(10, 10)
     @staticmethod
     async def get_token_assets(query: dict[str, Any]) -> list[TokenAsset]:
@@ -67,6 +76,12 @@ class BlockchainService:
         token_assets = await ModelUtilityService.find(TokenAsset, query)
 
         return token_assets
+
+    @staticmethod
+    def get_address(address: Address, network: Network) -> str:
+        return (
+            address.main if network.networkType == NetworkType.TESTNET else address.test
+        )
 
     @staticmethod
     async def get_last_block_txn_by_query(
