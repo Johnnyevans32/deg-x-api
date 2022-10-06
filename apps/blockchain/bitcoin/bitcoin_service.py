@@ -1,5 +1,5 @@
 from apps.blockchain.interfaces.blockchain_interface import ChainServiceName
-from apps.blockchain.services.base_coin_service import BasecoinService
+from apps.blockchain.bitcoin.base_coin_service import BasecoinService
 
 
 class BitcoinService(BasecoinService):

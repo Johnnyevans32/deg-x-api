@@ -36,7 +36,10 @@ class HTTPRepository:
             url = self.base_url + url if self.base_url else url
             # req: requests.Response = self.http_method[method](url, data)
             req: requests.Response = self.session.request(
-                method, url, data=data, headers=self.headers, **opts
+                method,
+                url,
+                data=data,
+                headers=self.headers,
             )
             req.raise_for_status()
             return generic_class(**req.json())

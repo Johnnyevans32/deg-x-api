@@ -294,13 +294,18 @@ class BlockchainService:
 
         chain_networks = await ModelUtilityService.find_and_populate(
             Network,
-            {"networkType": user_default_wallet.networkType, "isDeleted": False},
+            {
+                "networkType": user_default_wallet.networkType,
+                "isDeleted": False,
+                "isDefault": True,
+            },
             ["blockchain"],
         )
 
         # update user txns before returning
-
+        chain_ids = []
         for network in chain_networks:
+            chain_ids.append(network.id)
             await self.update_user_txns(user, user_default_wallet, network)
 
         res, meta = await ModelUtilityService.paginate_data(
@@ -308,7 +313,7 @@ class BlockchainService:
             {
                 "user": user.id,
                 "wallet": user_default_wallet.id,
-                "network": {"$in": [network.id for network in chain_networks]},
+                "network": {"$in": chain_ids},
                 "isDeleted": False,
             },
             page_num,

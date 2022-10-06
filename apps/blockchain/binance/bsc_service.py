@@ -1,7 +1,7 @@
 from apps.blockchain.interfaces.blockchain_interface import ChainServiceName
-from apps.blockchain.services.base_eth_service import BaseEvmService
+from apps.blockchain.evm_chains.base_eth_service import BaseEvmService
 
 
-class BSCService(BaseEvmService):
+class BscService(BaseEvmService):
     def __init__(self) -> None:
         super().__init__(ChainServiceName.BSC)

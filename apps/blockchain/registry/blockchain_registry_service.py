@@ -1,6 +1,6 @@
-from apps.blockchain.binance.bsc_service import BSCService
+from apps.blockchain.binance.bsc_service import BscService
 
-# from apps.blockchain.binance.bnb_service import BNBService
+# from apps.blockchain.binance.bnb_service import BnbService
 from apps.blockchain.bitcoin.bitcoin_service import BitcoinService
 from apps.blockchain.bitcoin.dashcoin_service import DashcoinService
 from apps.blockchain.bitcoin.dogecoin_service import DogecoinService
@@ -22,8 +22,8 @@ class BlockchainRegistry:
     solanaService = SolanaService()
     tezosService = TezosService()
     dogecoinService = DogecoinService()
-    # bnbService = BNBService()
-    bscService = BSCService()
+    # bnbService = BnbService()
+    bscService = BscService()
     dashService = DashcoinService()
     litecoinService = LitecoinService()
     polygonService = PolygonService()
