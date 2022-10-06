@@ -28,6 +28,8 @@ class UserLoginInput(BaseModel):
     email: Optional[EmailStr]
 
     class Config:
+        anystr_lower = True
+        anystr_strip_whitespace = True
         schema_extra = {
             "example": {"email": "evans@demigod.com", "password": "password"}
         }
@@ -37,9 +39,16 @@ class UserResetPasswordInput(BaseModel):
     password: str
 
 
-class UserUpdateDTO(BaseModel):
-    name: Optional[Name]
+class Username(BaseModel):
     username: Optional[str]
+
+    class Config:
+        anystr_lower = True
+        anystr_strip_whitespace = True
+
+
+class UserUpdateDTO(Username):
+    name: Optional[Name]
 
     class Config:
         anystr_strip_whitespace = True
@@ -51,6 +60,7 @@ class UserBase(UserUpdateDTO, SBaseOutModel):
 
     class Config:
         anystr_strip_whitespace = True
+        anystr_lower = True
 
 
 class User(UserBase, SBaseModel):
