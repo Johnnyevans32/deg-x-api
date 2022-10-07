@@ -28,6 +28,10 @@ class SendTokenDTO(SwapTokenDTO):
     receipient: str
     receipientType: ReceipientType = ReceipientType.ADDRESS
 
+    class Config:
+        anystr_lower = True
+        anystr_strip_whitespace = True
+
 
 class SendTxnRes(BaseModel):
     transactionHash: str
