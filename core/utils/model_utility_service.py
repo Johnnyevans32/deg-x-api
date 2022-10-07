@@ -52,6 +52,7 @@ class ModelUtilityService:
         query: dict[str, Any],
         page_num: int,
         page_size: int,
+        sort_field: str = "createdAt",
     ) -> tuple[list[T], MetaDataModel]:
         model = db[generic_class.__name__.lower()]
 
@@ -69,7 +70,7 @@ class ModelUtilityService:
         next_page = (lambda: page_num + 1 if (page_num + 1) <= total_page else None)()
 
         documents = (
-            model.find(query).sort("createdAt", DESCENDING).skip(skips).limit(page_size)
+            model.find(query).sort(sort_field, DESCENDING).skip(skips).limit(page_size)
         )
 
         # Skip and limit

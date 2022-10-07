@@ -318,6 +318,7 @@ class BlockchainService:
             },
             page_num,
             page_size,
+            "transactedAt",
         )
 
         return res, meta
