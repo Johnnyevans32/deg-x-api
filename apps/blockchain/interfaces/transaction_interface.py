@@ -56,5 +56,5 @@ class BlockchainTransaction(BlockchainTransactionOut, SBaseModel):
     @staticmethod
     def init() -> None:
         db.blockchaintransaction.create_index(
-            [("transactionHash", ASCENDING)], unique=True
+            [("transactionHash", ASCENDING), ("user", ASCENDING)], unique=True
         )
