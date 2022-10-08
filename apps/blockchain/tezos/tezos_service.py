@@ -136,7 +136,8 @@ class TezosService(IBlockchainService, HTTPRepository):
         address = address_obj.main
         res = await self.httpRepository.call(
             REQUEST_METHOD.GET,
-            f"{chain_network.apiExplorer.url}/explorer/account/{address}/operations?limit=100&order=desc",
+            f"{chain_network.apiExplorer.url}/explorer/account/{address}/"
+            "operations?limit=100&order=desc",
             ResponseModel[list[ITezosAccountTxn]],
         )
 
