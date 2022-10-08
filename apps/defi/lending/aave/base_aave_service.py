@@ -3,7 +3,6 @@ from typing import Any, cast
 from eth_typing import Address, HexStr
 from web3 import Web3
 from web3.contract import AsyncContract
-from web3.types import Wei
 
 from apps.blockchain.evm_chains.ethereum_service import EthereumService
 from apps.blockchain.interfaces.network_interface import Network
@@ -92,35 +91,24 @@ class BaseAaveService(ILendingService):
             (aave_contract, web3) = await BaseAaveService.get_contract_obj(
                 defi_provider
             )
-            await self.ethereumService.approve_erc_20_txns(
-                asset,
-                web3,
-                defi_provider.contractAddress,
-                amount,
+            network = cast(Network, defi_provider.network)
+            await self.ethereumService.approve_token_delegation(
+                network,
                 mnemonic,
+                amount,
+                asset,
+                defi_provider.contractAddress,
             )
-
-            nonce = web3.eth.get_transaction_count(on_behalf_of)
-            txn_miner_tip = Wei(web3.eth.max_priority_fee + Web3.toWei(10, "gwei"))
-            block_base_fee_per_gas = web3.eth.get_block("latest")["baseFeePerGas"]
 
             deposit_txn_build = aave_contract.functions.deposit(
                 Web3.toBytes(hexstr=HexStr(asset)),
                 Web3.toWei(amount, "ether"),
                 Web3.toBytes(hexstr=HexStr(on_behalf_of)),
                 referral_code,
-            ).build_transaction(
-                {
-                    "nonce": nonce,
-                    "gas": Wei(400000),
-                    "chainId": web3.eth.chain_id,
-                    "maxPriorityFeePerGas": txn_miner_tip,
-                    "maxFeePerGas": Wei(block_base_fee_per_gas + txn_miner_tip),
-                }
-            )
+            ).build_transaction()
 
             txn_hash = await self.ethereumService.sign_txn(
-                web3, mnemonic, deposit_txn_build
+                network, mnemonic, deposit_txn_build
             )
             return txn_hash
         except ValueError as val_err:
@@ -142,27 +130,17 @@ class BaseAaveService(ILendingService):
             (aave_contract, web3) = await BaseAaveService.get_contract_obj(
                 defi_provider
             )
-            nonce = web3.eth.get_transaction_count(to)
-            txn_miner_tip = Wei(web3.eth.max_priority_fee + Web3.toWei(10, "gwei"))
-            block_base_fee_per_gas = web3.eth.get_block("latest")["baseFeePerGas"]
-
+            network = cast(Network, defi_provider.network)
             withdraw_txn_build = aave_contract.functions.withdraw(
                 Web3.toBytes(hexstr=HexStr(asset)),
                 Web3.toWei(amount, "ether"),
                 Web3.toBytes(hexstr=HexStr(to)),
-            ).build_transaction(
-                {
-                    "nonce": nonce,
-                    "gas": Wei(400000),
-                    "chainId": web3.eth.chain_id,
-                    "maxPriorityFeePerGas": txn_miner_tip,
-                    "maxFeePerGas": Wei(block_base_fee_per_gas + txn_miner_tip),
-                }
-            )
+            ).build_transaction()
 
             txn_hash = await self.ethereumService.sign_txn(
-                web3, mnemonic, withdraw_txn_build
+                network, mnemonic, withdraw_txn_build
             )
+
             return txn_hash
         except ValueError as val_err:
             return Utils.get_evm_reverted_reason(val_err.args[0])
@@ -185,26 +163,16 @@ class BaseAaveService(ILendingService):
             (aave_contract, web3) = await BaseAaveService.get_contract_obj(
                 defi_provider
             )
-            nonce = web3.eth.get_transaction_count(on_behalf_of)
-            txn_miner_tip = Wei(web3.eth.max_priority_fee + Web3.toWei(10, "gwei"))
-            block_base_fee_per_gas = web3.eth.get_block("latest")["baseFeePerGas"]
+            network = cast(Network, defi_provider.network)
             borrow_txn_build = aave_contract.functions.borrow(
                 Web3.toBytes(hexstr=HexStr(asset)),
                 Web3.toWei(amount, "ether"),
                 self.aave_interest_rate_mode[interest_rate_mode],
                 referral_code,
                 Web3.toBytes(hexstr=HexStr(on_behalf_of)),
-            ).build_transaction(
-                {
-                    "nonce": nonce,
-                    "gas": Wei(400000),
-                    "chainId": web3.eth.chain_id,
-                    "maxPriorityFeePerGas": txn_miner_tip,
-                    "maxFeePerGas": Wei(block_base_fee_per_gas + txn_miner_tip),
-                }
-            )
+            ).build_transaction()
             txn_hash = await self.ethereumService.sign_txn(
-                web3, mnemonic, borrow_txn_build
+                network, mnemonic, borrow_txn_build
             )
             return txn_hash
         except ValueError as val_err:
@@ -228,26 +196,23 @@ class BaseAaveService(ILendingService):
             (aave_contract, web3) = await BaseAaveService.get_contract_obj(
                 defi_provider
             )
-            nonce = web3.eth.get_transaction_count(on_behalf_of)
-            txn_miner_tip = Wei(web3.eth.max_priority_fee + Web3.toWei(10, "gwei"))
-            block_base_fee_per_gas = web3.eth.get_block("latest")["baseFeePerGas"]
+            network = cast(Network, defi_provider.network)
+            await self.ethereumService.approve_token_delegation(
+                network,
+                mnemonic,
+                amount,
+                asset,
+                defi_provider.contractAddress,
+            )
 
             repay_txn_build = aave_contract.functions.repay(
                 Web3.toBytes(hexstr=HexStr(asset)),
                 Web3.toWei(amount, "ether"),
                 self.aave_interest_rate_mode[rate_mode],
                 Web3.toBytes(hexstr=HexStr(on_behalf_of)),
-            ).build_transaction(
-                {
-                    "nonce": nonce,
-                    "gas": Wei(400000),
-                    "chainId": web3.eth.chain_id,
-                    "maxPriorityFeePerGas": txn_miner_tip,
-                    "maxFeePerGas": Wei(block_base_fee_per_gas + txn_miner_tip),
-                }
-            )
+            ).build_transaction()
             txn_hash = await self.ethereumService.sign_txn(
-                web3, mnemonic, repay_txn_build
+                network, mnemonic, repay_txn_build
             )
             return txn_hash
         except ValueError as val_err:

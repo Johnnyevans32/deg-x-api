@@ -4,7 +4,6 @@ from pytezos import pytezos
 from pytezos.client import PyTezosClient
 
 from apps.blockchain.interfaces.network_interface import Network
-from apps.blockchain.solana.solana_service import SolanaService
 from apps.blockchain.tezos.tezos_service import TezosService
 from apps.defi.interfaces.defiprovider_interface import DefiProvider
 from apps.defi.lending.aave.aave_interface import IReserveTokens, IUserAcccountData
@@ -15,7 +14,7 @@ from core.utils.utils_service import timed_cache
 
 
 class YupanaService(ILendingService):
-    solanaService = SolanaService()
+    tezosService = TezosService()
     httpRepository = HTTPRepository()
 
     def name(self) -> str:
@@ -45,20 +44,16 @@ class YupanaService(ILendingService):
         tez_client: PyTezosClient = pytezos.using(network.providerUrl, key)
         yupana = tez_client.contract(defi_provider.contractAddress)
         # proxy = tez_client.contract("")
-        amount = int(self.solanaService.format_num(value, "to"))
+        amount = int(self.tezosService.format_num(value, "to"))
         token_id = 1
-        call = (
-            pytezos.bulk(
-                # yupana.updateInterest(token_id),
-                # proxy.getPrice([token_id]),
-                yupana.mint(token_id, amount, amount),
-            )
-            .autofill()
-            .sign()
+        txn_group = pytezos.bulk(
+            # yupana.updateInterest(token_id),
+            # proxy.getPrice([token_id]),
+            yupana.mint(token_id, amount, amount),
         )
-        opg = call.inject()
-        print(opg)
-        return opg
+        txn_res = self.tezosService.sign_txn(network, mnemonic, txn_group)
+        print(txn_res)
+        return txn_res
 
     async def withdraw(
         self,
@@ -76,7 +71,7 @@ class YupanaService(ILendingService):
         yupana = tez_client.contract(defi_provider.contractAddress)
         proxy = tez_client.contract("")
         # amount of yTokens to burn, pass 0 to burn all.
-        amount = int(self.solanaService.format_num(value, "to"))
+        amount = int(self.tezosService.format_num(value, "to"))
         borrow_ids = [1, 2]  # user borrowed tokens
         token_id = 1
         borrow_updates = [
@@ -85,18 +80,15 @@ class YupanaService(ILendingService):
         borrow_updates.append(
             proxy.getPrice([borrow_token_id for borrow_token_id in borrow_ids])
         )
-        call = (
-            pytezos.bulk(
-                *borrow_updates,
-                yupana.updateInterest(token_id),
-                proxy.getPrice([token_id]),
-                yupana.redeem(token_id, amount),
-            )
-            .autofill()
-            .sign()
+        txn_group = pytezos.bulk(
+            *borrow_updates,
+            yupana.updateInterest(token_id),
+            proxy.getPrice([token_id]),
+            yupana.redeem(token_id, amount),
         )
-        opg = call.inject()
-        return opg
+        txn_res = self.tezosService.sign_txn(network, mnemonic, txn_group)
+        print(txn_res)
+        return txn_res
 
     async def borrow(
         self,
@@ -115,7 +107,7 @@ class YupanaService(ILendingService):
         tez_client: PyTezosClient = pytezos.using(network.providerUrl, key)
         yupana = tez_client.contract(defi_provider.contractAddress)
         proxy = tez_client.contract("")
-        amount = int(self.solanaService.format_num(value, "to"))
+        amount = int(self.tezosService.format_num(value, "to"))
         borrow_ids = [1, 2]  # user borrowed tokens
         token_id = 1
         borrow_updates = [
@@ -124,20 +116,16 @@ class YupanaService(ILendingService):
         borrow_updates.append(
             proxy.getPrice([borrow_token_id for borrow_token_id in borrow_ids])
         )
-        call = (
-            pytezos.bulk(
-                *borrow_updates,
-                yupana.updateInterest(token_id),
-                proxy.getPrice([token_id]),
-                yupana.borrow(token_id, amount),
-            )
-            .autofill()
-            .sign()
+        txn_group = pytezos.bulk(
+            *borrow_updates,
+            yupana.updateInterest(token_id),
+            proxy.getPrice([token_id]),
+            yupana.borrow(token_id, amount),
         )
-        opg = call.inject()
 
-        print(opg)
-        return opg
+        txn_res = self.tezosService.sign_txn(network, mnemonic, txn_group)
+        print(txn_res)
+        return txn_res
 
     async def repay(
         self,
@@ -155,7 +143,7 @@ class YupanaService(ILendingService):
         tez_client: PyTezosClient = pytezos.using(network.providerUrl, key)
         yupana = tez_client.contract(defi_provider.contractAddress)
         proxy = tez_client.contract("")
-        amount = int(self.solanaService.format_num(value, "to"))
+        amount = int(self.tezosService.format_num(value, "to"))
         borrow_ids = [1, 2]  # user borrowed tokens
         token_id = 1
         borrow_updates = [
@@ -164,18 +152,15 @@ class YupanaService(ILendingService):
         borrow_updates.append(
             proxy.getPrice([borrow_token_id for borrow_token_id in borrow_ids])
         )
-        call = (
-            pytezos.bulk(
-                *borrow_updates,
-                yupana.updateInterest(token_id),
-                proxy.getPrice([token_id]),
-                yupana.repay(token_id, amount),
-            )
-            .autofill()
-            .sign()
+        txn_group = pytezos.bulk(
+            *borrow_updates,
+            yupana.updateInterest(token_id),
+            proxy.getPrice([token_id]),
+            yupana.repay(token_id, amount),
         )
-        opg = call.inject()
-        return opg
+        txn_res = self.tezosService.sign_txn(network, mnemonic, txn_group)
+        print(txn_res)
+        return txn_res
 
     async def swap_borrow_rate_mode(
         self,

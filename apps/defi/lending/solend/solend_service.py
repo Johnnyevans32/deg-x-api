@@ -1,7 +1,6 @@
 from typing import Any, cast
 
 import base58
-import spl.token.instructions as spl_token
 from solana.publickey import PublicKey
 
 from apps.appclient.services.beta_service import BetaService
@@ -44,31 +43,25 @@ class SolendService(ILendingService):
         gas_price: int = 50,
     ) -> str:
         chain_network = cast(Network, defi_provider.network)
-        client = await self.solanaService.get_network_provider(chain_network)
 
-        sender = self.solanaService.get_keypair_from_mnemonic(mnemonic)
-
-        solend_program_id = PublicKey(defi_provider.contractAddress)
         amount = int(self.solanaService.format_num(value, "to"))
 
-        token_account = spl_token.get_associated_token_address(
-            sender.public_key, PublicKey(asset)
-        )
-        await self.solanaService.approve_spl_token_delegate(
-            client,
-            sender,
-            solend_program_id,
-            token_account,
+        await self.solanaService.approve_token_delegation(
+            chain_network,
+            mnemonic,
             amount,
+            PublicKey(asset),
+            PublicKey(defi_provider.contractAddress),
         )
         # create txn of approval request
         solend_info = await get_solend_info(defi_provider)
         token_info = get_token_info(asset, solend_info)
+        sender = self.solanaService.get_keypair_from_mnemonic(mnemonic)
         payload = {
             "providerUrl": chain_network.providerUrl,
             "amount": amount,
             "symbol": token_info.symbol,
-            "userAddress": str(sender.public_key),
+            "userAddress": on_behalf_of,
             "secretKey": str(base58.b58encode(sender.secret_key), "utf-8"),
             "cluster": "devnet"
             if chain_network.networkType == NetworkType.TESTNET
@@ -159,22 +152,17 @@ class SolendService(ILendingService):
         gas_price: int = 50,
     ) -> Any:
         chain_network = cast(Network, defi_provider.network)
-        client = await self.solanaService.get_network_provider(chain_network)
 
         sender = self.solanaService.get_keypair_from_mnemonic(mnemonic)
 
-        solend_program_id = PublicKey(defi_provider.contractAddress)
         amount = int(self.solanaService.format_num(value, "to"))
 
-        token_account = spl_token.get_associated_token_address(
-            sender.public_key, PublicKey(asset)
-        )
-        await self.solanaService.approve_spl_token_delegate(
-            client,
-            sender,
-            solend_program_id,
-            token_account,
+        await self.solanaService.approve_token_delegation(
+            chain_network,
+            mnemonic,
             amount,
+            PublicKey(asset),
+            PublicKey(defi_provider.contractAddress),
         )
         # create txn of approval request
         solend_info = await get_solend_info(defi_provider)

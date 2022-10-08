@@ -3,6 +3,7 @@ from fastapi_restful.inferring_router import InferringRouter
 
 from apps.appclient.controllers.appclient_controller import router as router_client
 from apps.auth.controllers.auth_controller import router as router_auth
+from apps.auditlog.controllers.auditlog_controller import router as router_audit
 from apps.blockchain.controllers.blockchain_controller import (
     router as router_blockchain,
 )
@@ -34,3 +35,4 @@ router.include_router(router_blockchain)
 router.include_router(router_defi)
 router.include_router(router_cloud)
 router.include_router(router_user)
+router.include_router(router_audit)

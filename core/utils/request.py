@@ -42,8 +42,18 @@ class HTTPRepository:
                 headers=self.headers,
             )
             req.raise_for_status()
+            if type(req.json()) is list:
+                return generic_class(**{"data": req.json(), "message": "success"})
             return generic_class(**req.json())
         except requests.exceptions.RequestException as e:
+            logger.error(f"Error making request call - {str(e)}")
+            self.slackService.send_formatted_message(
+                "HTTP request error alert!!",
+                f"An error just occured \n *Error*: ```{e}``` \n *Payload:* ```{data}```",
+                "error-report",
+            )
+            raise Exception("A request error has occured")
+        except Exception as e:
             logger.error(f"Error making request call - {str(e)}")
             self.slackService.send_formatted_message(
                 "HTTP request error alert!!",

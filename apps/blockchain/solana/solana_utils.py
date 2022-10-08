@@ -1,7 +1,7 @@
 import asyncio
 from enum import IntEnum
 from typing import Union
-
+from pydantic import Field
 import spl.token.instructions as spl_token
 from construct import Int8ub, Pass
 from construct import Struct as cStruct
@@ -73,6 +73,27 @@ class IRPCResponse(BaseModel):
     jsonrpc: str
     result: IRPCResult
     id: int
+
+
+class ParsedInstruction(BaseModel):
+    programId: str
+    program: str
+    instructionType: str = Field(alias="type")
+
+
+class ISolanaExplorerTxn(BaseModel):
+    blockTime: int
+    txHash: str
+    lamport: int
+    fee: int
+    slot: int
+    signer: list[str]
+    parsedInstruction: list[ParsedInstruction]
+
+
+class ISolanaExplorer(BaseModel):
+    succcess: bool
+    data: list[ISolanaExplorerTxn]
 
 
 async def get_or_create_assoc_token_acc(

@@ -10,11 +10,20 @@ from apps.blockchain.interfaces.blockchain_interface import ChainServiceName
 from apps.blockchain.interfaces.network_interface import Network
 from apps.blockchain.interfaces.tokenasset_interface import TokenAsset
 from apps.blockchain.interfaces.blockchain_service_interface import IBlockchainService
+from apps.blockchain.interfaces.transaction_interface import (
+    BlockchainTransaction,
+    TxnSource,
+    TxnStatus,
+    TxnType,
+)
+from apps.blockchain.tezos.tezos_type import ITezosAccountTxn
 from apps.user.interfaces.user_interface import User
 from apps.wallet.interfaces.wallet_interface import Wallet
 from apps.wallet.interfaces.walletasset_interface import Address
+from core.depends.get_object_id import PyObjectId
 from core.utils.model_utility_service import ModelUtilityService
-from core.utils.request import HTTPRepository
+from core.utils.request import REQUEST_METHOD, HTTPRepository
+from core.utils.response_service import ResponseModel
 
 
 class TezosService(IBlockchainService, HTTPRepository):
@@ -52,10 +61,10 @@ class TezosService(IBlockchainService, HTTPRepository):
     ) -> str:
         from_address = address_obj.main
         network = cast(Network, token_asset.network)
-        key = Key.from_mnemonic(mnemonic)
-        tez_client: PyTezosClient = pytezos.using(network.providerUrl, key)
+
+        tez_client: PyTezosClient = pytezos.using(network.providerUrl)
         amount = int(self.format_num(value, "to"))
-        transfer_op: OperationGroup
+
         if token_asset.contractAddress:
             # KT1PW3aKxfB89HUrq8ywnw9tLvxtuHLgsjJW
             crt = tez_client.contract(token_asset.contractAddress)
@@ -75,9 +84,23 @@ class TezosService(IBlockchainService, HTTPRepository):
             ).operation_group
         else:
             transfer_op = tez_client.transaction(destination=to_address, amount=amount)
-        txn = transfer_op.fill().sign().inject()
 
-        return txn
+        txn_res = self.sign_txn(
+            network,
+            mnemonic,
+            transfer_op,
+        )
+        return txn_res
+
+    def sign_txn(
+        self,
+        chain_network: Network,
+        mnemonic: str,
+        transfer_op: OperationGroup,
+    ) -> Any:
+        # key = Key.from_mnemonic(mnemonic)
+        txn_res = transfer_op.autofill().sign().inject()
+        return txn_res
 
     async def get_balance(
         self,
@@ -102,13 +125,55 @@ class TezosService(IBlockchainService, HTTPRepository):
 
     async def get_transactions(
         self,
-        address: Address,
+        address_obj: Address,
         user: User,
         wallet: Wallet,
         chain_network: Network,
         start_block: int,
     ) -> list[Any]:
-        pass
+        assert chain_network.apiExplorer, "network apiexplorer not found"
+
+        address = address_obj.main
+        res = await self.httpRepository.call(
+            REQUEST_METHOD.GET,
+            f"{chain_network.apiExplorer.url}/explorer/account/{address}/operations?limit=100&order=desc",
+            ResponseModel[list[ITezosAccountTxn]],
+        )
+
+        txns_result = res.data
+        assert txns_result, "no tezos transaction"
+
+        txn_obj: list[Any] = []
+        for txn in txns_result:
+            txn_type = (
+                TxnType.DEBIT if txn.sender == address.lower() else TxnType.CREDIT
+            )
+
+            chain_txn = BlockchainTransaction(
+                id=None,
+                transactionHash=txn.hash,
+                fromAddress=txn.sender,
+                toAddress=txn.receiver,
+                gasPrice=int(self.format_num(txn.fee, "to")),
+                blockNumber=txn.height or 0,
+                gasUsed=txn.gas_used,
+                blockConfirmations=txn.confirmations or 0,
+                network=cast(PyObjectId, chain_network.id),
+                wallet=cast(PyObjectId, wallet.id),
+                amount=txn.volume,
+                status=TxnStatus.SUCCESS if txn.is_success else TxnStatus.FAILED,
+                txnType=txn_type,
+                user=cast(PyObjectId, user.id),
+                # otherUser=other_user_walletasset.user
+                # if other_user_walletasset
+                # else None,
+                transactedAt=txn.time,
+                source=TxnSource.EXPLORER,
+                metaData=txn.dict(by_alias=True),
+            ).dict(by_alias=True, exclude_none=True)
+            txn_obj.append(chain_txn)
+        print("tezos ", txn_obj)
+        return txn_obj
 
     async def activate_and_reveal_acc(
         self, tez_client: PyTezosClient, activation_code: str, pkh: str, public_key: str

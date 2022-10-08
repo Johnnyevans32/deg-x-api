@@ -41,10 +41,10 @@ class BlockchainTransactionOut(SBaseOutModel):
     blockConfirmations: Optional[int]
     blockNumber: int
     gasPrice: int
-    gasUsed: int
+    gasUsed: Optional[int]
     amount: float
     status: TxnStatus
-    isContractExecution: bool
+    isContractExecution: bool = Field(default=False)
     txnType: TxnType
     source: TxnSource = Field(default=TxnSource.EXPLORER)
     transactedAt: datetime

@@ -60,6 +60,24 @@ class IBlockchainService(metaclass=abc.ABCMeta):
     ) -> str:
         pass
 
+    async def approve_token_delegation(
+        self,
+        network: Network,
+        mnemonic: str,
+        amount: int,
+        asset_address: Any,
+        spender_address: Any,
+    ) -> Any:
+        pass
+
+    async def sign_txn(
+        self,
+        chain_network: Network,
+        mnemonic: str,
+        txn_build: Any,
+    ) -> Any:
+        pass
+
     async def get_test_token(
         self,
         to_address: str,

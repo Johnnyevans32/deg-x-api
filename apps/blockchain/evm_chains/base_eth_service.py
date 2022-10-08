@@ -55,7 +55,7 @@ class BaseEvmService(IBlockchainService):
         address = Web3.toBytes(hexstr=HexStr(crt_address))
         abi = Utils.get_compiled_sol("IERC20", "0.6.12")
         erc20_crt = cast(
-            AsyncContract, web3.eth.contract(address=EthAddress(address), abi=abi)
+            AsyncContract, Web3.eth.contract(address=EthAddress(address), abi=abi)
         )
 
         return erc20_crt
@@ -83,10 +83,6 @@ class BaseEvmService(IBlockchainService):
     ) -> str:
         chain_network = cast(Network, token_asset.network)
         web3 = await BaseEvmService.get_network_provider(chain_network)
-        from_address = address_obj.main
-        nonce = web3.eth.get_transaction_count(from_address)
-        txn_miner_tip = web3.eth.max_priority_fee + Web3.toWei(100, "gwei")
-        block_base_fee_per_gas = web3.eth.get_block("latest").get("baseFeePerGas")
         if token_asset.contractAddress:
             erc20_crt = BaseEvmService.get_erc20_contract_obj(
                 token_asset.contractAddress, web3
@@ -94,25 +90,20 @@ class BaseEvmService(IBlockchainService):
 
             txn_build = erc20_crt.functions.transfer(
                 Web3.toBytes(hexstr=HexStr(to)), Web3.toWei(value, "ether")
-            ).build_transaction({"nonce": nonce})
+            ).build_transaction()
 
         else:
             # build a transaction in a dictionary
             txn_build = {
-                "nonce": nonce,
                 "to": Web3.toBytes(hexstr=HexStr(to)),
                 "value": Web3.toWei(value, "ether"),
             }
 
         txn_build = {
             **txn_build,
-            "maxPriorityFeePerGas": txn_miner_tip,
-            "gas": web3.eth.estimate_gas(txn_build),
-            "chainId": web3.eth.chain_id,
-            "maxFeePerGas": block_base_fee_per_gas + txn_miner_tip,
         }
 
-        txn_hash = await self.sign_txn(web3, mnemonic, txn_build)
+        txn_hash = await self.sign_txn(chain_network, mnemonic, txn_build)
 
         return txn_hash
 
@@ -137,12 +128,25 @@ class BaseEvmService(IBlockchainService):
 
     async def sign_txn(
         self,
-        web3: Web3,
+        network: Network,
         mnemonic: str,
         txn_build: Any,
     ) -> str:
         # sign the transaction
+        web3 = await BaseEvmService.get_network_provider(network)
         account = self.get_account_by_mmenonic(mnemonic)
+        nonce = web3.eth.get_transaction_count(account.address)
+        txn_miner_tip = web3.eth.max_priority_fee + Web3.toWei(100, "gwei")
+        block_base_fee_per_gas = web3.eth.get_block("latest").get("baseFeePerGas")
+        txn_build = {
+            **txn_build,
+            "nonce": nonce,
+            "maxPriorityFeePerGas": txn_miner_tip,
+            "gas": web3.eth.estimate_gas(txn_build),
+            "chainId": web3.eth.chain_id,
+            "maxFeePerGas": block_base_fee_per_gas + txn_miner_tip,
+        }
+
         signed_tx = account.sign_transaction(txn_build)
 
         # send transaction
@@ -150,25 +154,22 @@ class BaseEvmService(IBlockchainService):
 
         return str(Web3.toHex(tx_hash))
 
-    async def approve_erc_20_txns(
+    async def approve_token_delegation(
         self,
-        token_contract_address: str,
-        web3: Web3,
-        spender: str,
-        amount: float,
+        network: Network,
         mnemonic: str,
-        gas: int = None,
-        gas_price: int = None,
+        amount: float,
+        token_address: str,
+        spender_address: str,
     ) -> str:
-        account = self.get_account_by_mmenonic(mnemonic)
-        erc20_crt = BaseEvmService.get_erc20_contract_obj(token_contract_address, web3)
-        nonce = web3.eth.get_transaction_count(account.address)
+        web3 = await BaseEvmService.get_network_provider(network)
+        erc20_crt = BaseEvmService.get_erc20_contract_obj(token_address, web3)
 
         approve_txn_build = erc20_crt.functions.approve(
-            Web3.toBytes(hexstr=HexStr(spender)), Web3.toWei(amount, "ether")
-        ).build_transaction({"nonce": nonce})
+            Web3.toBytes(hexstr=HexStr(spender_address)), Web3.toWei(amount, "ether")
+        ).build_transaction()
 
-        txn_hash = await self.sign_txn(web3, mnemonic, approve_txn_build)
+        txn_hash = await self.sign_txn(network, mnemonic, approve_txn_build)
 
         return txn_hash
 
