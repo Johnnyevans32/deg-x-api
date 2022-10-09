@@ -19,6 +19,7 @@ class DefiProviderOut(SBaseOutModel):
     desc: Optional[str]
     category: Optional[str]
     contractAddress: str
+    logo: Optional[str]
     isDefault: bool = Field(default=False)
     serviceType: DefiServiceType
     serviceName: str
