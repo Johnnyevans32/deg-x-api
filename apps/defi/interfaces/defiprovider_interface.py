@@ -17,17 +17,17 @@ class DefiServiceType(str, Enum):
 class DefiProviderOut(SBaseOutModel):
     name: str
     desc: Optional[str]
-    category: Optional[str]
-    contractAddress: str
+    tags: Optional[list[str]]
     logo: Optional[str]
-    isDefault: bool = Field(default=False)
+    website: Optional[str]
     serviceType: DefiServiceType
-    serviceName: str
-    blockchain: Union[PyObjectId, Blockchain]
-    network: Union[PyObjectId, Network]
-    networkType: NetworkType
-    meta: Optional[Any]
 
 
 class DefiProvider(DefiProviderOut, SBaseModel):
-    pass
+    meta: Optional[Any]
+    serviceName: str
+    contractAddress: str
+    isDefault: bool = Field(default=False)
+    blockchain: Union[PyObjectId, Blockchain]
+    network: Union[PyObjectId, Network]
+    networkType: NetworkType
