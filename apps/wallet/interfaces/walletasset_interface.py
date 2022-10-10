@@ -1,6 +1,6 @@
 from typing import Union
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 from apps.blockchain.interfaces.blockchain_interface import Blockchain
 from apps.blockchain.interfaces.tokenasset_interface import TokenAsset, TokenOut
@@ -19,6 +19,7 @@ class WalletAssetOut(SBaseOutModel):
     tokenasset: Union[PyObjectId, TokenOut]
     wallet: Union[PyObjectId, WalletOut]
     address: Address
+    balance: float = Field(default=0)
 
 
 class WalletAsset(WalletAssetOut, SBaseModel):
@@ -26,4 +27,3 @@ class WalletAsset(WalletAssetOut, SBaseModel):
     blockchain: Union[PyObjectId, Blockchain]
     user: Union[PyObjectId, User]
     wallet: Union[PyObjectId, Wallet]
-    # balance: int

@@ -9,6 +9,10 @@ from apps.blockchain.interfaces.transaction_interface import BlockchainTransacti
 
 from apps.blockchain.registry.blockchain_registry_service import BlockchainRegistry
 from apps.notification.slack.services.slack_service import SlackService
+from apps.socket.services.socket_service import (
+    SocketEvent,
+    emit_socket_event_to_clients,
+)
 from apps.user.interfaces.user_interface import User
 from apps.wallet.interfaces.wallet_interface import Wallet
 from apps.wallet.interfaces.walletasset_interface import Address, WalletAsset
@@ -174,11 +178,7 @@ class BlockchainService:
         if not user_asset:
             raise Exception("user asset not found")
 
-        return (
-            user_asset.address.main
-            if network.networkType == NetworkType.MAINNET
-            else user_asset.address.test
-        )
+        return self.get_address(user_asset.address, network)
 
     async def send(self, user: User, payload: SendTokenDTO) -> SendTxnRes:
         (
@@ -230,10 +230,42 @@ class BlockchainService:
             token_asset,
         )
 
+        await ModelUtilityService.model_find_one_and_update(
+            WalletAsset, {"_id": user_asset.id}, {"balance": asset_balance}
+        )
+
         return BalanceRes(
             symbol=token_asset.symbol,
             balance=asset_balance,
         )
+
+    async def update_walletasset_balance(
+        self, wallet: Wallet, blockchain: Blockchain
+    ) -> None:
+        user_assets = await ModelUtilityService.find(
+            WalletAsset,
+            {"wallet": wallet.id, "isDeleted": False, "blockchain": blockchain.id},
+        )
+        for user_asset in user_assets:
+            token_asset = await ModelUtilityService.find_one_and_populate(
+                TokenAsset,
+                {"_id": user_asset.tokenasset, "isDeleted": False},
+                [
+                    "network",
+                ],
+            )
+            if not token_asset:
+                raise Exception("token asset not found")
+            asset_balance = await self.blockchainRegistry.get_service(
+                blockchain.registryName
+            ).get_balance(
+                user_asset.address,
+                token_asset,
+            )
+
+            await ModelUtilityService.model_find_one_and_update(
+                WalletAsset, {"_id": user_asset.id}, {"balance": asset_balance}
+            )
 
     async def update_user_txns(
         self, user: User, user_default_wallet: Wallet, network: Network
@@ -251,6 +283,8 @@ class BlockchainService:
             )
             if not user_asset:
                 raise Exception("user asset not found")
+
+            await self.update_walletasset_balance(user_default_wallet, blockchain)
 
             user_last_txn = await BlockchainService.get_last_block_txn_by_query(
                 {
@@ -307,7 +341,11 @@ class BlockchainService:
         for network in chain_networks:
             chain_ids.append(network.id)
             await self.update_user_txns(user, user_default_wallet, network)
-
+        await emit_socket_event_to_clients(
+            SocketEvent.ASSETBALANCE,
+            SocketEvent.ASSETBALANCE.value,
+            str(user.id),
+        )
         res, meta = await ModelUtilityService.paginate_data(
             BlockchainTransaction,
             {

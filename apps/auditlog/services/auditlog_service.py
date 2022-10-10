@@ -1,4 +1,7 @@
-from apps.socket.services.socket_service import SocketEvent, emit_event_to_clients
+from apps.socket.services.socket_service import (
+    SocketEvent,
+    emit_socket_event_to_clients,
+)
 from apps.user.interfaces.user_interface import User
 from apps.auditlog.interfaces.notification_interface import (
     Notification,
@@ -25,7 +28,7 @@ class AuditLogService:
                 by_alias=True, exclude_none=True
             ),
         )
-        await emit_event_to_clients(
+        await emit_socket_event_to_clients(
             SocketEvent.NOTIFICATION,
             notf_obj.title,
             str(user.id) if user else None,

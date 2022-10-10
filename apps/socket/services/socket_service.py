@@ -16,9 +16,10 @@ sio = socketio.AsyncServer(
 class SocketEvent(str, Enum):
     NOTIFICATION = "notification"
     TRANSACTION = "transaction"
+    ASSETBALANCE = "assetbalance"
 
 
-async def emit_event_to_clients(
+async def emit_socket_event_to_clients(
     event: SocketEvent, data: Any, user_id: str = None
 ) -> None:
 
