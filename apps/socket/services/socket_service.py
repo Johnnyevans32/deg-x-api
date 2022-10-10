@@ -3,14 +3,11 @@ from typing import Any
 
 import socketio
 
-from apps.user.services.user_service import UserService
+from core.config import settings
 
-# from core.depends.get_object_id import PyObjectId
-
-userService = UserService()
 sio = socketio.AsyncServer(
     async_mode="asgi",
-    cors_allowed_origins=["http://localhost:3000"],
+    cors_allowed_origins=settings.BACKEND_CORS_ORIGINS.split(","),
     logger=True,
     engineio_logger=True,
 )
