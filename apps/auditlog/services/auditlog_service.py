@@ -1,3 +1,4 @@
+from apps.socket.services.socket_service import SocketEvent, emit_event_to_clients
 from apps.user.interfaces.user_interface import User
 from apps.auditlog.interfaces.notification_interface import (
     Notification,
@@ -18,12 +19,19 @@ class AuditLogService:
         type: NotificationType = NotificationType.Generic,
         user: User = None,
     ) -> Notification:
-        return await ModelUtilityService.model_create(
+        notf_obj = await ModelUtilityService.model_create(
             Notification,
             Notification(title=title, message=message, type=type, user=user).dict(
                 by_alias=True, exclude_none=True
             ),
         )
+        await emit_event_to_clients(
+            SocketEvent.NOTIFICATION,
+            notf_obj.title,
+            str(user.id) if user else None,
+        )
+
+        return notf_obj
 
     async def get_users_notification(
         self, user: User, page_num: int, page_size: int

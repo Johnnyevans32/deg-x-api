@@ -2,11 +2,11 @@ from enum import Enum
 from typing import Any, Optional, Union
 
 from apps.blockchain.interfaces.tokenasset_interface import TokenAsset
-from apps.defi.interfaces.defiprovider_interface import DefiProvider
+from apps.defi.interfaces.defiprovider_interface import DefiProvider, DefiProviderOut
 from apps.user.interfaces.user_interface import User
 from apps.wallet.interfaces.wallet_interface import Wallet
 from core.depends.get_object_id import PyObjectId
-from core.depends.model import SBaseModel
+from core.depends.model import SBaseModel, SBaseOutModel
 
 
 class LendingRequestStatus(str, Enum):
@@ -27,16 +27,20 @@ class InterestRateMode(str, Enum):
     VARIABLE = "variable"
 
 
-class LendingRequest(SBaseModel):
+class LendingRequestOut(SBaseOutModel):
     user: Union[PyObjectId, User]
-    wallet: Union[PyObjectId, Wallet]
-    defiProvider: Union[PyObjectId, DefiProvider]
+    defiProvider: Union[PyObjectId, DefiProviderOut]
     status: LendingRequestStatus
     tokenAsset: Union[PyObjectId, TokenAsset, str]
     amount: float
     repaidAmount: Optional[float]
     requestType: LendingRequestType
     interestRateMode: Optional[InterestRateMode]
+
+
+class LendingRequest(LendingRequestOut, SBaseModel):
+    wallet: Union[PyObjectId, Wallet]
+    defiProvider: Union[PyObjectId, DefiProvider]
     providerResponse: Optional[Any]
     # requestBeneficiary: str
 

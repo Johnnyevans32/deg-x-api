@@ -19,6 +19,7 @@ from apps.wallet.interfaces.walletasset_interface import WalletAsset
 from apps.wallet.services.wallet_service import WalletService
 from core.depends.get_object_id import PyObjectId
 from core.utils.model_utility_service import ModelUtilityService
+from core.utils.response_service import MetaDataModel
 
 
 class LendingService:
@@ -73,6 +74,19 @@ class LendingService:
             raise Exception("user asset not found")
 
         return user_wallet_asset
+
+    async def get_user_lending_requests(
+        self, user: User, page_num: int, page_size: int
+    ) -> tuple[list[LendingRequest], MetaDataModel]:
+        user_wallet = await self.walletService.get_user_default_wallet(user)
+        lending_reqs, metadata = await ModelUtilityService.populate_and_paginate_data(
+            LendingRequest,
+            {"wallet": user_wallet.id, "isDeleted": False},
+            ["defiProvider"],
+            page_num,
+            page_size,
+        )
+        return lending_reqs, metadata
 
     async def get_user_lending_data(
         self,

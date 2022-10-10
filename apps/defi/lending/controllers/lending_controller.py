@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from typing import Any
+from typing import Any, Sequence
 
 from fastapi import Depends, Response, status
 from fastapi_restful.cbv import cbv
@@ -7,7 +7,10 @@ from fastapi_restful.inferring_router import InferringRouter
 
 from apps.auth.services.auth_bearer import JWTBearer
 from apps.defi.lending.aave.aave_interface import IReserveTokens
-from apps.defi.lending.interfaces.lending_request_interface import LendingRequest
+from apps.defi.lending.interfaces.lending_request_interface import (
+    LendingRequest,
+    LendingRequestOut,
+)
 from apps.defi.lending.services.lending_service import LendingService
 from apps.defi.lending.types.lending_types import BaseLendingActionDTO, BorrowAssetDTO
 from core.utils.custom_exceptions import UnicornRequest
@@ -71,6 +74,42 @@ class LendingController:
                 response,
                 status.HTTP_400_BAD_REQUEST,
                 f"Error in getting user lending account data: {str(e)}",
+            )
+
+    @router.get(
+        "/get-requests",
+        dependencies=[Depends(JWTBearer())],
+    )
+    async def get_user_lending_requests(
+        self,
+        request: UnicornRequest,
+        response: Response,
+        page_num: int = 1,
+        page_size: int = 10,
+    ) -> ResponseModel[Sequence[LendingRequestOut]]:
+        try:
+            user = request.state.user
+            request.app.logger.info(f"getting user lending requests - {user.id}")
+            (
+                user_lending_data,
+                metadata,
+            ) = await self.lendingService.get_user_lending_requests(
+                user, page_num, page_size
+            )
+            request.app.logger.info("done getting user lending requests ")
+            return self.responseService.send_response(
+                response,
+                status.HTTP_200_OK,
+                "user lending requests retrieved",
+                user_lending_data,
+                metadata,
+            )
+
+        except Exception as e:
+            return self.responseService.send_response(
+                response,
+                status.HTTP_400_BAD_REQUEST,
+                f"Error in getting user lending requests data: {str(e)}",
             )
 
     @router.post(
