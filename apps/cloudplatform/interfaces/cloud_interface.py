@@ -1,6 +1,7 @@
 from enum import Enum
-from typing import Any, Optional
+from typing import Optional
 from pydantic import BaseModel
+from core.utils.aes import EncryptedDTO
 
 
 class CloudProvider(str, Enum):
@@ -12,8 +13,9 @@ class IDType(str, Enum):
     AccessToken = "accesstoken"
 
 
-class UploadFileDTO(BaseModel):
+class BackupSeedPhraseDTO(BaseModel):
     fileName: str
-    data: Optional[Any]
+    data: Optional[EncryptedDTO]
     authToken: str
+    password: Optional[str]
     cloudProvider: CloudProvider

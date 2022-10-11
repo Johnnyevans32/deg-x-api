@@ -8,14 +8,18 @@ from starlette.middleware.base import BaseHTTPMiddleware
 
 from starlette.types import Message, ASGIApp
 
+from core.utils.aes import AesEncryptionService
+
 
 class DecrptRequestBody(Request):
+    aesEncryptionService = AesEncryptionService()
+
     async def body(self) -> bytes:
 
         if not hasattr(self, "_body"):
             body = await super().body()
             if "encrypted" in self.headers.getlist("Content-Encoding"):
-                # TODO: decrypt payload and pass as body for app usage
+                print("body", body)
                 pass
 
             self._body = body

@@ -7,6 +7,8 @@ from Crypto.Cipher import AES
 from Crypto.Cipher._mode_gcm import GcmMode
 from pydantic import BaseModel
 
+from core.config import settings
+
 
 class KDFParams(BaseModel):
     dklen: int
@@ -40,11 +42,43 @@ T = TypeVar("T")
 enc_str = "utf-8"
 
 
+class EncryptedDTO(BaseModel):
+    ciphertext: str
+    nonce: str
+    mac: str
+
+
 class AesEncryptionService:
     def __init__(self, password: str = "DEFAULT_PASSWORD") -> None:
         self.password = password
 
-    def encrypt_AES_GCM(
+    def encrypt_AES_GCM(self, msg: Any) -> EncryptedDTO:
+        encoded_payload = json.dumps(msg).encode(enc_str)
+        aes_cipher = cast(
+            GcmMode, AES.new(bytes.fromhex(settings.SECRET_KEY), AES.MODE_GCM)
+        )
+        ciphertext, auth_tag = aes_cipher.encrypt_and_digest(encoded_payload)
+        return EncryptedDTO(
+            ciphertext=ciphertext.hex(),
+            nonce=aes_cipher.nonce.hex(),
+            mac=auth_tag.hex(),
+        )
+
+    def decrypt_AES_GCM(
+        self,
+        encrypted_payload: EncryptedDTO,
+    ) -> Any:
+
+        ciphertext = bytes.fromhex(encrypted_payload.ciphertext)
+        nonce = bytes.fromhex(encrypted_payload.nonce)
+        mac = bytes.fromhex(encrypted_payload.mac)
+        aes_cipher = cast(
+            GcmMode, AES.new(bytes.fromhex(settings.SECRET_KEY), AES.MODE_GCM, nonce)
+        )
+        dec_data = aes_cipher.decrypt_and_verify(ciphertext, mac)
+        return json.loads(dec_data)
+
+    def encrypt_mnemonic(
         self, user: str, msg: dict[str, Any] | str, _password: str = None
     ) -> KeystoreModel:
         encoded_payload = json.dumps(msg).encode(enc_str)
@@ -72,7 +106,7 @@ class AesEncryptionService:
         )
         return KeystoreModel(version=1, id=user, crypto=crypto_model)
 
-    def decrypt_AES_GCM(
+    def decrypt_mnemonic(
         self, key_store: KeystoreModel, generic_class: Type[T], _password: str = None
     ) -> T:
         kdf_params = key_store.crypto.kdfparams

@@ -60,13 +60,13 @@ class WalletController:
         try:
             user = request.state.user
             request.app.logger.info(f"creating wallet for - {user.id}")
-            user_wallet, key_store_model = await self.walletService.create_wallet(user)
+            user_wallet, seed = await self.walletService.create_wallet(user)
             request.app.logger.info("done creating user wallet")
             return self.responseService.send_response(
                 response,
                 status.HTTP_201_CREATED,
                 "user wallet created successfully",
-                AuthResponse(wallet=user_wallet, keystore=key_store_model),
+                AuthResponse(wallet=user_wallet, seed=seed),
             )
         except Exception as e:
             return self.responseService.send_response(

@@ -12,7 +12,7 @@ from apps.wallet.interfaces.walletasset_interface import WalletAsset
 
 # from core.db import client
 from core.depends.get_object_id import PyObjectId
-from core.utils.aes import AesEncryptionService, KeystoreModel
+from core.utils.aes import AesEncryptionService, EncryptedDTO
 from core.utils.model_utility_service import ModelUtilityService
 from core.utils.utils_service import Utils
 
@@ -48,7 +48,7 @@ class WalletService:
         user: User,
         session: ClientSession = None,
         walletType: WalletType = WalletType.MULTICHAIN,
-    ) -> tuple[Wallet, KeystoreModel]:
+    ) -> tuple[Wallet, EncryptedDTO]:
         assert user.id, "user id not found"
         mnemonic = self.mnemo.generate(strength=256)
         dict_wallet = Wallet(
@@ -63,9 +63,7 @@ class WalletService:
             {"isDefault": False},
         )
 
-        key_store_model = self.aesEncryptionService.encrypt_AES_GCM(
-            str(user.id), mnemonic
-        )
+        encrypted_mnemonic_obj = self.aesEncryptionService.encrypt_AES_GCM(mnemonic)
         wallet_obj = await ModelUtilityService.model_create(
             Wallet, dict_wallet, session
         )
@@ -87,7 +85,7 @@ class WalletService:
         for chain in blockchains:
             await self.create_wallet_assets(user, wallet_obj, mnemonic, chain, session)
 
-        return wallet_obj, key_store_model
+        return wallet_obj, encrypted_mnemonic_obj
 
     async def create_wallet_assets(
         self,

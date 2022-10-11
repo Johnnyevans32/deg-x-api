@@ -89,7 +89,7 @@ def create_app() -> FastAPI:
         debug=False,
         openapi_url=openapi_url,
     )
-
+    print("sbsbbuff", settings.SECRET_KEY)
     app.logger = logger  # type: ignore[attr-defined]
 
     # FASTAPI ADMIN

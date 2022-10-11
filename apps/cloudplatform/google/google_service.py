@@ -111,7 +111,7 @@ class GoogleService(ICloudService):
             )
             user_res = await self.userService.create_user(user_obj)
 
-            user, wallet, keystore = user_res
+            user, wallet, seed = user_res
             assert user.id, "id is null"
             access_token = self.jwtService.sign_jwt(user.id, "ACCESS_TOKEN")
             refresh_token = self.jwtService.sign_jwt(user.id, "REFRESH_TOKEN")
@@ -119,7 +119,7 @@ class GoogleService(ICloudService):
             return AuthResponse(
                 user=user,
                 wallet=wallet,
-                keystore=keystore,
+                seed=seed,
                 accessToken=access_token,
                 refreshToken=refresh_token,
             )

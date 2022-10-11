@@ -1,5 +1,4 @@
 import os
-from base64 import b64encode
 from functools import lru_cache
 from typing import Any
 
@@ -18,7 +17,7 @@ class Settings(BaseSettings):
     # ~~~~~ TEST ~~~~~
     TEST_RUN: bool = False
 
-    SECRET_KEY: str = b64encode(os.urandom(32)).decode("utf-8")
+    SECRET_KEY: str = os.urandom(32).hex()
 
     # ~~~~~ CORS ~~~~~
     BACKEND_CORS_ORIGINS: str = "http://localhost:4200"
