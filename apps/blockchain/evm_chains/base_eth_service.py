@@ -28,6 +28,7 @@ from apps.wallet.interfaces.wallet_interface import Wallet
 from apps.wallet.interfaces.walletasset_interface import Address
 from core.depends.get_object_id import PyObjectId
 from core.utils.loggly import logger
+from core.utils.model_utility_service import ModelUtilityService
 from core.utils.request import REQUEST_METHOD, HTTPRepository
 from core.utils.utils_service import Utils, timed_cache
 
@@ -214,6 +215,18 @@ class BaseEvmService(IBlockchainService):
             #     if other_user_address
             #     else None
             # )
+
+            tokenasset = await ModelUtilityService.find_one(
+                TokenAsset,
+                {
+                    "network": chain_network.id,
+                    "contractAddress": txn.contractAddress,
+                    "isDeleted": False,
+                },
+            )
+
+            assert tokenasset, "token asset not found"
+            assert tokenasset.id, "token asset id not found"
             chain_txn = BlockchainTransaction(
                 id=None,
                 transactionHash=txn.hash,
@@ -230,8 +243,10 @@ class BaseEvmService(IBlockchainService):
                     TxnStatus.FAILED if (txn.isError == "1") else TxnStatus.SUCCESS
                 ),
                 isContractExecution=txn.contractAddress != "",
+                tokenasset=tokenasset.id,
                 txnType=txn_type,
                 user=cast(PyObjectId, user.id),
+                explorerUrl=str(chain_network.blockExplorerUrl) + txn.hash,
                 # otherUser=other_user_walletasset.user
                 # if other_user_walletasset
                 # else None,

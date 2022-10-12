@@ -4,6 +4,7 @@ import pendulum
 from web3 import Web3
 from apps.appclient.services.appclient_service import AppClientService, Apps
 from apps.blockchain.interfaces.blockchain_interface import ChainServiceName
+from apps.blockchain.interfaces.tokenasset_interface import TokenAsset
 from apps.blockchain.interfaces.transaction_interface import (
     BlockchainTransaction,
     TxnSource,
@@ -19,6 +20,7 @@ from apps.notification.slack.services.slack_service import SlackService
 from apps.wallet.services.wallet_service import WalletService
 from core.depends.get_object_id import PyObjectId
 from core.config import settings
+from core.utils.model_utility_service import ModelUtilityService
 from core.utils.request import REQUEST_METHOD, HTTPRepository
 from core.utils.utils_service import timed_cache
 
@@ -205,6 +207,16 @@ class MoralisService(IStreamService):
                     "blockchain": network.blockchain,
                 }
             )
+            tokenasset = await ModelUtilityService.find_one(
+                TokenAsset,
+                {
+                    "network": network.id,
+                    "isDeleted": False,
+                },
+            )
+
+            assert tokenasset, "token asset not found"
+            assert tokenasset.id, "token asset id not found"
             txn_payload = BlockchainTransaction(
                 transactionHash=txn.hash,
                 fromAddress=txn.fromAddress,
@@ -220,6 +232,8 @@ class MoralisService(IStreamService):
                     if (txn.receiptStatus == "1")
                     else TxnStatus.FAILED
                 ),
+                tokenasset=tokenasset.id,
+                explorerUrl=str(network.blockExplorerUrl) + txn.hash,
                 otherUser=other_user_walletasset.user
                 if other_user_walletasset
                 else None,

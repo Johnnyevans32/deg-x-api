@@ -150,6 +150,17 @@ class TezosService(IBlockchainService, HTTPRepository):
                 TxnType.DEBIT if txn.sender == address.lower() else TxnType.CREDIT
             )
 
+            tokenasset = await ModelUtilityService.find_one(
+                TokenAsset,
+                {
+                    "network": chain_network.id,
+                    "isDeleted": False,
+                },
+            )
+
+            assert tokenasset, "token asset not found"
+            assert tokenasset.id, "token asset id not found"
+
             chain_txn = BlockchainTransaction(
                 id=None,
                 transactionHash=txn.hash,
@@ -165,6 +176,8 @@ class TezosService(IBlockchainService, HTTPRepository):
                 status=TxnStatus.SUCCESS if txn.is_success else TxnStatus.FAILED,
                 txnType=txn_type,
                 user=cast(PyObjectId, user.id),
+                tokenasset=tokenasset.id,
+                explorerUrl=str(chain_network.blockExplorerUrl) + txn.hash,
                 # otherUser=other_user_walletasset.user
                 # if other_user_walletasset
                 # else None,

@@ -107,6 +107,7 @@ class ModelUtilityService:
         fields: list[str],
         page_num: int = 1,
         page_size: int = 10,
+        sort_field: str = "createdAt",
     ) -> tuple[list[T], MetaDataModel]:
         model = db[generic_class.__name__.lower()]
         # Calculate number of documents to skip
@@ -119,7 +120,7 @@ class ModelUtilityService:
                         {
                             "$match": query,
                         },
-                        {"$sort": {"createdAt": DESCENDING}},
+                        {"$sort": {sort_field: DESCENDING}},
                         {"$skip": skips},
                         {"$limit": page_size},
                     ],
@@ -155,11 +156,12 @@ class ModelUtilityService:
                     "$unwind": {
                         "path": f"${field}",
                         "includeArrayIndex": "arrayIndex",
-                        "preserveNullAndEmptyArrays": False,
+                        "preserveNullAndEmptyArrays": True,
                     }
                 },
             ]
-            pipeline[0]["$facet"]["pipelineData"].insert(1, *lookup)
+            for i, pl in enumerate(lookup):
+                pipeline[0]["$facet"]["pipelineData"].insert(1 + i, pl)
 
         aggregation_result = list(model.aggregate(pipeline))
 

@@ -309,6 +309,16 @@ class SolanaService(IBlockchainService):
                 txDetails["result"]["meta"]["postBalances"][1]
                 - txDetails["result"]["meta"]["preBalances"][1]
             )
+            tokenasset = await ModelUtilityService.find_one(
+                TokenAsset,
+                {
+                    "network": chain_network.id,
+                    "isDeleted": False,
+                },
+            )
+
+            assert tokenasset, "token asset not found"
+            assert tokenasset.id, "token asset id not found"
             chain_txn = BlockchainTransaction(
                 id=None,
                 transactionHash=txn.txHash,
@@ -324,6 +334,8 @@ class SolanaService(IBlockchainService):
                 status=TxnStatus.SUCCESS,
                 txnType=txn_type,
                 user=cast(PyObjectId, user.id),
+                tokenasset=tokenasset.id,
+                explorerUrl=str(chain_network.blockExplorerUrl) + txn.txHash + cluster,
                 # otherUser=other_user_walletasset.user
                 # if other_user_walletasset
                 # else None,

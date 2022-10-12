@@ -346,7 +346,7 @@ class BlockchainService:
             SocketEvent.ASSETBALANCE.value,
             str(user.id),
         )
-        res, meta = await ModelUtilityService.paginate_data(
+        res, meta = await ModelUtilityService.populate_and_paginate_data(
             BlockchainTransaction,
             {
                 "user": user.id,
@@ -354,10 +354,13 @@ class BlockchainService:
                 "network": {"$in": chain_ids},
                 "isDeleted": False,
             },
+            ["tokenasset"],
             page_num,
             page_size,
             "transactedAt",
         )
+
+        print(res)
 
         return res, meta
 
