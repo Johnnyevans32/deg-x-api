@@ -26,7 +26,7 @@ class GoogleService(ICloudService):
     userService = UserService()
     walletService = WalletService()
     jwtService = JWTService()
-    folder_name = "Deg X"
+    folder_name = "Deg X Wallet"
 
     def name(self) -> CloudProvider:
         return CloudProvider.GOOGLE
