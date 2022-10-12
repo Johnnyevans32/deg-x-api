@@ -55,7 +55,7 @@ class BaseEvmService(IBlockchainService):
         address = Web3.toBytes(hexstr=HexStr(crt_address))
         abi = Utils.get_compiled_sol("IERC20", "0.6.12")
         erc20_crt = cast(
-            AsyncContract, Web3.eth.contract(address=EthAddress(address), abi=abi)
+            AsyncContract, web3.eth.contract(address=EthAddress(address), abi=abi)
         )
 
         return erc20_crt
