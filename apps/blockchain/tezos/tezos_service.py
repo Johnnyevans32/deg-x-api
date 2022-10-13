@@ -61,8 +61,8 @@ class TezosService(IBlockchainService, HTTPRepository):
     ) -> str:
         from_address = address_obj.main
         network = cast(Network, token_asset.network)
-
-        tez_client: PyTezosClient = pytezos.using(network.providerUrl)
+        key = Key.from_mnemonic(mnemonic)
+        tez_client: PyTezosClient = pytezos.using(network.providerUrl, key=key)
         amount = int(self.format_num(value, "to"))
 
         if token_asset.contractAddress:
@@ -98,7 +98,6 @@ class TezosService(IBlockchainService, HTTPRepository):
         mnemonic: str,
         transfer_op: OperationGroup,
     ) -> Any:
-        # key = Key.from_mnemonic(mnemonic)
         txn_res = transfer_op.autofill().sign().inject()
         return txn_res
 
