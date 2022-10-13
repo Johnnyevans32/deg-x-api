@@ -242,30 +242,38 @@ class BlockchainService:
     async def update_walletasset_balance(
         self, wallet: Wallet, blockchain: Blockchain
     ) -> None:
+
         user_assets = await ModelUtilityService.find(
             WalletAsset,
             {"wallet": wallet.id, "isDeleted": False, "blockchain": blockchain.id},
         )
         for user_asset in user_assets:
-            token_asset = await ModelUtilityService.find_one_and_populate(
-                TokenAsset,
-                {"_id": user_asset.tokenasset, "isDeleted": False},
-                [
-                    "network",
-                ],
-            )
-            if not token_asset:
-                raise Exception("token asset not found")
-            asset_balance = await self.blockchainRegistry.get_service(
-                blockchain.registryName
-            ).get_balance(
-                user_asset.address,
-                token_asset,
-            )
+            try:
+                token_asset = await ModelUtilityService.find_one_and_populate(
+                    TokenAsset,
+                    {"_id": user_asset.tokenasset, "isDeleted": False},
+                    [
+                        "network",
+                    ],
+                )
+                if not token_asset:
+                    raise Exception("token asset not found")
+                asset_balance = await self.blockchainRegistry.get_service(
+                    blockchain.registryName
+                ).get_balance(
+                    user_asset.address,
+                    token_asset,
+                )
 
-            await ModelUtilityService.model_find_one_and_update(
-                WalletAsset, {"_id": user_asset.id}, {"balance": asset_balance}
-            )
+                await ModelUtilityService.model_find_one_and_update(
+                    WalletAsset, {"_id": user_asset.id}, {"balance": asset_balance}
+                )
+            except Exception as e:
+                self.slackService.send_message(
+                    f">*error updating wallet asset balance for user* \n "
+                    f"*user:* `{wallet.user}` \n *tokenasset:* `{user_asset.tokenasset}` \n *error:* `{e}`",
+                    "backend",
+                )
 
     async def update_user_txns(
         self, user: User, user_default_wallet: Wallet, network: Network
@@ -359,8 +367,6 @@ class BlockchainService:
             page_size,
             "transactedAt",
         )
-
-        print(res)
 
         return res, meta
 

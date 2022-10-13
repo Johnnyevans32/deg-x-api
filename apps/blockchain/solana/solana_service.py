@@ -276,7 +276,7 @@ class SolanaService(IBlockchainService):
     ) -> list[Any]:
         assert chain_network.apiExplorer, "network apiexplorer not found"
         cluster = (
-            "&cluster=devnet"
+            "?cluster=devnet"
             if chain_network.networkType == NetworkType.TESTNET
             else ""
         )
