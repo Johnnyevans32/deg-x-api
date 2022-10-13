@@ -271,7 +271,8 @@ class BlockchainService:
             except Exception as e:
                 self.slackService.send_message(
                     f">*error updating wallet asset balance for user* \n "
-                    f"*user:* `{wallet.user}` \n *tokenasset:* `{user_asset.tokenasset}` \n *error:* `{e}`",
+                    f"*user:* `{wallet.user}` \n *tokenasset:* `{user_asset.tokenasset}`"
+                    f"\n *error:* `{e}`",
                     "backend",
                 )
 
