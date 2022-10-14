@@ -76,9 +76,17 @@ class LendingService:
         return user_wallet_asset
 
     async def get_user_lending_requests(
-        self, user: User, page_num: int, page_size: int
+        self,
+        user: User,
+        page_num: int,
+        page_size: int,
+        defi_provider: PyObjectId = None,
     ) -> tuple[list[LendingRequest], MetaDataModel]:
+
         user_wallet = await self.walletService.get_user_default_wallet(user)
+        query = {"wallet": user_wallet.id, "isDeleted": False}
+        if not defi_provider:
+            query["defiProvider"] = defi_provider
         lending_reqs, metadata = await ModelUtilityService.populate_and_paginate_data(
             LendingRequest,
             {"wallet": user_wallet.id, "isDeleted": False},

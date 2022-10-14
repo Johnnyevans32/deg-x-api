@@ -87,6 +87,7 @@ class LendingController:
         response: Response,
         page_num: int = 1,
         page_size: int = 10,
+        defi_provider: PyObjectId = None,
     ) -> ResponseModel[Sequence[LendingRequestOut]]:
         try:
             user = request.state.user
@@ -95,7 +96,7 @@ class LendingController:
                 user_lending_data,
                 metadata,
             ) = await self.lendingService.get_user_lending_requests(
-                user, page_num, page_size
+                user, page_num, page_size, defi_provider
             )
             request.app.logger.info("done getting user lending requests ")
             return self.responseService.send_response(
