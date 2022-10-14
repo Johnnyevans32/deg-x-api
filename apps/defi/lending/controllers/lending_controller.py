@@ -13,6 +13,7 @@ from apps.defi.lending.interfaces.lending_request_interface import (
 )
 from apps.defi.lending.services.lending_service import LendingService
 from apps.defi.lending.types.lending_types import BaseLendingActionDTO, BorrowAssetDTO
+from core.depends.get_object_id import PyObjectId
 from core.utils.custom_exceptions import UnicornRequest
 from core.utils.response_service import ResponseModel, ResponseService
 
@@ -197,20 +198,25 @@ class LendingController:
             )
 
     @router.get(
-        "/reserved-assets",
+        "/reserve-assets",
     )
-    async def get_reserved_assets(
-        self, request: UnicornRequest, response: Response
+    async def get_reserve_assets(
+        self,
+        request: UnicornRequest,
+        response: Response,
+        defi_provider_id: PyObjectId = None,
     ) -> ResponseModel[list[IReserveTokens]]:
         try:
-            request.app.logger.info("getting reserved assets from protocol")
-            reserved_assets_res = await self.lendingService.get_reserve_assets()
-            request.app.logger.info("done getting reserved assets from protocol")
+            request.app.logger.info("getting reserve assets from protocol")
+            reserved_assets_res = await self.lendingService.get_reserve_assets(
+                defi_provider_id
+            )
+            request.app.logger.info("done getting reserve assets from protocol")
 
             return self.responseService.send_response(
                 response,
                 status.HTTP_200_OK,
-                "reserved assets retrieved successfully",
+                "reserve assets retrieved successfully",
                 reserved_assets_res,
             )
 
@@ -218,5 +224,5 @@ class LendingController:
             return self.responseService.send_response(
                 response,
                 status.HTTP_400_BAD_REQUEST,
-                f"Error in getting reserved assets from protocol: {str(e)}",
+                f"Error in getting reserve assets from protocol: {str(e)}",
             )

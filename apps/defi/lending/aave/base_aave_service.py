@@ -35,7 +35,7 @@ class BaseAaveService(ILendingService):
         str_address = addr if addr else defi_provider.contractAddress
         address = Web3.toBytes(hexstr=HexStr(str_address))
         network = cast(Network, defi_provider.network)
-        web3 = await EthereumService.get_network_provider(network)
+        web3 = EthereumService.get_network_provider(network)
         abi = Utils.get_compiled_sol(crt_name, "0.6.12")
         aave_protocol = cast(
             AsyncContract, web3.eth.contract(address=Address(address), abi=abi)
@@ -252,6 +252,7 @@ class BaseAaveService(ILendingService):
             meta["ProtocolDataProvider"]["address"],
             "IProtocolDataProvider",
         )
+        print(aave_contract.functions.getAllReservesTokens().call())
         reserve_tokens = list(
             map(
                 lambda token: IReserveTokens(

@@ -43,7 +43,7 @@ class BaseEvmService(IBlockchainService):
         return self.service_name
 
     @staticmethod
-    async def get_network_provider(chain_network: Network) -> Web3:
+    def get_network_provider(chain_network: Network) -> Web3:
         logger.info("getting network rpc provider")
         web3 = Web3(Web3.HTTPProvider(chain_network.providerUrl))
         web3.middleware_onion.inject(geth_poa_middleware, layer=0)
@@ -83,7 +83,7 @@ class BaseEvmService(IBlockchainService):
         gas_price: int = 1,
     ) -> str:
         chain_network = cast(Network, token_asset.network)
-        web3 = await BaseEvmService.get_network_provider(chain_network)
+        web3 = BaseEvmService.get_network_provider(chain_network)
         if token_asset.contractAddress:
             erc20_crt = BaseEvmService.get_erc20_contract_obj(
                 token_asset.contractAddress, web3
@@ -115,7 +115,7 @@ class BaseEvmService(IBlockchainService):
     ) -> float:
         chain_network = cast(Network, token_asset.network)
         address = address_obj.main
-        web3 = await BaseEvmService.get_network_provider(chain_network)
+        web3 = BaseEvmService.get_network_provider(chain_network)
         if token_asset.contractAddress:
             erc20_crt = BaseEvmService.get_erc20_contract_obj(
                 token_asset.contractAddress, web3
@@ -134,7 +134,7 @@ class BaseEvmService(IBlockchainService):
         txn_build: Any,
     ) -> str:
         # sign the transaction
-        web3 = await BaseEvmService.get_network_provider(network)
+        web3 = BaseEvmService.get_network_provider(network)
         account = self.get_account_by_mmenonic(mnemonic)
         nonce = web3.eth.get_transaction_count(account.address)
         txn_miner_tip = web3.eth.max_priority_fee + Web3.toWei(100, "gwei")
@@ -163,7 +163,7 @@ class BaseEvmService(IBlockchainService):
         token_address: str,
         spender_address: str,
     ) -> str:
-        web3 = await BaseEvmService.get_network_provider(network)
+        web3 = BaseEvmService.get_network_provider(network)
         erc20_crt = BaseEvmService.get_erc20_contract_obj(token_address, web3)
 
         approve_txn_build = erc20_crt.functions.approve(

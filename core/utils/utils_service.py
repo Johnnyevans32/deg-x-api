@@ -150,7 +150,7 @@ class Utils:
         with open(Path(f"./solidity/{contract_file_name}.sol"), "r") as file:
             contract_file = file.read()
 
-        install_solc(version)
+        install_solc(version, True)
 
         # Solidity source code
         compiled_sol = compile_standard(
