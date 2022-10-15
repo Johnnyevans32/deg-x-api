@@ -4,7 +4,7 @@ from mnemonic import Mnemonic
 from pymongo.client_session import ClientSession
 
 from apps.blockchain.interfaces.blockchain_interface import Blockchain
-from apps.blockchain.interfaces.network_interface import NetworkType
+from apps.blockchain.interfaces.network_interface import Network, NetworkType
 from apps.blockchain.services.blockchain_service import BlockchainService
 from apps.user.interfaces.user_interface import User
 from apps.wallet.interfaces.wallet_interface import Wallet, WalletType
@@ -51,10 +51,12 @@ class WalletService:
     ) -> tuple[Wallet, EncryptedDTO]:
         assert user.id, "user id not found"
         mnemonic = self.mnemo.generate(strength=256)
+        qr_code_image = await Utils.create_qr_image(user.username)
         dict_wallet = Wallet(
             user=user.id,
             name="multi-coin wallet",
             walletType=walletType,
+            qrImage=qr_code_image,
         ).dict(by_alias=True, exclude_none=True)
 
         await ModelUtilityService.model_find_one_and_update(
@@ -67,17 +69,7 @@ class WalletService:
         wallet_obj = await ModelUtilityService.model_create(
             Wallet, dict_wallet, session
         )
-        qr_code_image = await Utils.create_qr_image(user.username)
 
-        wallet_obj = (
-            await ModelUtilityService.model_find_one_and_update(
-                Wallet,
-                {"_id": wallet_obj.id},
-                {"qrImage": qr_code_image},
-                session=session,
-            )
-            or wallet_obj
-        )
         blockchains = await BlockchainService.get_blockchains(
             {"isDeleted": {"$ne": True}}
         )
@@ -108,7 +100,10 @@ class WalletService:
                     user=cast(PyObjectId, user.id),
                     wallet=cast(PyObjectId, wallet.id),
                     tokenasset=cast(PyObjectId, token_asset.id),
-                    address=address,
+                    address=self.blockchainService.get_address(
+                        address, cast(Network, token_asset.network)
+                    ),
+                    networkType=cast(Network, token_asset.network).networkType,
                     blockchain=cast(PyObjectId, chain.id),
                 ).dict(by_alias=True, exclude_none=True),
                 token_assets,
@@ -122,7 +117,13 @@ class WalletService:
     async def retrieve_wallet_assets(self, user: User) -> list[WalletAsset]:
         user_wallet = await self.get_user_default_wallet(user)
         user_assets = await ModelUtilityService.find_and_populate(
-            WalletAsset, {"wallet": user_wallet.id, "isDeleted": False}, ["tokenasset"]
+            WalletAsset,
+            {
+                "wallet": user_wallet.id,
+                "networkType": user_wallet.networkType,
+                "isDeleted": False,
+            },
+            ["tokenasset"],
         )
         return user_assets
 

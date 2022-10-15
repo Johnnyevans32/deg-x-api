@@ -29,7 +29,7 @@ class IBlockchainService(metaclass=abc.ABCMeta):
     @abc.abstractmethod
     async def send(
         self,
-        from_address: Address,
+        from_address: str,
         to: str,
         value: float,
         token_asset: TokenAsset,
@@ -38,13 +38,13 @@ class IBlockchainService(metaclass=abc.ABCMeta):
         raise NotImplementedError
 
     @abc.abstractmethod
-    async def get_balance(self, address: Address, token_asset: TokenAsset) -> float:
+    async def get_balance(self, address: str, token_asset: TokenAsset) -> float:
         raise NotImplementedError
 
     @abc.abstractmethod
     async def get_transactions(
         self,
-        address: Address,
+        address: str,
         user: User,
         wallet: Wallet,
         chain_network: Network,

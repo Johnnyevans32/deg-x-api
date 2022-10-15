@@ -68,7 +68,7 @@ class BasecoinService(IBlockchainService):
 
     async def send(
         self,
-        from_address: Address,
+        address: str,
         to_address: str,
         value: float,
         token_asset: TokenAsset,
@@ -89,16 +89,10 @@ class BasecoinService(IBlockchainService):
 
     async def get_balance(
         self,
-        address_obj: Address,
+        address: str,
         token_asset: TokenAsset,
     ) -> float:
         network = cast(Network, token_asset.network)
-
-        address = (
-            address_obj.test
-            if network.networkType == NetworkType.TESTNET
-            else address_obj.main
-        )
 
         balance = Service(
             network=self.network_map[self.coin_network(network.networkType)]
@@ -107,7 +101,7 @@ class BasecoinService(IBlockchainService):
 
     async def get_transactions(
         self,
-        address: Address,
+        address: str,
         user: User,
         wallet: Wallet,
         chain_network: Network,

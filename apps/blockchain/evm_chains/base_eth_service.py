@@ -74,7 +74,7 @@ class BaseEvmService(IBlockchainService):
 
     async def send(
         self,
-        address_obj: Address,
+        address: str,
         to: str,
         value: float,
         token_asset: TokenAsset,
@@ -110,11 +110,11 @@ class BaseEvmService(IBlockchainService):
 
     async def get_balance(
         self,
-        address_obj: Address,
+        address: str,
         token_asset: TokenAsset,
     ) -> float:
         chain_network = cast(Network, token_asset.network)
-        address = address_obj.main
+
         web3 = BaseEvmService.get_network_provider(chain_network)
         if token_asset.contractAddress:
             erc20_crt = BaseEvmService.get_erc20_contract_obj(
@@ -176,7 +176,7 @@ class BaseEvmService(IBlockchainService):
 
     async def get_transactions(
         self,
-        address_obj: Address,
+        address: str,
         user: User,
         wallet: Wallet,
         chain_network: Network,
@@ -184,7 +184,7 @@ class BaseEvmService(IBlockchainService):
     ) -> list[Any]:
         assert chain_network.apiExplorer, "network apiexplorer not found"
         end_block = 999999999999999
-        address = address_obj.main
+
         res = await self.httpRepository.call(
             REQUEST_METHOD.GET,
             f"{chain_network.apiExplorer.url}?module=account&action=txlist&"

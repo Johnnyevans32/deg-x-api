@@ -77,7 +77,9 @@ class BlockchainService:
     @staticmethod
     async def get_token_assets(query: dict[str, Any]) -> list[TokenAsset]:
         logger.info(f"retrieving token assets for query - {query}")
-        token_assets = await ModelUtilityService.find(TokenAsset, query)
+        token_assets = await ModelUtilityService.find_and_populate(
+            TokenAsset, query, ["network"]
+        )
 
         return token_assets
 
@@ -154,7 +156,7 @@ class BlockchainService:
     ) -> None:
         generated_address = await self.create_address(blockchain_provider, mnemonic)
 
-        if user_asset.address.main != generated_address.main:
+        if user_asset.address != generated_address.main:
             raise Exception("wallet mnemonic mismatch")
 
     async def get_receipient_address(
@@ -172,13 +174,14 @@ class BlockchainService:
             {
                 "blockchain": blockchain.id,
                 "wallet": user_default_wallet.id,
+                "networkType": network.networkType.value,
                 "isDeleted": False,
             },
         )
         if not user_asset:
             raise Exception("user asset not found")
 
-        return self.get_address(user_asset.address, network)
+        return user_asset.address
 
     async def send(self, user: User, payload: SendTokenDTO) -> SendTxnRes:
         (
@@ -266,7 +269,9 @@ class BlockchainService:
                 )
 
                 await ModelUtilityService.model_find_one_and_update(
-                    WalletAsset, {"_id": user_asset.id}, {"balance": asset_balance}
+                    WalletAsset,
+                    {"_id": user_asset.id},
+                    {"balance": asset_balance},
                 )
             except Exception as e:
                 self.slackService.send_message(
@@ -402,7 +407,7 @@ class BlockchainService:
         txn_res = await self.blockchainRegistry.get_service(
             blockchain.registryName
         ).get_test_token(
-            user_asset.address.main,
+            user_asset.address,
             payload.amount,
         )
 

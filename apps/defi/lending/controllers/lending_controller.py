@@ -30,12 +30,17 @@ class LendingController:
         dependencies=[Depends(JWTBearer())],
     )
     async def get_user_account_data(
-        self, request: UnicornRequest, response: Response
+        self,
+        request: UnicornRequest,
+        response: Response,
+        defi_provider_id: PyObjectId = None,
     ) -> ResponseModel[Any]:
         try:
             user = request.state.user
             request.app.logger.info(f"getting user lending pool data for - {user.id}")
-            user_lending_data = await self.lendingService.get_user_lending_data(user)
+            user_lending_data = await self.lendingService.get_user_lending_data(
+                user, defi_provider_id
+            )
             request.app.logger.info("done getting user lending pool data ")
             return self.responseService.send_response(
                 response,

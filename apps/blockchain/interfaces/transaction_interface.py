@@ -6,7 +6,7 @@ from pydantic import Field
 from pymongo import ASCENDING
 
 from apps.blockchain.interfaces.network_interface import Network
-from apps.blockchain.interfaces.tokenasset_interface import TokenAsset, TokenOut
+from apps.blockchain.interfaces.tokenasset_interface import TokenAsset, TokenAssetOut
 from apps.user.interfaces.user_interface import User
 from apps.wallet.interfaces.wallet_interface import Wallet
 from core.db import db
@@ -34,7 +34,7 @@ class TxnStatus(str, Enum):
 class BlockchainTransactionOut(SBaseOutModel):
     user: Union[PyObjectId, User]
     otherUser: Optional[Union[PyObjectId, User]]
-    tokenasset: Union[PyObjectId, TokenOut]
+    tokenasset: Union[PyObjectId, TokenAssetOut]
     wallet: Union[PyObjectId, Wallet]
     network: Union[PyObjectId, Network]
     fromAddress: str

@@ -142,10 +142,7 @@ class MoralisService(IStreamService):
             chain_ids = self.get_supported_chain_ids()
             user_walletasset = await self.walletService.get_walletasset_by_query(
                 {
-                    "$or": [
-                        {"address.main": address},
-                        {"address.test": address},
-                    ],
+                    "address": address,
                     "isDeleted": False,
                 }
             )
@@ -188,9 +185,10 @@ class MoralisService(IStreamService):
                     "wallet": wallet_id,
                     "isDeleted": False,
                     "blockchain": network.blockchain,
+                    "networkType": network.networkType.value,
                 }
             )
-            user_address = BlockchainService.get_address(wallet_asset.address, network)
+            user_address = wallet_asset.address
             txn_type = (
                 TxnType.DEBIT if txn.fromAddress == user_address else TxnType.CREDIT
             )
@@ -199,12 +197,10 @@ class MoralisService(IStreamService):
             )
             other_user_walletasset = await self.walletService.get_walletasset_by_query(
                 {
-                    "$or": [
-                        {"address.main": other_user_address},
-                        {"address.test": other_user_address},
-                    ],
+                    "address": other_user_address,
                     "isDeleted": False,
                     "blockchain": network.blockchain,
+                    "networkType": network.networkType.value,
                 }
             )
             tokenasset = await ModelUtilityService.find_one(

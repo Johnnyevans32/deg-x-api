@@ -17,7 +17,7 @@ class CoinType(str, Enum):
     BTC = "btc"
 
 
-class TokenOut(SBaseOutModel):
+class TokenAssetOut(SBaseOutModel):
     name: str
     symbol: str
     image: str
@@ -25,7 +25,7 @@ class TokenOut(SBaseOutModel):
     contractAddress: Optional[str]
 
 
-class TokenAsset(TokenOut, SBaseModel):
+class TokenAsset(TokenAssetOut, SBaseModel):
     network: Optional[Union[PyObjectId, Network]]
     blockchain: Union[PyObjectId, Blockchain]
     isLayerOne: bool = Field(default=False)

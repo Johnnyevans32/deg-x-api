@@ -108,7 +108,7 @@ class LendingService:
         )
         user_lending_data = await self.lendingRegistry.get_service(
             defi_provider.serviceName
-        ).get_user_account_data(user_wallet_asset.address.main, defi_provider)
+        ).get_user_account_data(user_wallet_asset.address, defi_provider)
 
         return user_lending_data
 
@@ -135,7 +135,7 @@ class LendingService:
         )
         user_config_data = await self.lendingRegistry.get_service(
             defi_provider.serviceName
-        ).get_user_config(user_wallet_asset.address.main, defi_provider)
+        ).get_user_config(user_wallet_asset.address, defi_provider)
 
         return user_config_data
 
@@ -155,7 +155,7 @@ class LendingService:
             payload.asset,
             payload.amount,
             payload.interestRateMode,
-            user_wallet_asset.address.main,
+            user_wallet_asset.address,
             defi_provider,
             user_wallet.mnemonic or payload.mnemonic,
         )
@@ -221,7 +221,7 @@ class LendingService:
             ).deposit(
                 payload.asset,
                 payload.amount,
-                user_wallet_asset.address.main,
+                user_wallet_asset.address,
                 defi_provider,
                 user_wallet.mnemonic or payload.mnemonic,
             )
@@ -264,7 +264,7 @@ class LendingService:
             payload.asset,
             payload.amount,
             payload.interestRateMode,
-            user_wallet_asset.address.main,
+            user_wallet_asset.address,
             defi_provider,
             user_wallet.mnemonic or payload.mnemonic,
         )

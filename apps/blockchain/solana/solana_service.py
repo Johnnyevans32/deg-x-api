@@ -87,7 +87,7 @@ class SolanaService(IBlockchainService):
 
     async def send(
         self,
-        address_obj: Address,
+        address: str,
         to_address: str,
         value: float,
         token_asset: TokenAsset,
@@ -95,7 +95,7 @@ class SolanaService(IBlockchainService):
         gas: int = 2000000,
         gas_price: int = 50,
     ) -> str:
-        owner_address = PublicKey(address_obj.main)
+        owner_address = PublicKey(address)
         chain_network = cast(Network, token_asset.network)
 
         amount = int(self.format_num(value, "to"))
@@ -150,11 +150,10 @@ class SolanaService(IBlockchainService):
 
     async def get_balance(
         self,
-        address_obj: Address,
+        address: str,
         token_asset: TokenAsset,
     ) -> float:
         try:
-            address = address_obj.main
             chain_network = cast(Network, token_asset.network)
             solana_client = await self.get_network_provider(chain_network)
 
@@ -268,7 +267,7 @@ class SolanaService(IBlockchainService):
 
     async def get_transactions(
         self,
-        address_obj: Address,
+        address: str,
         user: User,
         wallet: Wallet,
         chain_network: Network,
@@ -276,20 +275,16 @@ class SolanaService(IBlockchainService):
     ) -> list[Any]:
         assert chain_network.apiExplorer, "network apiexplorer not found"
         cluster = (
-            "?cluster=devnet"
-            if chain_network.networkType == NetworkType.TESTNET
-            else ""
+            "cluster=devnet" if chain_network.networkType == NetworkType.TESTNET else ""
         )
-        address = address_obj.main
         res = await self.httpRepository.call(
             REQUEST_METHOD.GET,
-            f"{chain_network.apiExplorer.url}/account/transaction?address={address}"
+            f"{chain_network.apiExplorer.url}/account/transaction?address={address}&"
             + cluster,
             ISolanaExplorer,
         )
         txns_result = res.data
         solana_client = await self.get_network_provider(chain_network)
-
         txn_obj: list[Any] = []
         for txn in txns_result:
             from_address = txn.signer[0]
@@ -335,7 +330,7 @@ class SolanaService(IBlockchainService):
                 txnType=txn_type,
                 user=cast(PyObjectId, user.id),
                 tokenasset=tokenasset.id,
-                explorerUrl=str(chain_network.blockExplorerUrl) + txn.txHash + cluster,
+                explorerUrl=f"{str(chain_network.blockExplorerUrl)}{txn.txHash}?{cluster}",
                 # otherUser=other_user_walletasset.user
                 # if other_user_walletasset
                 # else None,
