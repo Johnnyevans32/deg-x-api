@@ -4,7 +4,7 @@ from typing import Optional, Union
 from pydantic import Field
 
 from apps.blockchain.interfaces.blockchain_interface import Blockchain
-from apps.blockchain.interfaces.network_interface import Network
+from apps.blockchain.interfaces.network_interface import Network, NetworkOut
 from core.depends.get_object_id import PyObjectId
 from core.depends.model import SBaseModel, SBaseOutModel
 
@@ -21,6 +21,7 @@ class TokenAssetOut(SBaseOutModel):
     name: str
     symbol: str
     image: str
+    network: Optional[Union[PyObjectId, NetworkOut]]
     # coinType: Optional[CoinType]
     contractAddress: Optional[str]
 

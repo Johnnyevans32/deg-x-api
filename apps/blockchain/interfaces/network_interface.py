@@ -5,7 +5,7 @@ from pydantic import HttpUrl
 
 from apps.blockchain.interfaces.blockchain_interface import Blockchain
 from core.depends.get_object_id import PyObjectId
-from core.depends.model import HashableBaseModel, SBaseModel
+from core.depends.model import HashableBaseModel, SBaseModel, SBaseOutModel
 
 
 class NetworkType(str, Enum):
@@ -18,8 +18,11 @@ class ApiExplorer(HashableBaseModel):
     keyToken: Optional[str]
 
 
-class Network(SBaseModel):
+class NetworkOut(SBaseOutModel):
     name: str
+
+
+class Network(NetworkOut, SBaseModel):
     chainId: Optional[str]
     networkType: NetworkType
     blockchain: Union[PyObjectId, Blockchain]

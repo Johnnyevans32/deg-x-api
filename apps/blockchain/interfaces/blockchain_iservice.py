@@ -1,7 +1,7 @@
 import abc
 from typing import Any
 
-from apps.blockchain.interfaces.blockchain_interface import ChainServiceName
+from apps.blockchain.interfaces.blockchain_interface import Blockchain, ChainServiceName
 from apps.blockchain.interfaces.network_interface import Network
 from apps.blockchain.interfaces.tokenasset_interface import TokenAsset
 from apps.user.interfaces.user_interface import User
@@ -63,6 +63,7 @@ class IBlockchainService(metaclass=abc.ABCMeta):
     async def approve_token_delegation(
         self,
         network: Network,
+        blockchain: Blockchain,
         mnemonic: str,
         amount: int,
         asset_address: Any,
@@ -72,7 +73,8 @@ class IBlockchainService(metaclass=abc.ABCMeta):
 
     async def sign_txn(
         self,
-        chain_network: Network,
+        network: Network,
+        blockchain: Blockchain,
         mnemonic: str,
         txn_build: Any,
     ) -> Any:

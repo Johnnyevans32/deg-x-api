@@ -4,6 +4,7 @@ import base58
 from solana.publickey import PublicKey
 
 from apps.appclient.services.beta_service import BetaService
+from apps.blockchain.interfaces.blockchain_interface import Blockchain
 from apps.blockchain.interfaces.network_interface import Network, NetworkType
 from apps.blockchain.solana.solana_service import SolanaService
 from apps.defi.interfaces.defiprovider_interface import DefiProvider
@@ -31,6 +32,10 @@ class SolendService(ILendingService):
     async def get_user_config(self, user_addr: str, defi_provider: DefiProvider) -> Any:
         pass
 
+    @staticmethod
+    def get_cluster(networkType: NetworkType) -> str:
+        return "devnet" if networkType == NetworkType.TESTNET else "production"
+
     async def deposit(
         self,
         asset: str,
@@ -43,11 +48,12 @@ class SolendService(ILendingService):
         gas_price: int = 50,
     ) -> str:
         chain_network = cast(Network, defi_provider.network)
-
+        blockchain = cast(Blockchain, defi_provider.blockchain)
         amount = int(self.solanaService.format_num(value, "to"))
 
         await self.solanaService.approve_token_delegation(
             chain_network,
+            blockchain,
             mnemonic,
             amount,
             PublicKey(asset),
@@ -63,9 +69,7 @@ class SolendService(ILendingService):
             "symbol": token_info.symbol,
             "userAddress": on_behalf_of,
             "secretKey": str(base58.b58encode(sender.secret_key), "utf-8"),
-            "cluster": "devnet"
-            if chain_network.networkType == NetworkType.TESTNET
-            else "production",
+            "cluster": self.get_cluster(chain_network.networkType),
         }
 
         depositRes = await self.betaService.interact_on_solend("deposit", payload)
@@ -96,9 +100,7 @@ class SolendService(ILendingService):
             "symbol": token_info.symbol,
             "userAddress": str(sender.public_key),
             "secretKey": str(base58.b58encode(sender.secret_key), "utf-8"),
-            "cluster": "devnet"
-            if chain_network.networkType == NetworkType.TESTNET
-            else "production",
+            "cluster": self.get_cluster(chain_network.networkType),
         }
 
         withdrawRes = await self.betaService.interact_on_solend("withdraw", payload)
@@ -131,9 +133,7 @@ class SolendService(ILendingService):
             "symbol": token_info.symbol,
             "userAddress": str(sender.public_key),
             "secretKey": str(base58.b58encode(sender.secret_key), "utf-8"),
-            "cluster": "devnet"
-            if chain_network.networkType == NetworkType.TESTNET
-            else "production",
+            "cluster": self.get_cluster(chain_network.networkType),
         }
 
         borrowRes = await self.betaService.interact_on_solend("borrow", payload)
@@ -152,13 +152,14 @@ class SolendService(ILendingService):
         gas_price: int = 50,
     ) -> Any:
         chain_network = cast(Network, defi_provider.network)
-
+        blockchain = cast(Blockchain, defi_provider.blockchain)
         sender = self.solanaService.get_keypair_from_mnemonic(mnemonic)
 
         amount = int(self.solanaService.format_num(value, "to"))
 
         await self.solanaService.approve_token_delegation(
             chain_network,
+            blockchain,
             mnemonic,
             amount,
             PublicKey(asset),
@@ -173,9 +174,7 @@ class SolendService(ILendingService):
             "symbol": token_info.symbol,
             "userAddress": str(sender.public_key),
             "secretKey": str(base58.b58encode(sender.secret_key), "utf-8"),
-            "cluster": "devnet"
-            if chain_network.networkType == NetworkType.TESTNET
-            else "production",
+            "cluster": self.get_cluster(chain_network.networkType),
         }
 
         repayRes = await self.betaService.interact_on_solend("repay", payload)

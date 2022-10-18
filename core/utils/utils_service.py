@@ -1,3 +1,4 @@
+import asyncio
 import base64
 import binascii
 import hashlib
@@ -144,13 +145,13 @@ class Utils:
         )
         return email
 
-    @lru_cache(10)
     @staticmethod
-    def get_compiled_sol(contract_file_name: str, version: str) -> Any:
+    @timed_cache(10000000, asyncFunction=True)
+    async def get_compiled_sol(contract_file_name: str, version: str) -> Any:
         with open(Path(f"./solidity/{contract_file_name}.sol"), "r") as file:
             contract_file = file.read()
-
-        install_solc(version, True)
+        loop = asyncio.get_event_loop()
+        await loop.run_in_executor(None, install_solc, version, True)
 
         # Solidity source code
         compiled_sol = compile_standard(

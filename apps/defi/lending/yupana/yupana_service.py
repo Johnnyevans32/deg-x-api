@@ -2,6 +2,7 @@ from typing import Any, cast
 
 from pytezos import pytezos
 from pytezos.client import PyTezosClient
+from apps.blockchain.interfaces.blockchain_interface import Blockchain
 
 from apps.blockchain.interfaces.network_interface import Network
 from apps.blockchain.tezos.tezos_service import TezosService
@@ -41,6 +42,7 @@ class YupanaService(ILendingService):
     ) -> str:
         key = TezosService.get_key_from_mnemonic(mnemonic)
         network = cast(Network, defi_provider.network)
+        blockchain = cast(Blockchain, defi_provider.blockchain)
         tez_client: PyTezosClient = pytezos.using(network.providerUrl, key)
         yupana = tez_client.contract(defi_provider.contractAddress)
         # proxy = tez_client.contract("")
@@ -51,7 +53,7 @@ class YupanaService(ILendingService):
             # proxy.getPrice([token_id]),
             yupana.mint(token_id, amount, amount),
         )
-        txn_res = self.tezosService.sign_txn(network, mnemonic, txn_group)
+        txn_res = self.tezosService.sign_txn(network, blockchain, mnemonic, txn_group)
         print(txn_res)
         return txn_res
 
@@ -67,6 +69,7 @@ class YupanaService(ILendingService):
     ) -> str:
         key = TezosService.get_key_from_mnemonic(mnemonic)
         network = cast(Network, defi_provider.network)
+        blockchain = cast(Blockchain, defi_provider.blockchain)
         tez_client: PyTezosClient = pytezos.using(network.providerUrl, key)
         yupana = tez_client.contract(defi_provider.contractAddress)
         proxy = tez_client.contract("")
@@ -86,7 +89,7 @@ class YupanaService(ILendingService):
             proxy.getPrice([token_id]),
             yupana.redeem(token_id, amount),
         )
-        txn_res = self.tezosService.sign_txn(network, mnemonic, txn_group)
+        txn_res = self.tezosService.sign_txn(network, blockchain, mnemonic, txn_group)
         print(txn_res)
         return txn_res
 
@@ -104,6 +107,7 @@ class YupanaService(ILendingService):
     ) -> str:
         key = TezosService.get_key_from_mnemonic(mnemonic)
         network = cast(Network, defi_provider.network)
+        blockchain = cast(Blockchain, defi_provider.blockchain)
         tez_client: PyTezosClient = pytezos.using(network.providerUrl, key)
         yupana = tez_client.contract(defi_provider.contractAddress)
         proxy = tez_client.contract("")
@@ -123,7 +127,7 @@ class YupanaService(ILendingService):
             yupana.borrow(token_id, amount),
         )
 
-        txn_res = self.tezosService.sign_txn(network, mnemonic, txn_group)
+        txn_res = self.tezosService.sign_txn(network, blockchain, mnemonic, txn_group)
         print(txn_res)
         return txn_res
 
@@ -140,6 +144,7 @@ class YupanaService(ILendingService):
     ) -> str:
         key = TezosService.get_key_from_mnemonic(mnemonic)
         network = cast(Network, defi_provider.network)
+        blockchain = cast(Blockchain, defi_provider.blockchain)
         tez_client: PyTezosClient = pytezos.using(network.providerUrl, key)
         yupana = tez_client.contract(defi_provider.contractAddress)
         proxy = tez_client.contract("")
@@ -158,7 +163,7 @@ class YupanaService(ILendingService):
             proxy.getPrice([token_id]),
             yupana.repay(token_id, amount),
         )
-        txn_res = self.tezosService.sign_txn(network, mnemonic, txn_group)
+        txn_res = self.tezosService.sign_txn(network, blockchain, mnemonic, txn_group)
         print(txn_res)
         return txn_res
 

@@ -9,7 +9,7 @@ from web3 import Web3
 from web3.contract import AsyncContract
 from web3.middleware.geth_poa import geth_poa_middleware
 
-from apps.blockchain.interfaces.blockchain_interface import ChainServiceName
+from apps.blockchain.interfaces.blockchain_interface import Blockchain, ChainServiceName
 from apps.blockchain.interfaces.network_interface import Network
 from apps.blockchain.interfaces.tokenasset_interface import TokenAsset
 from apps.blockchain.interfaces.transaction_interface import (
@@ -18,11 +18,16 @@ from apps.blockchain.interfaces.transaction_interface import (
     TxnStatus,
     TxnType,
 )
-from apps.blockchain.interfaces.blockchain_service_interface import IBlockchainService
+from apps.blockchain.interfaces.blockchain_iservice import IBlockchainService
 from apps.blockchain.types.ethereum_type import (
     EtherscanBaseResponse,
     IEtherscanNormalTxns,
 )
+from apps.networkfee.services.networkfee_service import (
+    NetworkFeeService,
+)
+from apps.networkfee.types.networkfee_type import TxnSpeedOption
+
 from apps.user.interfaces.user_interface import User
 from apps.wallet.interfaces.wallet_interface import Wallet
 from apps.wallet.interfaces.walletasset_interface import Address
@@ -35,6 +40,7 @@ from core.utils.utils_service import Utils, timed_cache
 
 class BaseEvmService(IBlockchainService):
     httpRepository = HTTPRepository()
+    networkFeeService = NetworkFeeService()
 
     def __init__(self, service_name: ChainServiceName) -> None:
         self.service_name = service_name
@@ -42,19 +48,18 @@ class BaseEvmService(IBlockchainService):
     def name(self) -> ChainServiceName:
         return self.service_name
 
-    @staticmethod
-    def get_network_provider(chain_network: Network) -> Web3:
+    def get_network_provider(self, chain_network: Network) -> Web3:
         logger.info("getting network rpc provider")
         web3 = Web3(Web3.HTTPProvider(chain_network.providerUrl))
         web3.middleware_onion.inject(geth_poa_middleware, layer=0)
 
         return web3
 
-    @timed_cache(60, 10)
     @staticmethod
-    def get_erc20_contract_obj(crt_address: str, web3: Web3) -> AsyncContract:
+    @timed_cache(60, 10, asyncFunction=True)
+    async def get_erc20_contract_obj(crt_address: str, web3: Web3) -> AsyncContract:
         address = Web3.toBytes(hexstr=HexStr(crt_address))
-        abi = Utils.get_compiled_sol("IERC20", "0.6.12")
+        abi = await Utils.get_compiled_sol("IERC20", "0.6.12")
         erc20_crt = cast(
             AsyncContract, web3.eth.contract(address=EthAddress(address), abi=abi)
         )
@@ -83,9 +88,10 @@ class BaseEvmService(IBlockchainService):
         gas_price: int = 1,
     ) -> str:
         chain_network = cast(Network, token_asset.network)
-        web3 = BaseEvmService.get_network_provider(chain_network)
+        blockchain = cast(Blockchain, token_asset.blockchain)
+        web3 = self.get_network_provider(chain_network)
         if token_asset.contractAddress:
-            erc20_crt = BaseEvmService.get_erc20_contract_obj(
+            erc20_crt = await BaseEvmService.get_erc20_contract_obj(
                 token_asset.contractAddress, web3
             )
 
@@ -104,7 +110,7 @@ class BaseEvmService(IBlockchainService):
             **txn_build,
         }
 
-        txn_hash = await self.sign_txn(chain_network, mnemonic, txn_build)
+        txn_hash = await self.sign_txn(chain_network, blockchain, mnemonic, txn_build)
 
         return txn_hash
 
@@ -115,9 +121,9 @@ class BaseEvmService(IBlockchainService):
     ) -> float:
         chain_network = cast(Network, token_asset.network)
 
-        web3 = BaseEvmService.get_network_provider(chain_network)
+        web3 = self.get_network_provider(chain_network)
         if token_asset.contractAddress:
-            erc20_crt = BaseEvmService.get_erc20_contract_obj(
+            erc20_crt = await BaseEvmService.get_erc20_contract_obj(
                 token_asset.contractAddress, web3
             )
             balance = erc20_crt.functions.balanceOf(
@@ -130,22 +136,31 @@ class BaseEvmService(IBlockchainService):
     async def sign_txn(
         self,
         network: Network,
+        blockchain: Blockchain,
         mnemonic: str,
         txn_build: Any,
+        txn_speed: TxnSpeedOption = TxnSpeedOption.STANDARD,
     ) -> str:
         # sign the transaction
-        web3 = BaseEvmService.get_network_provider(network)
+        web3 = self.get_network_provider(network)
         account = self.get_account_by_mmenonic(mnemonic)
         nonce = web3.eth.get_transaction_count(account.address)
-        txn_miner_tip = web3.eth.max_priority_fee + Web3.toWei(100, "gwei")
+        gas_fee_data = await self.networkFeeService.get_fee_value_by_speed(
+            txn_speed, blockchain.symbol
+        )
+        txn_miner_tip = web3.eth.max_priority_fee + Web3.toWei(12, "gwei")
         block_base_fee_per_gas = web3.eth.get_block("latest").get("baseFeePerGas")
+        maxPFee = gas_fee_data.maxPriorityFeePerGas
+        maxFee = gas_fee_data.maxFeePerGas
+        assert maxPFee and maxFee, "evm gas fee not set"
         txn_build = {
             **txn_build,
             "nonce": nonce,
-            "maxPriorityFeePerGas": txn_miner_tip,
+            "maxPriorityFeePerGas": Web3.toWei(maxPFee, "gwei") or txn_miner_tip,
             "gas": web3.eth.estimate_gas(txn_build),
             "chainId": web3.eth.chain_id,
-            "maxFeePerGas": block_base_fee_per_gas + txn_miner_tip,
+            "maxFeePerGas": Web3.toWei(maxFee, "gwei")
+            or block_base_fee_per_gas + txn_miner_tip,
         }
 
         signed_tx = account.sign_transaction(txn_build)
@@ -158,19 +173,20 @@ class BaseEvmService(IBlockchainService):
     async def approve_token_delegation(
         self,
         network: Network,
+        blockchain: Blockchain,
         mnemonic: str,
         amount: float,
         token_address: str,
         spender_address: str,
     ) -> str:
-        web3 = BaseEvmService.get_network_provider(network)
-        erc20_crt = BaseEvmService.get_erc20_contract_obj(token_address, web3)
+        web3 = self.get_network_provider(network)
+        erc20_crt = await BaseEvmService.get_erc20_contract_obj(token_address, web3)
 
         approve_txn_build = erc20_crt.functions.approve(
             Web3.toBytes(hexstr=HexStr(spender_address)), Web3.toWei(amount, "ether")
         ).build_transaction()
 
-        txn_hash = await self.sign_txn(network, mnemonic, approve_txn_build)
+        txn_hash = await self.sign_txn(network, blockchain, mnemonic, approve_txn_build)
 
         return txn_hash
 

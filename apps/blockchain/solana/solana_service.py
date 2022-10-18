@@ -10,7 +10,7 @@ from solana.system_program import TransferParams, transfer
 from solana.transaction import Transaction
 from spl.token.constants import TOKEN_PROGRAM_ID, WRAPPED_SOL_MINT
 
-from apps.blockchain.interfaces.blockchain_interface import ChainServiceName
+from apps.blockchain.interfaces.blockchain_interface import Blockchain, ChainServiceName
 from apps.blockchain.interfaces.network_interface import Network, NetworkType
 from apps.blockchain.interfaces.tokenasset_interface import TokenAsset
 from apps.blockchain.interfaces.transaction_interface import (
@@ -24,7 +24,7 @@ from apps.blockchain.solana.solana_utils import (
     create_sync_native_instruction,
     get_or_create_assoc_token_acc,
 )
-from apps.blockchain.interfaces.blockchain_service_interface import IBlockchainService
+from apps.blockchain.interfaces.blockchain_iservice import IBlockchainService
 from apps.user.interfaces.user_interface import User
 from apps.wallet.interfaces.wallet_interface import Wallet
 from apps.wallet.interfaces.walletasset_interface import Address
@@ -45,7 +45,7 @@ class SolanaService(IBlockchainService):
     def name(self) -> ChainServiceName:
         return ChainServiceName.SOL
 
-    async def get_network_provider(self, network: Network) -> AsyncClient:
+    def get_network_provider(self, network: Network) -> AsyncClient:
         solana_client = AsyncClient(network.providerUrl)
         # res = await solana_client.is_connected()
         return solana_client
@@ -97,7 +97,7 @@ class SolanaService(IBlockchainService):
     ) -> str:
         owner_address = PublicKey(address)
         chain_network = cast(Network, token_asset.network)
-
+        blockchain = cast(Blockchain, token_asset.blockchain)
         amount = int(self.format_num(value, "to"))
         if token_asset.contractAddress:
             from_token_account = spl_token.get_associated_token_address(
@@ -132,7 +132,7 @@ class SolanaService(IBlockchainService):
                 )
             )
         txn_build = Transaction().add(txn)
-        resp = await self.sign_txn(chain_network, mnemonic, txn_build)
+        resp = await self.sign_txn(chain_network, blockchain, mnemonic, txn_build)
         cluster = (
             "?cluster=devnet"
             if chain_network.networkType == NetworkType.TESTNET
@@ -141,9 +141,13 @@ class SolanaService(IBlockchainService):
         return str(resp["result"]) + cluster
 
     async def sign_txn(
-        self, network: Network, mnemonic: str, txn_build: Transaction
+        self,
+        network: Network,
+        blockchain: Blockchain,
+        mnemonic: str,
+        txn_build: Transaction,
     ) -> Any:
-        client = await self.get_network_provider(network)
+        client = self.get_network_provider(network)
         sender = self.get_keypair_from_mnemonic(mnemonic)
         resp = await client.send_transaction(txn_build, sender)
         return resp
@@ -155,7 +159,7 @@ class SolanaService(IBlockchainService):
     ) -> float:
         try:
             chain_network = cast(Network, token_asset.network)
-            solana_client = await self.get_network_provider(chain_network)
+            solana_client = self.get_network_provider(chain_network)
 
             if token_asset.contractAddress:
                 associated_token_account = spl_token.get_associated_token_address(
@@ -184,6 +188,7 @@ class SolanaService(IBlockchainService):
     async def approve_token_delegation(
         self,
         network: Network,
+        blockchain: Blockchain,
         mnemonic: str,
         amount: int,
         asset_address: PublicKey,
@@ -205,7 +210,7 @@ class SolanaService(IBlockchainService):
             )
         )
 
-        resp = await self.sign_txn(network, mnemonic, appr_spl_del_txn)
+        resp = await self.sign_txn(network, blockchain, mnemonic, appr_spl_del_txn)
 
         return resp
 
@@ -217,7 +222,8 @@ class SolanaService(IBlockchainService):
     ) -> str:
         sender = self.get_keypair_from_mnemonic(mnemonic)
         chain_network = cast(Network, token_asset.network)
-        solana_client = await self.get_network_provider(chain_network)
+        blockchain = cast(Blockchain, token_asset.blockchain)
+        solana_client = self.get_network_provider(chain_network)
         associated_token_account = spl_token.get_associated_token_address(
             sender.public_key, WRAPPED_SOL_MINT
         )
@@ -262,7 +268,7 @@ class SolanaService(IBlockchainService):
                     ),
                 )
 
-        resp = await self.sign_txn(chain_network, mnemonic, txn)
+        resp = await self.sign_txn(chain_network, blockchain, mnemonic, txn)
         return str(resp["result"])
 
     async def get_transactions(
@@ -284,7 +290,7 @@ class SolanaService(IBlockchainService):
             ISolanaExplorer,
         )
         txns_result = res.data
-        solana_client = await self.get_network_provider(chain_network)
+        solana_client = self.get_network_provider(chain_network)
         txn_obj: list[Any] = []
         for txn in txns_result:
             from_address = txn.signer[0]
@@ -347,7 +353,7 @@ class SolanaService(IBlockchainService):
             network = await ModelUtilityService.find_one(Network, {"name": "solanadev"})
             if not network:
                 raise Exception("no test network set for solana")
-            solana_client = await self.get_network_provider(network)
+            solana_client = self.get_network_provider(network)
 
             amount = int(self.format_num(1, "to"))
             resp = await solana_client.request_airdrop(PublicKey(to_address), amount)

@@ -123,7 +123,7 @@ class WalletService:
                 "networkType": user_wallet.networkType,
                 "isDeleted": False,
             },
-            ["tokenasset"],
+            ["tokenasset", "blockchain", "tokenasset.network"],
         )
         return user_assets
 

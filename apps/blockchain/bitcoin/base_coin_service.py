@@ -9,7 +9,7 @@ from mnemonic import Mnemonic
 from apps.blockchain.interfaces.blockchain_interface import ChainServiceName
 from apps.blockchain.interfaces.network_interface import Network, NetworkType
 from apps.blockchain.interfaces.tokenasset_interface import TokenAsset
-from apps.blockchain.interfaces.blockchain_service_interface import IBlockchainService
+from apps.blockchain.interfaces.blockchain_iservice import IBlockchainService
 from apps.user.interfaces.user_interface import User
 from apps.wallet.interfaces.wallet_interface import Wallet
 from apps.wallet.interfaces.walletasset_interface import Address

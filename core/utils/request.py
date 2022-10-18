@@ -1,3 +1,4 @@
+import asyncio
 from enum import Enum
 from typing import Any, Optional, Type, TypeVar
 
@@ -35,24 +36,24 @@ class HTTPRepository:
             # req.add_header('User-agent', PYCOIN_AGENT)
             url = self.base_url + url if self.base_url else url
             # req: requests.Response = self.http_method[method](url, data)
-            req: requests.Response = self.session.request(
-                method,
-                url,
-                data=data,
-                headers=self.headers,
-            )
-            req.raise_for_status()
+
+            def run_req() -> requests.Response:
+                req: requests.Response = self.session.request(
+                    method,
+                    url,
+                    data=data,
+                    headers=self.headers,
+                )
+                req.raise_for_status()
+                return req
+
+            loop = asyncio.get_event_loop()
+            req = await loop.run_in_executor(None, run_req)
+
             if type(req.json()) is list:
                 return generic_class(**{"data": req.json(), "message": "success"})
             return generic_class(**req.json())
-        except requests.exceptions.RequestException as e:
-            logger.error(f"Error making request call - {str(e)}")
-            self.slackService.send_formatted_message(
-                "HTTP request error alert!!",
-                f"An error just occured \n *Error*: ```{e}``` \n *Payload:* ```{data}```",
-                "error-report",
-            )
-            raise Exception("A request error has occured")
+        # except requests.exceptions.RequestException as e:
         except Exception as e:
             logger.error(f"Error making request call - {str(e)}")
             self.slackService.send_formatted_message(

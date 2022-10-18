@@ -11,6 +11,7 @@ from core.utils.utils_service import Utils
 class Apps(str, Enum):
     Beta = "beta"
     MoralisStream = "moralis-stream"
+    OwlRacle = "owlracle"
 
 
 class AppClientService:

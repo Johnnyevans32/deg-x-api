@@ -133,9 +133,7 @@ class BlockchainService:
         token_asset = await ModelUtilityService.find_one_and_populate(
             TokenAsset,
             {"_id": tokenasset.id, "isDeleted": False},
-            [
-                "network",
-            ],
+            ["network", "blockchain"],
         )
         if not token_asset:
             raise Exception("token asset not found")

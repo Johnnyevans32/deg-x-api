@@ -21,6 +21,9 @@ from apps.wallet.controllers.wallet_controller import router as router_wallet
 from apps.webhook.controllers.webhook_controller import router as router_webhook
 from apps.cloudplatform.controllers.cloud_controller import router as router_cloud
 from apps.user.controllers.user_controller import router as router_user
+from apps.networkfee.controllers.networkfee_controller import (
+    router as router_networkfee,
+)
 
 
 router = InferringRouter()
@@ -36,3 +39,4 @@ router.include_router(router_defi)
 router.include_router(router_cloud)
 router.include_router(router_user)
 router.include_router(router_audit)
+router.include_router(router_networkfee)

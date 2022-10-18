@@ -36,7 +36,7 @@ class LendingService:
                 "serviceType": DefiServiceType.LENDING,
                 "isDeleted": False,
             },
-            ["network"],
+            ["network", "blockchain"],
         )
 
         if not default_lending_provider:
@@ -51,7 +51,7 @@ class LendingService:
             return await self.get_default_provider_key()
 
         defi_provider = await ModelUtilityService.find_one_and_populate(
-            DefiProvider, {"_id": defi_provider_id}, ["network"]
+            DefiProvider, {"_id": defi_provider_id}, ["network", "blockchain"]
         )
         if not defi_provider:
             raise Exception("defi protocol not found")

@@ -6,10 +6,10 @@ from pytezos.client import PyTezosClient
 from pytezos.crypto.key import Key
 from pytezos.operation.group import OperationGroup
 
-from apps.blockchain.interfaces.blockchain_interface import ChainServiceName
+from apps.blockchain.interfaces.blockchain_interface import Blockchain, ChainServiceName
 from apps.blockchain.interfaces.network_interface import Network
 from apps.blockchain.interfaces.tokenasset_interface import TokenAsset
-from apps.blockchain.interfaces.blockchain_service_interface import IBlockchainService
+from apps.blockchain.interfaces.blockchain_iservice import IBlockchainService
 from apps.blockchain.interfaces.transaction_interface import (
     BlockchainTransaction,
     TxnSource,
@@ -60,6 +60,7 @@ class TezosService(IBlockchainService, HTTPRepository):
         gas_price: int = 50,
     ) -> str:
         network = cast(Network, token_asset.network)
+        blockchain = cast(Blockchain, token_asset.blockchain)
         key = Key.from_mnemonic(mnemonic)
         tez_client: PyTezosClient = pytezos.using(network.providerUrl, key=key)
         amount = int(self.format_num(value, "to"))
@@ -86,6 +87,7 @@ class TezosService(IBlockchainService, HTTPRepository):
 
         txn_res = self.sign_txn(
             network,
+            blockchain,
             mnemonic,
             transfer_op,
         )
@@ -94,6 +96,7 @@ class TezosService(IBlockchainService, HTTPRepository):
     def sign_txn(
         self,
         chain_network: Network,
+        blockchain: Blockchain,
         mnemonic: str,
         transfer_op: OperationGroup,
     ) -> Any:

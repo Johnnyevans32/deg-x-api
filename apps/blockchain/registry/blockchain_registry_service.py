@@ -1,4 +1,4 @@
-from apps.blockchain.binance.bsc_service import BscService
+from apps.blockchain.evm_chains.bsc_service import BscService
 
 # from apps.blockchain.binance.bnb_service import BnbService
 from apps.blockchain.bitcoin.bitcoin_service import BitcoinService
@@ -12,7 +12,7 @@ from apps.blockchain.evm_chains.tron_service import TronService
 from apps.blockchain.interfaces.blockchain_interface import ChainServiceName
 from apps.blockchain.solana.solana_service import SolanaService
 from apps.blockchain.tezos.tezos_service import TezosService
-from apps.blockchain.interfaces.blockchain_service_interface import IBlockchainService
+from apps.blockchain.interfaces.blockchain_iservice import IBlockchainService
 from core.utils.loggly import logger
 
 
