@@ -8,9 +8,9 @@ from apps.blockchain.evm_chains.ethereum_service import EthereumService
 from apps.blockchain.interfaces.blockchain_interface import Blockchain
 from apps.blockchain.interfaces.network_interface import Network
 from apps.defi.interfaces.defiprovider_interface import DefiProvider
-from apps.defi.lending.aave.aave_interface import IReserveTokens, IUserAcccountData
+from apps.defi.lending.types.lending_types import IReserveTokens, IUserAcccountData
 from apps.defi.lending.interfaces.lending_request_interface import InterestRateMode
-from apps.defi.lending.services.lending_service_interface import ILendingService
+from apps.defi.lending.services.lending_iservice import ILendingService
 from core.utils.utils_service import Utils, timed_cache
 
 
@@ -60,14 +60,10 @@ class BaseAaveService(ILendingService):
         ) = user_account_data
 
         return IUserAcccountData(
-            **{
-                "totalCollateralETH": total_collateral_eth,
-                "totalDebtETH": total_debt_eth,
-                "availableBorrowsETH": available_borrows_eth,
-                "currentLiquidationThreshold": current_liquidation_threshold,
-                "ltv": ltv,
-                "healthFactory": health_factory,
-            }
+            totalCollateral=total_collateral_eth,
+            totalDebt=total_debt_eth,
+            availableBorrows=available_borrows_eth,
+            healthFactory=health_factory,
         )
 
     async def get_user_config(self, user_addr: str, defi_provider: DefiProvider) -> Any:

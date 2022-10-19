@@ -8,9 +8,9 @@ from apps.blockchain.interfaces.blockchain_interface import Blockchain
 from apps.blockchain.interfaces.network_interface import Network, NetworkType
 from apps.blockchain.solana.solana_service import SolanaService
 from apps.defi.interfaces.defiprovider_interface import DefiProvider
-from apps.defi.lending.aave.aave_interface import IReserveTokens, IUserAcccountData
+from apps.defi.lending.types.lending_types import IReserveTokens, IUserAcccountData
 from apps.defi.lending.interfaces.lending_request_interface import InterestRateMode
-from apps.defi.lending.services.lending_service_interface import ILendingService
+from apps.defi.lending.services.lending_iservice import ILendingService
 from apps.defi.lending.solend.solend_utils import get_solend_info, get_token_info
 from core.utils.request import HTTPRepository
 from core.utils.utils_service import timed_cache

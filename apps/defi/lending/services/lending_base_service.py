@@ -1,5 +1,5 @@
 from apps.defi.interfaces.defiprovider_interface import DefiProvider
-from apps.defi.lending.aave.aave_interface import IReserveTokens
+from apps.defi.lending.types.lending_types import IReserveTokens
 
 
 class BaseLendingService:

@@ -22,3 +22,17 @@ class BaseLendingActionDTO(BaseModel):
 
 class BorrowAssetDTO(BaseLendingActionDTO):
     interestRateMode: InterestRateMode
+
+
+class IUserAcccountData(BaseModel):
+    totalCollateral: float
+    totalDebt: float
+    availableBorrows: float
+    currentLiquidationThreshold: Optional[float]
+    ltv: Optional[float]
+    healthFactory: float
+
+
+class IReserveTokens(BaseModel):
+    tokenSymbol: str
+    tokenAddress: str

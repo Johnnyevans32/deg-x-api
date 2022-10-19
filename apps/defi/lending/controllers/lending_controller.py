@@ -6,7 +6,7 @@ from fastapi_restful.cbv import cbv
 from fastapi_restful.inferring_router import InferringRouter
 
 from apps.auth.services.auth_bearer import JWTBearer
-from apps.defi.lending.aave.aave_interface import IReserveTokens
+from apps.defi.lending.types.lending_types import IReserveTokens, IUserAcccountData
 from apps.defi.lending.interfaces.lending_request_interface import (
     LendingRequest,
     LendingRequestOut,
@@ -34,7 +34,7 @@ class LendingController:
         request: UnicornRequest,
         response: Response,
         defi_provider_id: PyObjectId = None,
-    ) -> ResponseModel[Any]:
+    ) -> ResponseModel[IUserAcccountData]:
         try:
             user = request.state.user
             request.app.logger.info(f"getting user lending pool data for - {user.id}")

@@ -4,7 +4,7 @@ from apps.blockchain.interfaces.blockchain_interface import Blockchain
 from apps.blockchain.interfaces.tokenasset_interface import TokenAsset
 from apps.blockchain.services.blockchain_service import BlockchainService
 from apps.defi.interfaces.defiprovider_interface import DefiProvider, DefiServiceType
-from apps.defi.lending.aave.aave_interface import IReserveTokens
+from apps.defi.lending.types.lending_types import IReserveTokens, IUserAcccountData
 from apps.defi.lending.interfaces.lending_request_interface import (
     InterestRateMode,
     LendingRequest,
@@ -102,7 +102,7 @@ class LendingService:
         self,
         user: User,
         defi_provider_id: PyObjectId = None,
-    ) -> Any:
+    ) -> IUserAcccountData:
         defi_provider = await self.get_defi_provider(defi_provider_id)
         user_wallet = await self.walletService.get_user_default_wallet(user)
         user_wallet_asset = await self.get_wallet_asset(

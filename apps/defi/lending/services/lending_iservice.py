@@ -2,7 +2,7 @@ import abc
 from typing import Any
 
 from apps.defi.interfaces.defiprovider_interface import DefiProvider
-from apps.defi.lending.aave.aave_interface import IReserveTokens
+from apps.defi.lending.types.lending_types import IReserveTokens, IUserAcccountData
 from apps.defi.lending.interfaces.lending_request_interface import InterestRateMode
 
 
@@ -22,7 +22,7 @@ class ILendingService(metaclass=abc.ABCMeta):
     @abc.abstractmethod
     async def get_user_account_data(
         self, user: str, defi_provider: DefiProvider
-    ) -> Any:
+    ) -> IUserAcccountData:
         raise NotImplementedError
 
     @abc.abstractmethod

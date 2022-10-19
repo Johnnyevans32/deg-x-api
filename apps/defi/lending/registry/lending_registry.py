@@ -1,6 +1,6 @@
 from apps.defi.lending.aave.aave_service import AaveService
 from apps.defi.lending.aave.aave_v3_service import AaveV3Service
-from apps.defi.lending.services.lending_service_interface import ILendingService
+from apps.defi.lending.services.lending_iservice import ILendingService
 from apps.defi.lending.solend.solend_service import SolendService
 from apps.defi.lending.yupana.yupana_service import YupanaService
 from core.utils.loggly import logger
