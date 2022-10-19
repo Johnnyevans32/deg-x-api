@@ -65,13 +65,13 @@ class LendingController:
     ) -> ResponseModel[Any]:
         try:
             user = request.state.user
-            request.app.logger.info(f"getting user lending pool data for - {user.id}")
+            request.app.logger.info(f"getting user lending config data for - {user.id}")
             user_lending_data = await self.lendingService.get_user_config(user)
-            request.app.logger.info("done getting user lending pool data ")
+            request.app.logger.info("done getting user lending config data ")
             return self.responseService.send_response(
                 response,
                 status.HTTP_200_OK,
-                "user lending account data retrieved",
+                "user lending config data retrieved",
                 user_lending_data,
             )
 
@@ -79,7 +79,7 @@ class LendingController:
             return self.responseService.send_response(
                 response,
                 status.HTTP_400_BAD_REQUEST,
-                f"Error in getting user lending account data: {str(e)}",
+                f"Error in getting user lending config data: {str(e)}",
             )
 
     @router.get(

@@ -1,4 +1,5 @@
 from typing import Any, Optional, cast
+from apps.blockchain.interfaces.blockchain_interface import Blockchain
 
 from apps.blockchain.interfaces.tokenasset_interface import TokenAsset
 from apps.blockchain.services.blockchain_service import BlockchainService
@@ -61,12 +62,13 @@ class LendingService:
     async def get_wallet_asset(
         self, user: User, user_wallet: Wallet, defi_provider: DefiProvider
     ) -> WalletAsset:
+        blockchain = cast(Blockchain, defi_provider.blockchain)
         user_wallet_asset = await ModelUtilityService.find_one(
             WalletAsset,
             {
                 "wallet": user_wallet.id,
                 "user": user.id,
-                "blockchain": defi_provider.blockchain,
+                "blockchain": blockchain.id,
                 "isDeleted": False,
             },
         )

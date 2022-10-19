@@ -1,7 +1,6 @@
 from enum import Enum
 from typing import Any
-from pydantic import BaseModel
-from core.depends.model import SBaseModel
+from core.depends.model import SBaseModel, SBaseOutModel
 
 
 class ChainServiceName(str, Enum):
@@ -19,7 +18,7 @@ class ChainServiceName(str, Enum):
     TRON = "tron_service"
 
 
-class BlockchainOut(BaseModel):
+class BlockchainOut(SBaseOutModel):
     name: str
     symbol: str
 
