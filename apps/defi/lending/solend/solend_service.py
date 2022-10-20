@@ -8,7 +8,7 @@ from apps.blockchain.interfaces.blockchain_interface import Blockchain
 from apps.blockchain.interfaces.network_interface import Network, NetworkType
 from apps.blockchain.solana.solana_service import SolanaService
 from apps.defi.interfaces.defiprovider_interface import DefiProvider
-from apps.defi.lending.types.lending_types import IReserveTokens, IUserAcccountData
+from apps.defi.lending.types.lending_types import IReserveToken, IUserAcccountData
 from apps.defi.lending.interfaces.lending_request_interface import InterestRateMode
 from apps.defi.lending.services.lending_iservice import ILendingService
 from apps.defi.lending.solend.solend_utils import get_solend_info, get_token_info
@@ -200,11 +200,11 @@ class SolendService(ILendingService):
     @timed_cache(10, 10, asyncFunction=True)
     async def get_reserve_assets(
         self, defi_provider: DefiProvider
-    ) -> list[IReserveTokens]:
+    ) -> list[IReserveToken]:
         solend_info = await get_solend_info(defi_provider)
         reserve_tokens = list(
             map(
-                lambda asset: IReserveTokens(
+                lambda asset: IReserveToken(
                     **{"tokenSymbol": asset.symbol, "tokenAddress": asset.mintAddress}
                 ),
                 solend_info.assets,

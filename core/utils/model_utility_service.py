@@ -395,9 +395,16 @@ class ModelUtilityService:
     ) -> T:
         loop = asyncio.get_event_loop()
         model = db[generic_class.__name__.lower()]
-        result = await loop.run_in_executor(None, model.find_one, query)
-        if not result:
-            return await ModelUtilityService.model_create(generic_class, record)
+
+        def find_one_and_update() -> Any:
+            return model.find_one_and_update(
+                query,
+                {"$setOnInsert": record},
+                upsert=True,
+                return_document=ReturnDocument.AFTER,
+            )
+
+        result = await loop.run_in_executor(None, find_one_and_update)
 
         return generic_class(**result)
 

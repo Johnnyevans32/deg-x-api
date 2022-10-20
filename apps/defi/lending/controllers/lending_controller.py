@@ -6,7 +6,7 @@ from fastapi_restful.cbv import cbv
 from fastapi_restful.inferring_router import InferringRouter
 
 from apps.auth.services.auth_bearer import JWTBearer
-from apps.defi.lending.types.lending_types import IReserveTokens, IUserAcccountData
+from apps.defi.lending.types.lending_types import IReserveToken, IUserAcccountData
 from apps.defi.lending.interfaces.lending_request_interface import (
     LendingRequest,
     LendingRequestOut,
@@ -211,7 +211,7 @@ class LendingController:
         request: UnicornRequest,
         response: Response,
         defi_provider_id: PyObjectId = None,
-    ) -> ResponseModel[list[IReserveTokens]]:
+    ) -> ResponseModel[list[IReserveToken]]:
         try:
             request.app.logger.info("getting reserve assets from protocol")
             reserved_assets_res = await self.lendingService.get_reserve_assets(

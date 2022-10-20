@@ -2,7 +2,7 @@ import abc
 from typing import Any
 
 from apps.defi.interfaces.defiprovider_interface import DefiProvider
-from apps.defi.lending.types.lending_types import IReserveTokens, IUserAcccountData
+from apps.defi.lending.types.lending_types import IReserveToken, IUserAcccountData
 from apps.defi.lending.interfaces.lending_request_interface import InterestRateMode
 
 
@@ -78,5 +78,5 @@ class ILendingService(metaclass=abc.ABCMeta):
     async def get_reserve_assets(
         self,
         defi_provider: DefiProvider,
-    ) -> list[IReserveTokens]:
+    ) -> list[IReserveToken]:
         pass

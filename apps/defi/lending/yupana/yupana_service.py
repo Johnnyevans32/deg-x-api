@@ -7,7 +7,7 @@ from apps.blockchain.interfaces.blockchain_interface import Blockchain
 from apps.blockchain.interfaces.network_interface import Network
 from apps.blockchain.tezos.tezos_service import TezosService
 from apps.defi.interfaces.defiprovider_interface import DefiProvider
-from apps.defi.lending.types.lending_types import IReserveTokens, IUserAcccountData
+from apps.defi.lending.types.lending_types import IReserveToken, IUserAcccountData
 from apps.defi.lending.interfaces.lending_request_interface import InterestRateMode
 from apps.defi.lending.services.lending_iservice import ILendingService
 from core.utils.request import HTTPRepository
@@ -186,5 +186,5 @@ class YupanaService(ILendingService):
     @timed_cache(10, 10, asyncFunction=True)
     async def get_reserve_assets(
         self, defi_provider: DefiProvider
-    ) -> list[IReserveTokens]:
+    ) -> list[IReserveToken]:
         pass

@@ -8,7 +8,7 @@ from apps.blockchain.evm_chains.ethereum_service import EthereumService
 from apps.blockchain.interfaces.blockchain_interface import Blockchain
 from apps.blockchain.interfaces.network_interface import Network
 from apps.defi.interfaces.defiprovider_interface import DefiProvider
-from apps.defi.lending.types.lending_types import IReserveTokens, IUserAcccountData
+from apps.defi.lending.types.lending_types import IReserveToken, IUserAcccountData
 from apps.defi.lending.interfaces.lending_request_interface import InterestRateMode
 from apps.defi.lending.services.lending_iservice import ILendingService
 from core.utils.utils_service import Utils, timed_cache
@@ -240,18 +240,64 @@ class BaseAaveService(ILendingService):
     @timed_cache(10, 10, asyncFunction=True)
     async def get_reserve_assets(
         self, defi_provider: DefiProvider
-    ) -> list[IReserveTokens]:
+    ) -> list[IReserveToken]:
         meta: Any = defi_provider.meta
         (aave_contract, _) = await self.get_contract_obj(
             defi_provider,
             meta["ProtocolDataProvider"]["address"],
             "IProtocolDataProvider",
         )
+
+        def get_reserve_asset_data(
+            symbol: str,
+            asset: str,
+        ) -> IReserveToken:
+            res_data = aave_contract.functions.getReserveData(
+                Web3.toBytes(hexstr=HexStr(asset))
+            ).call()
+            (
+                availableLiquidity,
+                totalStableDebt,
+                totalVariableDebt,
+                liquidityRate,
+                variableBorrowRate,
+                stableBorrowRate,
+                averageStableBorrowRate,
+                liquidityIndex,
+                variableBorrowIndex,
+                lastUpdateTimestamp,
+            ) = res_data
+            res_config_data = aave_contract.functions.getReserveConfigurationData(
+                Web3.toBytes(hexstr=HexStr(asset))
+            ).call()
+            (
+                decimals,
+                ltv,
+                liquidationThreshold,
+                liquidationBonus,
+                reserveFactor,
+                usageAsCollateralEnabled,
+                borrowingEnabled,
+                stableBorrowRateEnabled,
+                isActive,
+                isFrozen,
+            ) = res_config_data
+
+            return IReserveToken(
+                tokenSymbol=symbol,
+                tokenAddress=asset,
+                borrowingEnabled=borrowingEnabled,
+                usageAsCollateralEnabled=usageAsCollateralEnabled,
+                liquidityRate=liquidityRate,
+                availableLiquidity=availableLiquidity,
+                variableBorrowRate=variableBorrowRate,
+                stableBorrowRate=stableBorrowRate,
+                ltv=ltv,
+            )
+
         reserve_tokens = list(
             map(
-                lambda token: IReserveTokens(
-                    **{"tokenSymbol": token[0], "tokenAddress": token[1]}
-                ),
+                lambda token: get_reserve_asset_data(token[0], token[1]),
                 aave_contract.functions.getAllReservesTokens().call(),
             )
         )

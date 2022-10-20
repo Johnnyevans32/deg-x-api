@@ -4,7 +4,7 @@ from apps.blockchain.interfaces.blockchain_interface import Blockchain
 from apps.blockchain.interfaces.tokenasset_interface import TokenAsset
 from apps.blockchain.services.blockchain_service import BlockchainService
 from apps.defi.interfaces.defiprovider_interface import DefiProvider, DefiServiceType
-from apps.defi.lending.types.lending_types import IReserveTokens, IUserAcccountData
+from apps.defi.lending.types.lending_types import IReserveToken, IUserAcccountData
 from apps.defi.lending.interfaces.lending_request_interface import (
     InterestRateMode,
     LendingRequest,
@@ -117,7 +117,7 @@ class LendingService:
     async def get_reserve_assets(
         self,
         defi_provider_id: PyObjectId = None,
-    ) -> list[IReserveTokens]:
+    ) -> list[IReserveToken]:
         defi_provider = await self.get_defi_provider(defi_provider_id)
         reserve_assets = await self.lendingRegistry.get_service(
             defi_provider.serviceName
