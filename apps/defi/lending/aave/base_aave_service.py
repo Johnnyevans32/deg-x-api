@@ -288,10 +288,10 @@ class BaseAaveService(ILendingService):
                 tokenAddress=asset,
                 borrowingEnabled=borrowingEnabled,
                 usageAsCollateralEnabled=usageAsCollateralEnabled,
-                liquidityRate=liquidityRate / 10**decimals,
+                liquidityRate=liquidityRate / liquidityIndex,
                 availableLiquidity=availableLiquidity / 10**decimals,
-                variableBorrowRate=variableBorrowRate / 10**decimals,
-                stableBorrowRate=stableBorrowRate / 10**decimals,
+                variableBorrowRate=variableBorrowRate / variableBorrowIndex,
+                stableBorrowRate=stableBorrowRate / variableBorrowIndex,
                 ltv=ltv / 100,
             )
 
