@@ -1,4 +1,4 @@
-from typing import Any, Optional
+from typing import Optional
 from pydantic import BaseModel
 
 from apps.defi.lending.interfaces.lending_request_interface import InterestRateMode
@@ -38,8 +38,8 @@ class IReserveToken(BaseModel):
     tokenAddress: str
     usageAsCollateralEnabled: bool
     borrowingEnabled: bool
-    liquidityRate: Any
-    availableLiquidity: Any
-    variableBorrowRate: Any
-    stableBorrowRate: Any
-    ltv: Any
+    liquidityRate: float
+    availableLiquidity: float
+    variableBorrowRate: float
+    stableBorrowRate: float
+    ltv: float

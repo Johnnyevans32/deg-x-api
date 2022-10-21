@@ -21,6 +21,7 @@ class DefiProviderOut(SBaseOutModel):
     logo: Optional[str]
     website: Optional[str]
     serviceType: DefiServiceType
+    isEnabled: bool = Field(default=True)
 
 
 class DefiProvider(DefiProviderOut, SBaseModel):

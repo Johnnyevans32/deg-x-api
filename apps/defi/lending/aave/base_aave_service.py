@@ -288,11 +288,11 @@ class BaseAaveService(ILendingService):
                 tokenAddress=asset,
                 borrowingEnabled=borrowingEnabled,
                 usageAsCollateralEnabled=usageAsCollateralEnabled,
-                liquidityRate=liquidityRate,
-                availableLiquidity=availableLiquidity,
-                variableBorrowRate=variableBorrowRate,
-                stableBorrowRate=stableBorrowRate,
-                ltv=ltv,
+                liquidityRate=liquidityRate / 10**decimals,
+                availableLiquidity=availableLiquidity / 10**decimals,
+                variableBorrowRate=variableBorrowRate / 10**decimals,
+                stableBorrowRate=stableBorrowRate / 10**decimals,
+                ltv=ltv / 100,
             )
 
         reserve_tokens = list(
