@@ -116,7 +116,7 @@ class BaseAaveService(ILendingService):
     async def withdraw(
         self,
         asset: str,
-        amount: int,
+        amount: float,
         to: str,
         defi_provider: DefiProvider,
         mnemonic: str,

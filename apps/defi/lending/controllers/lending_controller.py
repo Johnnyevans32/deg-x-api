@@ -120,10 +120,10 @@ class LendingController:
             )
 
     @router.post(
-        "/deposit",
+        "/supply",
         dependencies=[Depends(JWTBearer())],
     )
-    async def deposit_asset(
+    async def supply_asset(
         self, request: UnicornRequest, response: Response, payload: BaseLendingActionDTO
     ) -> ResponseModel[LendingRequest]:
         try:
@@ -131,7 +131,7 @@ class LendingController:
             request.app.logger.info(
                 f"initiating deposit request to protocol - {user.id}"
             )
-            borrow_asset_res = await self.lendingService.deposit(user, payload)
+            borrow_asset_res = await self.lendingService.supply(user, payload)
             request.app.logger.info("done initiating deposit request to protocol ")
             return self.responseService.send_response(
                 response,

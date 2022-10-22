@@ -207,7 +207,7 @@ class LendingService:
         )
         return lending_req
 
-    async def deposit(
+    async def supply(
         self,
         user: User,
         payload: BaseLendingActionDTO,
@@ -283,5 +283,48 @@ class LendingService:
             payload.amount,
             payload.asset,
             payload.interestRateMode,
+        )
+        return lending_req
+
+    async def withdraw(
+        self,
+        user: User,
+        payload: BaseLendingActionDTO,
+    ) -> LendingRequest:
+        defi_provider = await self.get_defi_provider(payload.provider)
+        user_wallet = await self.walletService.get_user_default_wallet(user)
+        user_wallet_asset = await self.get_wallet_asset(
+            user, user_wallet, defi_provider
+        )
+        try:
+            protocol_deposit_res = await self.lendingRegistry.get_service(
+                defi_provider.serviceName
+            ).withdraw(
+                payload.asset,
+                payload.amount,
+                user_wallet_asset.address,
+                defi_provider,
+                user_wallet.mnemonic or payload.mnemonic,
+            )
+        except Exception as e:
+            self.slackService.send_formatted_message(
+                "Error from lending defi provider",
+                f"An error just occured from {defi_provider.serviceName} "
+                f"lending provider \n *Error:* ```{e}```",
+                "error-report",
+            )
+            raise e
+        token_asset = await ModelUtilityService.find_one(
+            TokenAsset, {"contractAddress": payload.asset, "isDeleted": False}
+        )
+        lending_req = await self.create_lending_request(
+            user,
+            user_wallet,
+            LendingRequestType.WITHDRAW,
+            defi_provider,
+            token_asset,
+            protocol_deposit_res,
+            payload.amount,
+            payload.asset,
         )
         return lending_req

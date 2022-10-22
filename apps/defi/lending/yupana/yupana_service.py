@@ -60,7 +60,7 @@ class YupanaService(ILendingService):
     async def withdraw(
         self,
         asset: str,
-        value: int,
+        value: float,
         to: str,
         defi_provider: DefiProvider,
         mnemonic: str,
