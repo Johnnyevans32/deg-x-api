@@ -16,6 +16,7 @@ class IDType(str, Enum):
 class BackupSeedPhraseDTO(BaseModel):
     fileName: str
     data: Optional[EncryptedDTO]
+    seed: Optional[str]
     authToken: str
     password: Optional[str]
     cloudProvider: CloudProvider

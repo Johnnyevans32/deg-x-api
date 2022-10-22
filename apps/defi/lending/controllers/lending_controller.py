@@ -14,10 +14,13 @@ from apps.defi.lending.interfaces.lending_request_interface import (
 from apps.defi.lending.services.lending_service import LendingService
 from apps.defi.lending.types.lending_types import BaseLendingActionDTO, BorrowAssetDTO
 from core.depends.get_object_id import PyObjectId
+from core.middleware.encryption import DecrptRequestRoute
 from core.utils.custom_exceptions import UnicornRequest
 from core.utils.response_service import ResponseModel, ResponseService
 
-router = InferringRouter(prefix="/defi/lending", tags=["Defi 💸"])
+router = InferringRouter(
+    prefix="/defi/lending", tags=["Defi 💸"], route_class=DecrptRequestRoute
+)
 
 
 @cbv(router)
@@ -141,6 +144,7 @@ class LendingController:
             )
 
         except Exception as e:
+            raise e
             return self.responseService.send_response(
                 response,
                 status.HTTP_400_BAD_REQUEST,

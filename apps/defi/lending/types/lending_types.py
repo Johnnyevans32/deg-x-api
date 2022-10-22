@@ -8,7 +8,8 @@ from core.depends.get_object_id import PyObjectId
 class BaseLendingActionDTO(BaseModel):
     amount: float
     provider: Optional[PyObjectId]
-    asset: str
+    assetAddress: str
+    assetSymbol: str
     mnemonic: str
 
     class Config:

@@ -179,6 +179,8 @@ class Utils:
 
     @staticmethod
     def get_evm_reverted_reason(err: Any) -> str:
+        if type(err) == str:
+            return err
         code = str(err["data"]).replace("Reverted ", "")
         if code == "Reverted":
             return err

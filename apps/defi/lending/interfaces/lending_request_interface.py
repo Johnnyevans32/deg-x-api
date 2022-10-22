@@ -36,6 +36,7 @@ class LendingRequestOut(SBaseOutModel):
     repaidAmount: Optional[float]
     requestType: LendingRequestType
     interestRateMode: Optional[InterestRateMode]
+    assetSymbol: Optional[str]
 
 
 class LendingRequest(LendingRequestOut, SBaseModel):

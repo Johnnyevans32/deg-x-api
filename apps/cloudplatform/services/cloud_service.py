@@ -15,11 +15,10 @@ class CloudService:
     cloudPlatformRegistry = CloudPlatformRegistry()
 
     def backup_seedphrase(self, payload: BackupSeedPhraseDTO, user: User) -> str:
-        assert payload.data, "no seed phrase found"
+        assert payload.seed, "no seed phrase found"
         cloud_service = self.cloudPlatformRegistry.get_service(payload.cloudProvider)
-        seed = self.aesEncryptionService.decrypt_AES_GCM(payload.data)
         upload_data = self.aesEncryptionService.encrypt_mnemonic(
-            str(user.id), seed, payload.password
+            str(user.id), payload.seed, payload.password
         ).dict()
         return cloud_service.upload_file(
             payload.authToken, payload.fileName, upload_data

@@ -18,10 +18,13 @@ from apps.blockchain.types.blockchain_type import (
     GetTestTokenDTO,
     SwapTokenDTO,
 )
+from core.middleware.encryption import DecrptRequestRoute
 from core.utils.custom_exceptions import UnicornRequest
 from core.utils.response_service import ResponseModel, ResponseService
 
-router = InferringRouter(prefix="/blockchain", tags=["Blockchain 💸"])
+router = InferringRouter(
+    prefix="/blockchain", tags=["Blockchain 💸"], route_class=DecrptRequestRoute
+)
 
 
 @cbv(router)

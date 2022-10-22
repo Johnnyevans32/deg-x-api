@@ -154,7 +154,7 @@ class LendingService:
         protocol_borrow_res = await self.lendingRegistry.get_service(
             defi_provider.serviceName
         ).borrow(
-            payload.asset,
+            payload.assetAddress,
             payload.amount,
             payload.interestRateMode,
             user_wallet_asset.address,
@@ -162,7 +162,7 @@ class LendingService:
             user_wallet.mnemonic or payload.mnemonic,
         )
         token_asset = await BlockchainService.get_token_asset_by_query(
-            {"contractAddress": payload.asset}
+            {"contractAddress": payload.assetAddress}
         )
 
         lending_req = await self.create_lending_request(
@@ -173,7 +173,8 @@ class LendingService:
             token_asset,
             protocol_borrow_res,
             payload.amount,
-            payload.asset,
+            payload.assetAddress,
+            payload.assetSymbol,
             payload.interestRateMode,
         )
 
@@ -188,7 +189,8 @@ class LendingService:
         token_asset: Optional[TokenAsset],
         provider_res: str,
         amount: float,
-        asset: str,
+        assetAddress: str,
+        assetSymbol: str,
         interest_rate_mode: InterestRateMode = None,
     ) -> LendingRequest:
         lending_req = await ModelUtilityService.model_create(
@@ -201,7 +203,10 @@ class LendingService:
                 defiProvider=cast(PyObjectId, defi_provider.id),
                 requestType=lending_type,
                 status=LendingRequestStatus.OPEN,
-                tokenAsset=(cast(PyObjectId, token_asset.id) if token_asset else asset),
+                tokenAsset=(
+                    cast(PyObjectId, token_asset.id) if token_asset else assetAddress
+                ),
+                assetSymbol=assetSymbol,
                 providerResponse=provider_res,
             ).dict(by_alias=True, exclude_none=True),
         )
@@ -221,7 +226,7 @@ class LendingService:
             protocol_deposit_res = await self.lendingRegistry.get_service(
                 defi_provider.serviceName
             ).deposit(
-                payload.asset,
+                payload.assetAddress,
                 payload.amount,
                 user_wallet_asset.address,
                 defi_provider,
@@ -236,7 +241,7 @@ class LendingService:
             )
             raise e
         token_asset = await ModelUtilityService.find_one(
-            TokenAsset, {"contractAddress": payload.asset, "isDeleted": False}
+            TokenAsset, {"contractAddress": payload.assetAddress, "isDeleted": False}
         )
         lending_req = await self.create_lending_request(
             user,
@@ -246,7 +251,8 @@ class LendingService:
             token_asset,
             protocol_deposit_res,
             payload.amount,
-            payload.asset,
+            payload.assetAddress,
+            payload.assetSymbol,
         )
         return lending_req
 
@@ -263,7 +269,7 @@ class LendingService:
         protocol_repay_res = await self.lendingRegistry.get_service(
             defi_provider.serviceName
         ).repay(
-            payload.asset,
+            payload.assetAddress,
             payload.amount,
             payload.interestRateMode,
             user_wallet_asset.address,
@@ -271,7 +277,7 @@ class LendingService:
             user_wallet.mnemonic or payload.mnemonic,
         )
         token_asset = await BlockchainService.get_token_asset_by_query(
-            {"contractAddress": payload.asset}
+            {"contractAddress": payload.assetAddress}
         )
         lending_req = await self.create_lending_request(
             user,
@@ -281,7 +287,8 @@ class LendingService:
             token_asset,
             protocol_repay_res,
             payload.amount,
-            payload.asset,
+            payload.assetAddress,
+            payload.assetSymbol,
             payload.interestRateMode,
         )
         return lending_req
@@ -300,7 +307,7 @@ class LendingService:
             protocol_deposit_res = await self.lendingRegistry.get_service(
                 defi_provider.serviceName
             ).withdraw(
-                payload.asset,
+                payload.assetAddress,
                 payload.amount,
                 user_wallet_asset.address,
                 defi_provider,
@@ -315,7 +322,7 @@ class LendingService:
             )
             raise e
         token_asset = await ModelUtilityService.find_one(
-            TokenAsset, {"contractAddress": payload.asset, "isDeleted": False}
+            TokenAsset, {"contractAddress": payload.assetAddress, "isDeleted": False}
         )
         lending_req = await self.create_lending_request(
             user,
@@ -325,6 +332,7 @@ class LendingService:
             token_asset,
             protocol_deposit_res,
             payload.amount,
-            payload.asset,
+            payload.assetAddress,
+            payload.assetSymbol,
         )
         return lending_req

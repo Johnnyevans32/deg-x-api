@@ -8,7 +8,7 @@ from starlette.middleware.base import BaseHTTPMiddleware
 
 from starlette.types import Message, ASGIApp
 
-from core.utils.aes import AesEncryptionService
+from core.utils.aes import AesEncryptionService, EncryptedDTO
 
 
 class DecrptRequestBody(Request):
@@ -19,8 +19,10 @@ class DecrptRequestBody(Request):
         if not hasattr(self, "_body"):
             body = await super().body()
             if "encrypted" in self.headers.getlist("Content-Encoding"):
-                print("body", body)
-                pass
+                dec_body = self.aesEncryptionService.decrypt_AES_GCM(
+                    EncryptedDTO(**json.loads(body.decode()))
+                )
+                body = json.dumps(dec_body).encode()
 
             self._body = body
         return self._body
