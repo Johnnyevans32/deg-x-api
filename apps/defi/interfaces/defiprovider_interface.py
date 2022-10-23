@@ -4,7 +4,11 @@ from typing import Any, Optional, Union
 from pydantic import Field
 
 from apps.blockchain.interfaces.blockchain_interface import Blockchain
-from apps.blockchain.interfaces.network_interface import Network, NetworkType
+from apps.blockchain.interfaces.network_interface import (
+    Network,
+    NetworkOut,
+    NetworkType,
+)
 from core.depends.get_object_id import PyObjectId
 from core.depends.model import SBaseModel, SBaseOutModel
 
@@ -22,6 +26,7 @@ class DefiProviderOut(SBaseOutModel):
     website: Optional[str]
     serviceType: DefiServiceType
     isEnabled: bool = Field(default=True)
+    network: Union[PyObjectId, NetworkOut]
 
 
 class DefiProvider(DefiProviderOut, SBaseModel):
