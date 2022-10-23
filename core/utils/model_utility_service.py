@@ -150,7 +150,7 @@ class ModelUtilityService:
             lookup = [
                 {
                     "$lookup": {
-                        "from": field.split(".")[-1],
+                        "from": field.split(".")[-1].lower(),
                         "localField": field,
                         "foreignField": "_id",
                         "as": field,
@@ -193,7 +193,6 @@ class ModelUtilityService:
             "previousPage": prev_page,
             "nextPage": next_page,
         }
-
         # And there goes the populate function just as mongoose populate works 🚀🕺🏽
         return (
             list(
@@ -223,7 +222,7 @@ class ModelUtilityService:
             lookup: list[dict[str, Any]] = [
                 {
                     "$lookup": {
-                        "from": field.split(".")[-1],
+                        "from": field.split(".")[-1].lower(),
                         "localField": field,
                         "foreignField": "_id",
                         "as": field,
@@ -267,7 +266,7 @@ class ModelUtilityService:
             lookup = [
                 {
                     "$lookup": {
-                        "from": field.split(".")[-1],
+                        "from": field.split(".")[-1].lower(),
                         "localField": field,
                         "foreignField": "_id",
                         "as": field,
