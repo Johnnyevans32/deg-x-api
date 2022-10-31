@@ -209,7 +209,6 @@ class BaseEvmService(IBlockchainService):
             EtherscanBaseResponse[list[IEtherscanNormalTxns]],
         )
         txns_result = res.result
-
         txn_obj = []
         for txn in txns_result:
             txn_type = (
@@ -236,15 +235,10 @@ class BaseEvmService(IBlockchainService):
                 TokenAsset,
                 {
                     "network": chain_network.id,
-                    "contractAddress": txn.contractAddress,
                     "isDeleted": False,
                 },
             )
-
-            assert tokenasset, "token asset not found"
-            assert tokenasset.id, "token asset id not found"
             chain_txn = BlockchainTransaction(
-                id=None,
                 transactionHash=txn.hash,
                 fromAddress=cast(str, txn.fromAddress),
                 toAddress=cast(str, txn.to or txn.contractAddress),
@@ -259,7 +253,7 @@ class BaseEvmService(IBlockchainService):
                     TxnStatus.FAILED if (txn.isError == "1") else TxnStatus.SUCCESS
                 ),
                 isContractExecution=txn.contractAddress != "",
-                tokenasset=tokenasset.id,
+                tokenasset=tokenasset.id if tokenasset else None,
                 txnType=txn_type,
                 user=cast(PyObjectId, user.id),
                 explorerUrl=str(chain_network.blockExplorerUrl) + txn.hash,
@@ -270,6 +264,7 @@ class BaseEvmService(IBlockchainService):
                 source=TxnSource.EXPLORER,
                 metaData=txn.dict(by_alias=True),
             ).dict(by_alias=True, exclude_none=True)
+
             txn_obj.append(chain_txn)
 
         return txn_obj
