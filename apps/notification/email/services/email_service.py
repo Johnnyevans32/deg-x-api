@@ -5,6 +5,7 @@ from typing import Any
 import emails as emails
 from emails.template import JinjaTemplate
 from pydantic import EmailStr
+from starlette.background import BackgroundTask
 
 from apps.user.interfaces.user_interface import User
 from core.config import settings
@@ -89,7 +90,8 @@ class EmailService:
                 },
             )
         except Exception as e:
-            self.slackService.send_formatted_message(
+            BackgroundTask(
+                self.slackService.send_formatted_message,
                 "Error sending verification email",
                 f"*User:* {user.id} \n *Error:* {e}",
             )
@@ -131,7 +133,8 @@ class EmailService:
                 },
             )
         except Exception as e:
-            self.slackService.send_formatted_message(
+            BackgroundTask(
+                self.slackService.send_formatted_message,
                 "Error sending forgotten password email",
                 f"*User:* {user.id} \n *Error:* {e}",
             )

@@ -1,6 +1,7 @@
 from typing import Any, cast
 
 from pymongo import DESCENDING
+from starlette.background import BackgroundTask
 
 from apps.blockchain.interfaces.blockchain_interface import Blockchain, ChainServiceName
 from apps.blockchain.interfaces.network_interface import Network, NetworkType
@@ -272,8 +273,9 @@ class BlockchainService:
                     {"balance": asset_balance},
                 )
             except Exception as e:
-                self.slackService.send_message(
-                    f">*error updating wallet asset balance for user* \n "
+                BackgroundTask(
+                    self.slackService.send_formatted_message,
+                    "Error updating wallet asset balance for user",
                     f"*user:* `{wallet.user}` \n *tokenasset:* `{user_asset.tokenasset}`"
                     f"\n *error:* `{e}`",
                     "backend",
@@ -320,8 +322,9 @@ class BlockchainService:
 
             return default_wallet_txns
         except Exception as e:
-            self.slackService.send_message(
-                f">*error updating network txns for user* \n "
+            BackgroundTask(
+                self.slackService.send_formatted_message,
+                "Error updating network txns for user",
                 f"*user:* `{user.id}` \n *network:* `{network.name}` \n *error:* `{e}`",
                 "backend",
             )

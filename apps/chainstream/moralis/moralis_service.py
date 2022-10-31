@@ -2,6 +2,8 @@ from typing import Any, Optional, cast
 from pydantic import BaseModel, Field
 import pendulum
 from web3 import Web3
+from starlette.background import BackgroundTask
+
 from apps.appclient.services.appclient_service import AppClientService, Apps
 from apps.blockchain.interfaces.blockchain_interface import ChainServiceName
 from apps.blockchain.interfaces.tokenasset_interface import TokenAsset
@@ -157,16 +159,18 @@ class MoralisService(IStreamService):
             stream_res = await self.httpRepository.call(
                 REQUEST_METHOD.POST, "/streams/evm", ICreateStream, payload
             )
-            self.slackService.send_message(
-                f">*successfully created stream account on moralis* \n "
+            BackgroundTask(
+                self.slackService.send_formatted_message,
+                "Successfully created stream account on moralis",
                 f"*Address:* `{address}`  \n *chains:* `{chain_ids}`",
                 "backend",
             )
             return stream_res
 
         except Exception as e:
-            self.slackService.send_message(
-                f">*error creating stream account on moralis* \n "
+            BackgroundTask(
+                self.slackService.send_formatted_message,
+                "Error creating stream account on moralis",
                 f"*Address:* `{address}`  \n *error:* `{str(e)}`",
                 "backend",
             )

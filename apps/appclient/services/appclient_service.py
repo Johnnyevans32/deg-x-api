@@ -12,6 +12,8 @@ class Apps(str, Enum):
     Beta = "beta"
     MoralisStream = "moralis-stream"
     OwlRacle = "owlracle"
+    Coinmarket = "coinmarket"
+    Coingecko = "coingecko"
 
 
 class AppClientService:

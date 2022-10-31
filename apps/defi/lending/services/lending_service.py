@@ -1,6 +1,7 @@
 from typing import Any, Optional, cast
-from apps.blockchain.interfaces.blockchain_interface import Blockchain
+from starlette.background import BackgroundTask
 
+from apps.blockchain.interfaces.blockchain_interface import Blockchain
 from apps.blockchain.interfaces.tokenasset_interface import TokenAsset
 from apps.blockchain.services.blockchain_service import BlockchainService
 from apps.defi.interfaces.defiprovider_interface import DefiProvider, DefiServiceType
@@ -233,7 +234,8 @@ class LendingService:
                 user_wallet.mnemonic or payload.mnemonic,
             )
         except Exception as e:
-            self.slackService.send_formatted_message(
+            BackgroundTask(
+                self.slackService.send_formatted_message,
                 "Error from lending defi provider",
                 f"An error just occured from {defi_provider.serviceName} "
                 f"lending provider \n *Error:* ```{e}```",
@@ -314,7 +316,8 @@ class LendingService:
                 user_wallet.mnemonic or payload.mnemonic,
             )
         except Exception as e:
-            self.slackService.send_formatted_message(
+            BackgroundTask(
+                self.slackService.send_formatted_message,
                 "Error from lending defi provider",
                 f"An error just occured from {defi_provider.serviceName} "
                 f"lending provider \n *Error:* ```{e}```",

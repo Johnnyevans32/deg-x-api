@@ -159,8 +159,8 @@ class BaseEvmService(IBlockchainService):
             "maxPriorityFeePerGas": Web3.toWei(maxPFee, "gwei") or txn_miner_tip,
             "gas": web3.eth.estimate_gas(txn_build),
             "chainId": web3.eth.chain_id,
-            "maxFeePerGas": Web3.toWei(maxFee, "gwei")
-            or block_base_fee_per_gas + txn_miner_tip,
+            "maxFeePerGas": (Web3.toWei(maxFee, "gwei") or block_base_fee_per_gas)
+            + txn_miner_tip,
         }
 
         signed_tx = account.sign_transaction(txn_build)

@@ -24,6 +24,9 @@ from apps.user.controllers.user_controller import router as router_user
 from apps.networkfee.controllers.networkfee_controller import (
     router as router_networkfee,
 )
+from apps.marketdata.controllers.marketdata_controller import (
+    router as router_marketdata,
+)
 
 
 router = InferringRouter()
@@ -40,3 +43,4 @@ router.include_router(router_cloud)
 router.include_router(router_user)
 router.include_router(router_audit)
 router.include_router(router_networkfee)
+router.include_router(router_marketdata)

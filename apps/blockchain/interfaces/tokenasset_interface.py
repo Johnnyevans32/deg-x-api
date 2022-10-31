@@ -24,6 +24,11 @@ class TokenAssetOut(SBaseOutModel):
     network: Optional[Union[PyObjectId, NetworkOut]]
     # coinType: Optional[CoinType]
     contractAddress: Optional[str]
+    coinGeckoId: Optional[str]
+
+    class Config:
+        anystr_strip_whitespace = True
+        anystr_lower = True
 
 
 class TokenAsset(TokenAssetOut, SBaseModel):
