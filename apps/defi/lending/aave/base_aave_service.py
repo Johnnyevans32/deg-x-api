@@ -27,6 +27,7 @@ class BaseAaveService(ILendingService):
     def name(self) -> str:
         return self.service_name
 
+    @timed_cache(10000, 10, asyncFunction=True)
     async def get_contract_obj(
         self,
         defi_provider: DefiProvider,
