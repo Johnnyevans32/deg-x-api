@@ -16,7 +16,7 @@ from scout_apm.api import Config
 
 # from scout_apm.async_.starlette import ScoutMiddleware
 from starlette import status
-from starlette.exceptions import ExceptionMiddleware
+from starlette.middleware.exceptions import ExceptionMiddleware
 from starlette.exceptions import HTTPException as StarletteHTTPException
 
 # from starlette.middleware import Middleware

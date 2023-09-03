@@ -35,13 +35,9 @@ async def handle_user_join_room(sid: str, *args: Any, **kwargs: Any) -> None:
 
 @sio.on("connect")
 async def connect(sid: str, env: Any) -> None:
-    await sio.emit(
-        "welcome", "connection success", to=sid
-    )
+    await sio.emit("welcome", "connection success", to=sid)
 
 
 @sio.on("disconnect")
 async def disconnect(sid: str) -> None:
-    await sio.emit(
-        "bye", "connection disconnected", to=sid
-    )
+    await sio.emit("bye", "connection disconnected", to=sid)
