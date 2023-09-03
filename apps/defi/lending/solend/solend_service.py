@@ -8,11 +8,11 @@ from apps.blockchain.interfaces.blockchain_interface import Blockchain
 from apps.blockchain.interfaces.network_interface import Network, NetworkType
 from apps.blockchain.solana.solana_service import SolanaService
 from apps.defi.interfaces.defiprovider_interface import DefiProvider
+from apps.defi.lending.solend.solend_types import ISolendMarketReserve, SolendAsset
 from apps.defi.lending.types.lending_types import IReserveToken, IUserAcccountData
 from apps.defi.lending.interfaces.lending_request_interface import InterestRateMode
 from apps.defi.lending.services.lending_iservice import ILendingService
-from apps.defi.lending.solend.solend_utils import get_solend_info, get_token_info
-from core.utils.request import HTTPRepository
+from core.utils.request import REQUEST_METHOD, HTTPRepository
 from core.utils.utils_service import timed_cache
 
 
@@ -60,8 +60,8 @@ class SolendService(ILendingService):
             PublicKey(defi_provider.contractAddress),
         )
         # create txn of approval request
-        solend_info = await get_solend_info(defi_provider)
-        token_info = get_token_info(asset, solend_info)
+        solend_info = await self._get_solend_info(defi_provider)
+        token_info = self.get_token_info(asset, solend_info)
         sender = self.solanaService.get_keypair_from_mnemonic(mnemonic)
         payload = {
             "providerUrl": chain_network.providerUrl,
@@ -92,8 +92,8 @@ class SolendService(ILendingService):
 
         amount = int(self.solanaService.format_num(value, "to"))
 
-        solend_info = await get_solend_info(defi_provider)
-        token_info = get_token_info(asset, solend_info)
+        solend_info = await self._get_solend_info(defi_provider)
+        token_info = self.get_token_info(asset, solend_info)
         payload = {
             "providerUrl": chain_network.providerUrl,
             "amount": amount,
@@ -125,8 +125,8 @@ class SolendService(ILendingService):
 
         amount = int(self.solanaService.format_num(value, "to"))
 
-        solend_info = await get_solend_info(defi_provider)
-        token_info = get_token_info(asset, solend_info)
+        solend_info = await self._get_solend_info(defi_provider)
+        token_info = self.get_token_info(asset, solend_info)
         payload = {
             "providerUrl": chain_network.providerUrl,
             "amount": amount,
@@ -166,8 +166,8 @@ class SolendService(ILendingService):
             PublicKey(defi_provider.contractAddress),
         )
         # create txn of approval request
-        solend_info = await get_solend_info(defi_provider)
-        token_info = get_token_info(asset, solend_info)
+        solend_info = await self._get_solend_info(defi_provider)
+        token_info = self.get_token_info(asset, solend_info)
         payload = {
             "providerUrl": chain_network.providerUrl,
             "amount": amount,
@@ -201,7 +201,7 @@ class SolendService(ILendingService):
     async def get_reserve_assets(
         self, defi_provider: DefiProvider
     ) -> list[IReserveToken]:
-        solend_info = await get_solend_info(defi_provider)
+        solend_info = await self._get_solend_info(defi_provider)
         reserve_tokens = list(
             map(
                 lambda asset: IReserveToken(
@@ -211,3 +211,33 @@ class SolendService(ILendingService):
             )
         )
         return reserve_tokens
+
+    @timed_cache(100, 10, asyncFunction=True)
+    async def _get_solend_info(
+        self,
+        defi_provider: DefiProvider,
+    ) -> ISolendMarketReserve:
+        assert defi_provider.meta, "solend metadata not found"
+        url = (
+            f"{defi_provider.meta['API_ENDPOINT']}/"
+            f"v1/config?deployment={defi_provider.meta['ENV']}"
+        )
+
+        solend_info = await self.httpRepository.call(
+            REQUEST_METHOD.GET,
+            url,
+            ISolendMarketReserve,
+        )
+
+        return solend_info
+
+    @staticmethod
+    def get_token_info(
+        mint_address: str, solend_info: ISolendMarketReserve
+    ) -> SolendAsset:
+        token_info = list(
+            filter(lambda asset: asset.mintAddress == mint_address, solend_info.assets)
+        )[0]
+        if not token_info:
+            raise Exception(f"Could not find {mint_address} in ASSETS")
+        return token_info

@@ -1,7 +1,7 @@
 from enum import Enum
 from typing import Optional, Union
 
-from pydantic import Field
+from pydantic import BaseModel, Field
 
 from apps.blockchain.interfaces.blockchain_interface import Blockchain
 from apps.blockchain.interfaces.network_interface import Network, NetworkOut
@@ -17,13 +17,15 @@ class CoinType(str, Enum):
     BTC = "btc"
 
 
-class TokenAssetOut(SBaseOutModel):
+class TokenAssetCore(BaseModel):
+    network: Optional[Union[PyObjectId, NetworkOut]]
+    contractAddress: Optional[str]
+
+
+class TokenAssetOut(TokenAssetCore, SBaseOutModel):
     name: str
     symbol: str
-    image: str
-    network: Optional[Union[PyObjectId, NetworkOut]]
-    # coinType: Optional[CoinType]
-    contractAddress: Optional[str]
+    image: Optional[str]
     coinGeckoId: Optional[str]
 
     class Config:

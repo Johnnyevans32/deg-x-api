@@ -19,7 +19,7 @@ class FeatureConfigController:
     featureConfigService = FeatureConfigService()
     responseService = ResponseService()
 
-    @router.get("/check-status/{feature_name}")
+    @router.get("/{feature_name}")
     async def check_feature_status(
         self, request: UnicornRequest, response: Response, feature_name: FeatureName
     ) -> ResponseModel[bool]:
@@ -47,7 +47,7 @@ class FeatureConfigController:
                 f"Error in getting feature status: {str(e)}",
             )
 
-    @router.put("/update-status/{feature_name}")
+    @router.put("/{feature_name}")
     async def update_feature_status(
         self,
         request: UnicornRequest,

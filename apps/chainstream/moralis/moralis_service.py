@@ -226,7 +226,7 @@ class MoralisService(IStreamService):
                 gasUsed=int(txn.gas),
                 network=cast(PyObjectId, network.id),
                 wallet=cast(PyObjectId, wallet_id),
-                amount=float(Web3.fromWei(int(txn.value), "ether")),
+                amount=float(Web3.from_wei(int(txn.value), "ether")),
                 status=(
                     TxnStatus.SUCCESS
                     if (txn.receiptStatus == "1")

@@ -18,7 +18,7 @@ from core.db import client
 from core.depends.get_object_id import PyObjectId
 from core.utils.aes import EncryptedDTO
 from core.utils.model_utility_service import ModelUtilityService, UpdateAction
-from core.utils.utils_service import NotFoundInRecord, Utils
+from core.utils.utils_service import NotFoundInRecordException, Utils
 
 
 class UserService:
@@ -61,7 +61,7 @@ class UserService:
     async def get_user_by_query(self, query: dict[str, Any]) -> User:
         user = await ModelUtilityService.find_one(User, query)
         if not user:
-            raise NotFoundInRecord(message="user not found")
+            raise NotFoundInRecordException(message="user not found")
         return user
 
     async def check_if_username_exist_and_fail(

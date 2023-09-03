@@ -2,7 +2,7 @@ from typing import Any, cast
 
 from eth_typing import Address, HexStr
 from web3 import Web3
-from web3.contract import AsyncContract
+from web3.contract.async_contract import AsyncContract
 
 from apps.blockchain.evm_chains.ethereum_service import EthereumService
 from apps.blockchain.interfaces.blockchain_interface import Blockchain
@@ -35,7 +35,7 @@ class BaseAaveService(ILendingService):
         crt_name: str = "ILendingPool",
     ) -> tuple[AsyncContract, Web3]:
         str_address = addr if addr else defi_provider.contractAddress
-        address = Web3.toBytes(hexstr=HexStr(str_address))
+        address = Web3.to_bytes(hexstr=HexStr(str_address))
         network = cast(Network, defi_provider.network)
         web3 = self.ethereumService.get_network_provider(network)
         abi = await Utils.get_compiled_sol(crt_name, "0.6.12")
@@ -49,7 +49,7 @@ class BaseAaveService(ILendingService):
     ) -> IUserAcccountData:
         (aave_contract, _) = await self.get_contract_obj(defi_provider)
         user_account_data: list[float] = aave_contract.functions.getUserAccountData(
-            Web3.toBytes(hexstr=HexStr(user_addr))
+            Web3.to_bytes(hexstr=HexStr(user_addr))
         ).call()
         (
             total_collateral_eth,
@@ -70,7 +70,7 @@ class BaseAaveService(ILendingService):
     async def get_user_config(self, user_addr: str, defi_provider: DefiProvider) -> Any:
         (aave_contract, _) = await self.get_contract_obj(defi_provider)
         user_config_data = aave_contract.functions.getUserConfiguration(
-            Web3.toBytes(hexstr=HexStr(user_addr))
+            Web3.to_bytes(hexstr=HexStr(user_addr))
         ).call()
         return user_config_data
 
@@ -99,9 +99,9 @@ class BaseAaveService(ILendingService):
             )
 
             deposit_txn_build = aave_contract.functions.deposit(
-                Web3.toBytes(hexstr=HexStr(asset)),
-                Web3.toWei(amount, "ether"),
-                Web3.toBytes(hexstr=HexStr(on_behalf_of)),
+                Web3.to_bytes(hexstr=HexStr(asset)),
+                Web3.to_wei(amount, "ether"),
+                Web3.to_bytes(hexstr=HexStr(on_behalf_of)),
                 referral_code,
             ).build_transaction()
 
@@ -129,9 +129,9 @@ class BaseAaveService(ILendingService):
             network = cast(Network, defi_provider.network)
             blockchain = cast(Blockchain, defi_provider.blockchain)
             withdraw_txn_build = aave_contract.functions.withdraw(
-                Web3.toBytes(hexstr=HexStr(asset)),
-                Web3.toWei(amount, "ether"),
-                Web3.toBytes(hexstr=HexStr(to)),
+                Web3.to_bytes(hexstr=HexStr(asset)),
+                Web3.to_wei(amount, "ether"),
+                Web3.to_bytes(hexstr=HexStr(to)),
             ).build_transaction()
 
             txn_hash = await self.ethereumService.sign_txn(
@@ -161,11 +161,11 @@ class BaseAaveService(ILendingService):
             network = cast(Network, defi_provider.network)
             blockchain = cast(Blockchain, defi_provider.blockchain)
             borrow_txn_build = aave_contract.functions.borrow(
-                Web3.toBytes(hexstr=HexStr(asset)),
-                Web3.toWei(amount, "ether"),
+                Web3.to_bytes(hexstr=HexStr(asset)),
+                Web3.to_wei(amount, "ether"),
                 self.aave_interest_rate_mode[interest_rate_mode],
                 referral_code,
-                Web3.toBytes(hexstr=HexStr(on_behalf_of)),
+                Web3.to_bytes(hexstr=HexStr(on_behalf_of)),
             ).build_transaction()
             txn_hash = await self.ethereumService.sign_txn(
                 network, blockchain, mnemonic, borrow_txn_build
@@ -202,10 +202,10 @@ class BaseAaveService(ILendingService):
             )
 
             repay_txn_build = aave_contract.functions.repay(
-                Web3.toBytes(hexstr=HexStr(asset)),
-                Web3.toWei(amount, "ether"),
+                Web3.to_bytes(hexstr=HexStr(asset)),
+                Web3.to_wei(amount, "ether"),
                 self.aave_interest_rate_mode[rate_mode],
-                Web3.toBytes(hexstr=HexStr(on_behalf_of)),
+                Web3.to_bytes(hexstr=HexStr(on_behalf_of)),
             ).build_transaction()
             txn_hash = await self.ethereumService.sign_txn(
                 network, blockchain, mnemonic, repay_txn_build
@@ -224,7 +224,7 @@ class BaseAaveService(ILendingService):
     ) -> Any:
         (aave_contract, _) = await self.get_contract_obj(defi_provider)
         return aave_contract.functions.swapBorrowRateMode(
-            Web3.toBytes(hexstr=HexStr(asset)), rate_mode
+            Web3.to_bytes(hexstr=HexStr(asset)), rate_mode
         ).call()
 
     async def set_user_use_reserve_as_collateral(
@@ -235,7 +235,7 @@ class BaseAaveService(ILendingService):
     ) -> Any:
         (aave_contract, _) = await self.get_contract_obj(defi_provider)
         return aave_contract.functions.setUserUseReserveAsCollateral(
-            Web3.toBytes(hexstr=HexStr(asset)), use_as_collateral
+            Web3.to_bytes(hexstr=HexStr(asset)), use_as_collateral
         ).call()
 
     @timed_cache(10, 10, asyncFunction=True)
@@ -254,7 +254,7 @@ class BaseAaveService(ILendingService):
             asset: str,
         ) -> IReserveToken:
             res_data = aave_contract.functions.getReserveData(
-                Web3.toBytes(hexstr=HexStr(asset))
+                Web3.to_bytes(hexstr=HexStr(asset))
             ).call()
             (
                 availableLiquidity,
@@ -269,7 +269,7 @@ class BaseAaveService(ILendingService):
                 lastUpdateTimestamp,
             ) = res_data
             res_config_data = aave_contract.functions.getReserveConfigurationData(
-                Web3.toBytes(hexstr=HexStr(asset))
+                Web3.to_bytes(hexstr=HexStr(asset))
             ).call()
             (
                 decimals,

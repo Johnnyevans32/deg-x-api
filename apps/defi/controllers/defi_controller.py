@@ -20,7 +20,7 @@ class DefiController:
     responseService = ResponseService()
 
     @router.get(
-        "/get-defi-providers",
+        "/providers",
         dependencies=[Depends(JWTBearer())],
         response_model_by_alias=False,
     )

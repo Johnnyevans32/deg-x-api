@@ -5,6 +5,7 @@ from pymongo.client_session import ClientSession
 
 from apps.blockchain.interfaces.blockchain_interface import Blockchain
 from apps.blockchain.interfaces.network_interface import Network, NetworkType
+from apps.blockchain.interfaces.tokenasset_interface import TokenAsset, TokenAssetCore
 from apps.blockchain.services.blockchain_service import BlockchainService
 from apps.user.interfaces.user_interface import User
 from apps.wallet.interfaces.wallet_interface import Wallet, WalletType
@@ -51,12 +52,10 @@ class WalletService:
     ) -> tuple[Wallet, EncryptedDTO]:
         assert user.id, "user id not found"
         mnemonic = self.mnemo.generate(strength=256)
-        qr_code_image = await Utils.create_qr_image(user.username)
         dict_wallet = Wallet(
             user=user.id,
             name="multi-coin wallet",
             walletType=walletType,
-            qrImage=qr_code_image,
         ).dict(by_alias=True, exclude_none=True)
 
         await ModelUtilityService.model_find_one_and_update(
@@ -65,7 +64,9 @@ class WalletService:
             {"isDefault": False},
         )
 
-        encrypted_mnemonic_obj = self.aesEncryptionService.encrypt_AES_GCM(mnemonic)
+        encrypted_mnemonic_obj = await self.aesEncryptionService.encrypt_AES_GCM(
+            mnemonic
+        )
         wallet_obj = await ModelUtilityService.model_create(
             Wallet, dict_wallet, session
         )
@@ -102,6 +103,11 @@ class WalletService:
                     tokenasset=cast(PyObjectId, token_asset.id),
                     address=self.blockchainService.get_address(
                         address, cast(Network, token_asset.network)
+                    ),
+                    qrImage=Utils.create_qr_image(
+                        self.blockchainService.get_address(
+                            address, cast(Network, token_asset.network)
+                        )
                     ),
                     networkType=cast(Network, token_asset.network).networkType,
                     blockchain=cast(PyObjectId, chain.id),
@@ -157,69 +163,46 @@ class WalletService:
             {"isDefault": True},
         )
 
-    # def debit_wallet(
-    #     self, user: User, amount: int, ref: str, session: ClientSession = None
-    # ) -> None:
-    #     mutex = threading.Lock()
+    async def add_token_asset(self, user: User, payload: TokenAssetCore) -> WalletAsset:
+        network = await self.blockchainService.get_network_by_query(
+            {
+                "_id": payload.network,
+            }
+        )
+        user_wallet = await self.get_user_default_wallet(user)
+        token_asset = await ModelUtilityService.model_find_one_or_create(
+            TokenAsset,
+            {
+                "contractAddress": payload.contractAddress,
+                "network": payload.network,
+                "isDeleted": False,
+            },
+            {"name": "", "symbol": "", "blockchain": network.blockchain},
+        )
+        default_wallet_asset_query = {
+            "user": user.id,
+            "networkType": network.networkType,
+            "wallet": user_wallet.id,
+            "isDeleted": False,
+        }
+        wallet_asset_w_address = await ModelUtilityService.find_one(
+            WalletAsset,
+            {
+                **default_wallet_asset_query,
+                "blockchain": network.blockchain,
+            },
+        )
+        assert wallet_asset_w_address, "asset address not found"
+        wallet_asset = await ModelUtilityService.model_find_one_or_create(
+            WalletAsset,
+            {
+                **default_wallet_asset_query,
+                "tokenasset": token_asset.id,
+            },
+            {
+                "blockchain": network.blockchain,
+                "address": wallet_asset_w_address.address,
+            },
+        )
 
-    #     mutex.acquire()
-    #     try:
-    #         user_wallet = self.get_user_wallet(user.id)
-
-    #         if user_wallet.balance < amount:
-    #             raise Exception("wallet balance insufficient")
-
-    #         wallet_transaction_data = {
-    #             "wallet": user_wallet.id,
-    #             "user": user.id,
-    #             "action": WalletAction.debit.value,
-    #             "amount": amount,
-    #             "previousBalance": user_wallet.balance,
-    #             "ref": ref,
-    #         }
-    #         self.update_wallet_balance(user_wallet.id, -amount, session)
-    #         ModelUtilityService.model_create(
-    #             WalletTransaction,
-    #             wallet_transaction_data,
-    #             session,
-    #         )
-    #     except Exception as e:
-    #         raise e
-    #     finally:
-    #         mutex.release()
-
-    # def credit_wallet(
-    #     self, user: User, amount: int, ref: str, paymentMethod: str, metaData: Any
-    # ) -> None:
-    #     mutex = threading.Lock()
-
-    #     mutex.acquire()
-
-    #     session = client.start_session()
-    #     session.start_transaction()
-    #     try:
-    #         user_wallet = self.get_user_wallet(user.id)
-    #         wallet_transaction_data = {
-    #             "wallet": user_wallet.id,
-    #             "user": user.id,
-    #             "action": WalletAction.credit.value,
-    #             "amount": amount,
-    #             "previousBalance": user_wallet.balance,
-    #             "ref": ref,
-    #             "metaData": metaData,
-    #             "paymentMethod": paymentMethod,
-    #         }
-    #         self.update_wallet_balance(user_wallet.id, amount, session)
-    #         ModelUtilityService.model_create(
-    #             WalletTransaction,
-    #             wallet_transaction_data,
-    #             session,
-    #         )
-    #         session.commit_transaction()
-    #     except Exception as e:
-    #         # operation exception, interrupt transaction
-    #         session.abort_transaction()
-    #         raise e
-    #     finally:
-    #         session.end_session()
-    #         mutex.release()
+        return wallet_asset

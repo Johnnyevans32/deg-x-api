@@ -13,6 +13,8 @@ from io import BytesIO
 from pathlib import Path
 from typing import Any, Callable, Type, TypeVar
 
+from PIL import Image
+import requests
 import qrcode
 from async_lru import alru_cache
 from boto3 import client
@@ -30,7 +32,7 @@ from core.config import settings
 from core.utils.loggly import logger
 
 
-class NotFoundInRecord(Exception):
+class NotFoundInRecordException(Exception):
     def __init__(self, model: str = None, message: str = "payload not found") -> None:
         self.model = model
         self.message = message
@@ -185,7 +187,7 @@ class Utils:
         if code == "Reverted":
             return err
 
-        reason = Web3.toText(text="0x" + code)
+        reason = Web3.to_text(text="0x" + code)
         return reason
 
     @staticmethod
@@ -221,30 +223,39 @@ class Utils:
         return genericClass(**_dict)
 
     @staticmethod
-    async def create_qr_image(data_to_encode: Any) -> str:
+    def create_qr_image(data_to_encode: Any = "Deg X") -> str:
         # Creating an instance of QRCode class
-        qr = qrcode.QRCode(
-            version=2, box_size=10, border=4, error_correction=qrcode.ERROR_CORRECT_L
-        )
+        qr = qrcode.QRCode(version=2, error_correction=qrcode.ERROR_CORRECT_Q)
 
         # Adding data to the instance 'qr'
         qr.add_data(data_to_encode)
 
         qr.make(fit=True)
+        response = requests.get(
+            "https://res.cloudinary.com/dfbjysygb/image/upload/"
+            "v1668763106/rsz_1degx-pre_o8m3tt.png",
+            stream=True,
+        )
+        logo = Image.open(response.raw)
+        logo = logo.resize((50, 50))
         img = qr.make_image(
             image_factory=StyledPilImage,
             module_drawer=RoundedModuleDrawer(),
             color_mask=RadialGradiantColorMask(edge_color=(218, 112, 214)),
+            embeded_image=logo,
+            eye_drawer=RoundedModuleDrawer(),
         )
+
         buffer = BytesIO()
         img.save(buffer)
         img_base64 = base64.b64encode(buffer.getvalue()).decode()
         image_url = Utils.upload_file(data_to_encode, img_base64)
+        print("image_url", image_url)
         return image_url
 
     @staticmethod
     def upload_file(file_name: str, base64_data: str) -> str:
-        if settings.IS_DEV:
+        if not settings.IS_DEV:
             return (
                 "https://s3-us-west-2.amazonaws.com/verifi-app-bucket/"
                 + "1bad0760-22c5-4ac6-bcac-c963193e393063080868bcec8b55dc441a19"
@@ -272,10 +283,6 @@ class Utils:
 
     @staticmethod
     def get_file_url_location(s3_client: Any, file_name: str) -> str:
-        if settings.IS_DEV:
-            return "{}/{}/{}".format(
-                settings.AWS_S3_URL, settings.S3_BUCKET_NAME, file_name
-            )
         location = s3_client.get_bucket_location(Bucket=settings.S3_BUCKET_NAME)[
             "LocationConstraint"
         ]

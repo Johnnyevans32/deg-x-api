@@ -187,4 +187,11 @@ class YupanaService(ILendingService):
     async def get_reserve_assets(
         self, defi_provider: DefiProvider
     ) -> list[IReserveToken]:
-        pass
+        token_ids = [0, 1, 5]
+        network = cast(Network, defi_provider.network)
+        tez_client: PyTezosClient = pytezos.using(network.providerUrl)
+        proxy = tez_client.contract(defi_provider.contractAddress)
+        call = proxy.getPrice(token_ids)
+        opg = call.inject()
+        print(opg)
+        return []

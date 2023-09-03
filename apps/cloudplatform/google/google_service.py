@@ -16,15 +16,14 @@ from apps.cloudplatform.interfaces.cloud_interface import CloudProvider, IDType
 from apps.cloudplatform.interfaces.cloud_service_interface import ICloudService
 from apps.user.interfaces.user_interface import SignUpMethod, User, Name
 from apps.user.services.user_service import UserService
-from apps.wallet.services.wallet_service import WalletService
+
 from core.utils.loggly import logger
-from core.utils.utils_service import NotFoundInRecord
+from core.utils.utils_service import NotFoundInRecordException
 from core.config import settings
 
 
 class GoogleService(ICloudService):
     userService = UserService()
-    walletService = WalletService()
     jwtService = JWTService()
     folder_name = "Deg X Wallet"
 
@@ -56,18 +55,15 @@ class GoogleService(ICloudService):
             # userid = idinfo.sub
 
             user = await self.userService.get_user_by_query({"email": email})
-            wallet = await self.walletService.get_user_default_wallet(user)
             assert user.id, "id is null"
             access_token = self.jwtService.sign_jwt(user.id, "ACCESS_TOKEN")
             refresh_token = self.jwtService.sign_jwt(user.id, "REFRESH_TOKEN")
             await self.userService.create_user_refresh_token(user, refresh_token)
             return AuthResponse(
-                user=user,
-                wallet=wallet,
                 accessToken=access_token,
                 refreshToken=refresh_token,
             )
-        except NotFoundInRecord:
+        except NotFoundInRecordException:
             return await self.oauth_sign_up(auth_token, token_type, idinfo)
         except Exception as e:
             # Invalid token
@@ -117,8 +113,6 @@ class GoogleService(ICloudService):
             refresh_token = self.jwtService.sign_jwt(user.id, "REFRESH_TOKEN")
             await self.userService.create_user_refresh_token(user, refresh_token)
             return AuthResponse(
-                user=user,
-                wallet=wallet,
                 seed=seed,
                 accessToken=access_token,
                 refreshToken=refresh_token,

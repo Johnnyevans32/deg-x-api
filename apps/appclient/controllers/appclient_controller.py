@@ -16,7 +16,7 @@ class AppClientController:
     appClientService = AppClientService()
     responseService = ResponseService()
 
-    @router.post("/create")
+    @router.post("/")
     async def create_app_client(
         self,
         request: UnicornRequest,

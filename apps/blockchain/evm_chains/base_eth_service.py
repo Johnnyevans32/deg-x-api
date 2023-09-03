@@ -6,7 +6,7 @@ from eth_account.signers.local import LocalAccount
 from eth_typing import Address as EthAddress
 from eth_typing import HexStr
 from web3 import Web3
-from web3.contract import AsyncContract
+from web3.contract.async_contract import AsyncContract
 from web3.middleware.geth_poa import geth_poa_middleware
 
 from apps.blockchain.interfaces.blockchain_interface import Blockchain, ChainServiceName
@@ -58,7 +58,7 @@ class BaseEvmService(IBlockchainService):
     @staticmethod
     @timed_cache(60, 10, asyncFunction=True)
     async def get_erc20_contract_obj(crt_address: str, web3: Web3) -> AsyncContract:
-        address = Web3.toBytes(hexstr=HexStr(crt_address))
+        address = Web3.to_bytes(hexstr=HexStr(crt_address))
         abi = await Utils.get_compiled_sol("IERC20", "0.6.12")
         erc20_crt = cast(
             AsyncContract, web3.eth.contract(address=EthAddress(address), abi=abi)
@@ -96,14 +96,14 @@ class BaseEvmService(IBlockchainService):
             )
 
             txn_build = erc20_crt.functions.transfer(
-                Web3.toBytes(hexstr=HexStr(to)), Web3.toWei(value, "ether")
+                Web3.to_bytes(hexstr=HexStr(to)), Web3.to_wei(value, "ether")
             ).build_transaction()
 
         else:
             # build a transaction in a dictionary
             txn_build = {
-                "to": Web3.toBytes(hexstr=HexStr(to)),
-                "value": Web3.toWei(value, "ether"),
+                "to": Web3.to_bytes(hexstr=HexStr(to)),
+                "value": Web3.to_wei(value, "ether"),
             }
 
         txn_build = {
@@ -127,11 +127,11 @@ class BaseEvmService(IBlockchainService):
                 token_asset.contractAddress, web3
             )
             balance = erc20_crt.functions.balanceOf(
-                Web3.toBytes(hexstr=HexStr(address))
+                Web3.to_bytes(hexstr=HexStr(address))
             ).call()
         else:
             balance = web3.eth.get_balance(address)
-        return float(Web3.fromWei(int(balance), "ether"))
+        return float(Web3.from_wei(int(balance), "ether"))
 
     async def sign_txn(
         self,
@@ -148,7 +148,7 @@ class BaseEvmService(IBlockchainService):
         gas_fee_data = await self.networkFeeService.get_fee_value_by_speed(
             txn_speed, blockchain.symbol
         )
-        txn_miner_tip = web3.eth.max_priority_fee + Web3.toWei(12, "gwei")
+        txn_miner_tip = web3.eth.max_priority_fee + Web3.to_wei(12, "gwei")
         block_base_fee_per_gas = web3.eth.get_block("latest").get("baseFeePerGas")
         maxPFee = gas_fee_data.maxPriorityFeePerGas
         maxFee = gas_fee_data.maxFeePerGas
@@ -156,10 +156,10 @@ class BaseEvmService(IBlockchainService):
         txn_build = {
             **txn_build,
             "nonce": nonce,
-            "maxPriorityFeePerGas": Web3.toWei(maxPFee, "gwei") or txn_miner_tip,
+            "maxPriorityFeePerGas": Web3.to_wei(maxPFee, "gwei") or txn_miner_tip,
             "gas": web3.eth.estimate_gas(txn_build),
             "chainId": web3.eth.chain_id,
-            "maxFeePerGas": (Web3.toWei(maxFee, "gwei") or block_base_fee_per_gas)
+            "maxFeePerGas": (Web3.to_wei(maxFee, "gwei") or block_base_fee_per_gas)
             + txn_miner_tip,
         }
 
@@ -168,7 +168,7 @@ class BaseEvmService(IBlockchainService):
         # send transaction
         tx_hash = web3.eth.send_raw_transaction(signed_tx.rawTransaction)
 
-        return str(Web3.toHex(tx_hash))
+        return str(Web3.to_hex(tx_hash))
 
     async def approve_token_delegation(
         self,
@@ -183,7 +183,7 @@ class BaseEvmService(IBlockchainService):
         erc20_crt = await BaseEvmService.get_erc20_contract_obj(token_address, web3)
 
         approve_txn_build = erc20_crt.functions.approve(
-            Web3.toBytes(hexstr=HexStr(spender_address)), Web3.toWei(amount, "ether")
+            Web3.to_bytes(hexstr=HexStr(spender_address)), Web3.to_wei(amount, "ether")
         ).build_transaction()
 
         txn_hash = await self.sign_txn(network, blockchain, mnemonic, approve_txn_build)
@@ -248,7 +248,7 @@ class BaseEvmService(IBlockchainService):
                 blockConfirmations=int(txn.confirmations or 0),
                 network=cast(PyObjectId, chain_network.id),
                 wallet=cast(PyObjectId, wallet.id),
-                amount=float(Web3.fromWei(int(txn.value or 0), "ether")),
+                amount=float(Web3.from_wei(int(txn.value or 0), "ether")),
                 status=(
                     TxnStatus.FAILED if (txn.isError == "1") else TxnStatus.SUCCESS
                 ),

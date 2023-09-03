@@ -56,6 +56,7 @@ class UserUpdateDTO(Username):
 
 class UserBase(UserUpdateDTO, SBaseOutModel):
     email: EmailStr
+    qrImage: Optional[str]
     country: Optional[Union[PyObjectId, Country]]
 
     class Config:

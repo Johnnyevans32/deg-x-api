@@ -27,7 +27,7 @@ class CloudController:
         status_code=status.HTTP_201_CREATED,
         dependencies=[Depends(JWTBearer())],
     )
-    def backup_mnemonic(
+    async def backup_mnemonic(
         self,
         request: UnicornRequest,
         res: Response,
@@ -37,7 +37,7 @@ class CloudController:
         try:
             user = request.state.user
             request.app.logger.info("uploading file to cloud")
-            resp = self.cloudService.backup_seedphrase(payload, user)
+            resp = await self.cloudService.backup_seedphrase(payload, user)
             request.app.logger.info("uploaded file to cloud")
             return self.responseService.send_response(
                 res, status.HTTP_200_OK, "file upload successful", resp

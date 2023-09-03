@@ -29,7 +29,7 @@ class LendingController:
     responseService = ResponseService()
 
     @router.get(
-        "/get-user-account-data",
+        "/account-data",
         dependencies=[Depends(JWTBearer())],
     )
     async def get_user_account_data(
@@ -60,7 +60,7 @@ class LendingController:
             )
 
     @router.get(
-        "/get-user-config",
+        "/config",
         dependencies=[Depends(JWTBearer())],
     )
     async def get_user_config(
@@ -86,7 +86,7 @@ class LendingController:
             )
 
     @router.get(
-        "/get-requests",
+        "/",
         dependencies=[Depends(JWTBearer())],
     )
     async def get_user_lending_requests(

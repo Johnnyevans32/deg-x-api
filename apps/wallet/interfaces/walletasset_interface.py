@@ -1,4 +1,4 @@
-from typing import Union
+from typing import Optional, Union
 
 from pydantic import BaseModel, Field
 
@@ -28,10 +28,11 @@ class WalletAssetOut(SBaseOutModel):
     address: str
     balance: float = Field(default=0)
     networkType: NetworkType
+    qrImage: Optional[str]
 
 
 class WalletAsset(WalletAssetOut, SBaseModel):
     tokenasset: Union[PyObjectId, TokenAsset]
+    wallet: Union[PyObjectId, Wallet]
     blockchain: Union[PyObjectId, Blockchain]
     user: Union[PyObjectId, User]
-    wallet: Union[PyObjectId, Wallet]

@@ -3,6 +3,8 @@ import math
 from collections import deque
 from time import time
 from typing import Callable
+import requests
+from bs4 import BeautifulSoup
 
 
 def timer_func(func):
@@ -799,7 +801,166 @@ def candle_crush(data: str):
     return stack
 
 
-print(candle_crush("abcaaabbb"))
+def kandane_algo(data: list[int]):
+    max_sum = data[0]
+    sub_arr = data[:1]
+    for i in range(2, len(data)):
+        print(data[:i])
+        curr_sub_arr_sum = sum(data[:i])
+        if curr_sub_arr_sum > max_sum:
+            sub_arr = data[:i]
+            max_sum = curr_sub_arr_sum
+
+    print(max_sum, sub_arr)
+    return max_sum
+
+
+def groupAnagrams(strs):
+    """
+    :type strs: List[str]
+    :rtype: List[List[str]]
+    """
+    res = []
+    hmm: dict[str, list[str]] = {}
+
+    for i in range(len(strs)):
+        sorted_word = "".join(sorted(strs[i])).__str__()
+        if not hmm.get(sorted_word):
+            hmm[sorted_word] = []
+        hmm[sorted_word].append(strs[i])
+
+    for k, v in hmm.items():
+        print(v)
+        res.append(v)
+    return res
+
+
+def longestConsecutive(nums: list[int]):
+    """
+    :type nums: List[int]
+    :rtype: int
+    """
+    sorted_nums = sorted(list(set(nums)))
+    resC = 0
+    wC = 1
+    for i in range(len(sorted_nums) - 1):
+        if sorted_nums[i] + 1 == sorted_nums[i + 1]:
+            wC += 1
+        else:
+            wC = 1
+
+        if wC > resC:
+            resC = wC
+    return resC
+
+
+def twoSum1(num, target):
+    """
+    :type nums: List[int]
+    :type target: int
+    :rtype: List[int]
+    """
+    nums = sorted(num)
+    l, r = 0, len(nums) - 1
+    while l < r:
+        print("2", l, r)
+        if nums[r] + nums[l] == target:
+            return [l, r]
+        while l < r and nums[r] + nums[l] > target:
+            r -= 1
+        while l < r and nums[r] + nums[l] < target:
+            print(l, r)
+            l += 1
+    print(l, r)
+    return []
+
+
+def twoSum(numbers, target):
+    """
+    :type numbers: List[int]
+    :type target: int
+    :rtype: List[int]
+    """
+    left = 0
+    right = len(numbers) - 1
+
+    while left < right:
+        cS = numbers[left] + numbers[right]
+        if cS > target:
+            right -= 1
+        elif cS < target:
+            left += 1
+        else:
+            return [left + 1, right + 1]
+    return []
+
+
+def maxProfit(prices):
+    """
+    :type prices: List[int]
+    :rtype: int
+    """
+    cs = 0
+    l = 0
+    r = 1
+    while l < r and r < len(prices):
+        print("27892", l, r)
+        while l < r and r < len(prices) and prices[l] > prices[r]:
+            print("27892", l, r)
+            l = r
+            r += 1
+
+        while l < r and r < len(prices) and prices[l] <= prices[r]:
+            print("e7829", l, r)
+            cs = max(prices[r] - prices[l], cs)
+            r += 1
+    return cs
+
+
+def lengthOfLongestSubstring(s):
+    uni = set()
+    res = 0
+    for l in s:
+        print(f"l `{l}` l")
+        if l not in uni:
+            print(uni)
+            uni.add(l)
+            print(uni)
+            res = max(res, len(uni))
+        else:
+            print("sks")
+            res = max(res, len(uni))
+            uni = set(l)
+    return res
+
+
+def getCompoundedAmount(startingM: float, interest: float):
+    res = startingM
+    while startingM > 1:
+        print(res, startingM)
+        startingM = startingM * interest
+        res += startingM
+    return res
+
+
+def dailyTemperatures(temperatures):
+    """
+    :type temperatures: List[int]
+    :rtype: List[int]
+    """
+    res = []
+    for i, v in enumerate(temperatures):
+        diff = 0
+        for j, w in enumerate(temperatures):
+            print(i, j, w, v)
+            if w > v:
+                diff = j - i
+                break
+        res.append(diff)
+    return res
+
+
+print(dailyTemperatures([73, 74, 75, 71, 69, 72, 76, 73]))
 # print [m(2) for m in multipliers()]
 
 
@@ -811,3 +972,45 @@ print(candle_crush("abcaaabbb"))
 # (smax_sliding_window_k(random.sample(range(10000000), 10000000), 20))
 # (max_sliding_window_k(random.sample(range(10000000), 10000000), 20))
 # (imax_sliding_window_k(random.sample(range(10000000), 10000000), 20))
+
+
+def in_stock(title: str, topic: str) -> True:
+    base_url = "http://books.toscrape.com/"
+    response = requests.get(base_url)
+    soup = BeautifulSoup(response.content, "html.parser")
+    sidebar = soup.find("ul", {"class": "nav-list"}).find("ul").find_all("a")
+    hashmap_topic = {}
+    for res in sidebar:
+        hashmap_topic[res.text.strip().lower()] = res["href"]
+
+    if hashmap_topic.get(topic.lower()):
+        page_c = int(
+            int(
+                soup.find("form", {"class": "form-horizontal"}).select("strong")[0].text
+            )
+            / 26
+        )
+        topic_baseurl = (base_url + hashmap_topic[topic.lower()])[:-10]
+        for r in range(1, page_c):
+            attach = "index.html" if r == 1 else f"page-{r}.html"
+            topic_url = topic_baseurl + attach
+            topic_response = requests.get(topic_url)
+            topic_soup = BeautifulSoup(topic_response.content, "html.parser")
+
+            topic_section = topic_soup.find_all("article", {"class": "product_pod"})
+            if topic_section:
+                for title_ in topic_section:
+                    title_name = title_.select("h3 > a")[0]["title"]
+                    if title_name.lower() == title.lower():
+                        return True
+            else:
+                break
+
+    return False
+
+
+print(
+    in_stock(
+        "Online Marketing for Busy Authors: A Step-By-Step guide", "Historical Fiction"
+    )
+)

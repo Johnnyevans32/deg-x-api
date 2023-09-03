@@ -19,7 +19,7 @@ class DecrptRequestBody(Request):
         if not hasattr(self, "_body"):
             body = await super().body()
             if "encrypted" in self.headers.getlist("Content-Encoding"):
-                dec_body = self.aesEncryptionService.decrypt_AES_GCM(
+                dec_body = await self.aesEncryptionService.decrypt_AES_GCM(
                     EncryptedDTO(**json.loads(body.decode()))
                 )
                 body = json.dumps(dec_body).encode()

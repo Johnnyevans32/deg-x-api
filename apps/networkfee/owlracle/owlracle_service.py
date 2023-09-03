@@ -46,8 +46,8 @@ class OwlracleService(INetworkFeeService):
         def convert_to_eth(value: Optional[float]) -> float | None:
             if not value:
                 return value
-            wei_value = Web3.toWei(value, "gwei")
-            return Web3.fromWei(int(wei_value), "ether").__float__()
+            wei_value = Web3.to_wei(value, "gwei")
+            return Web3.from_wei(int(wei_value), "ether").__float__()
 
         def convert_to_total_gas_fee(gas_price: Optional[float]) -> float | None:
             return gas_price * self.network_gas_limit[network] if gas_price else None

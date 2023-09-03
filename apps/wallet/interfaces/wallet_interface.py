@@ -30,8 +30,6 @@ class WalletOut(SBaseOutModel):
 
 
 class Wallet(WalletOut, SBaseModel):
-    # blockchain: Optional[PyObjectId | Blockchain]
-    # address: Optional[str]
     mnemonic: Optional[str]
 
     # @property

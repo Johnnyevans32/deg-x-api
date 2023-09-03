@@ -32,7 +32,7 @@ from core.utils.model_utility_service import ModelUtilityService
 from core.utils.request import HTTPRepository
 from core.utils.response_service import MetaDataModel
 from core.depends.get_object_id import PyObjectId
-from core.utils.utils_service import NotFoundInRecord
+from core.utils.utils_service import NotFoundInRecordException
 
 
 class BlockchainService:
@@ -144,7 +144,7 @@ class BlockchainService:
     async def get_user_by_query(self, query: dict[str, Any]) -> User:
         user = await ModelUtilityService.find_one(User, query)
         if not user:
-            raise NotFoundInRecord(message="user not found")
+            raise NotFoundInRecordException(message="user not found")
         return user
 
     async def verify_mnemonic_and_fail(
@@ -350,7 +350,6 @@ class BlockchainService:
             },
             ["blockchain"],
         )
-
         # update user txns before returning
         chain_ids = []
         for network in chain_networks:

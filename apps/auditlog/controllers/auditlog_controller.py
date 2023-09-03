@@ -54,7 +54,7 @@ class AuditLogController:
             )
 
     @router.post(
-        "/notification/create",
+        "/notification",
         response_model_by_alias=False,
     )
     async def create_generic_notification(

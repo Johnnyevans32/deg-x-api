@@ -33,7 +33,7 @@ class BlockchainController:
     responseService = ResponseService()
 
     @router.get(
-        "/get-transaction",
+        "/transactions",
         dependencies=[Depends(JWTBearer())],
         response_model_by_alias=False,
     )
@@ -90,7 +90,7 @@ class BlockchainController:
             )
 
     @router.post(
-        "/get-token-balance",
+        "/token-balance",
         dependencies=[Depends(JWTBearer())],
     )
     async def get_token_balance(

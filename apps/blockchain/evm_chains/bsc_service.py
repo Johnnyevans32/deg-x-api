@@ -27,13 +27,13 @@ class BscService(BaseEvmService):
         gas_fee_data = await self.networkFeeService.get_fee_value_by_speed(
             txn_speed, blockchain.symbol
         )
-        txn_miner_tip = web3.eth.max_priority_fee + Web3.toWei(10, "gwei")
+        txn_miner_tip = web3.eth.max_priority_fee + Web3.to_wei(10, "gwei")
         maxPFee = gas_fee_data.gasPrice
         assert maxPFee, "bsc gas fee not set"
         txn_build = {
             **txn_build,
             "nonce": nonce,
-            "gasPrice": Web3.toWei(maxPFee, "gwei") or txn_miner_tip,
+            "gasPrice": Web3.to_wei(maxPFee, "gwei") or txn_miner_tip,
             "gas": web3.eth.estimate_gas(txn_build),
             "chainId": web3.eth.chain_id,
         }
@@ -43,4 +43,4 @@ class BscService(BaseEvmService):
         # send transaction
         tx_hash = web3.eth.send_raw_transaction(signed_tx.rawTransaction)
 
-        return str(Web3.toHex(tx_hash))
+        return str(Web3.to_hex(tx_hash))
