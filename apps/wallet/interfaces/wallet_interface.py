@@ -1,5 +1,5 @@
 from enum import Enum
-from typing import Optional, Union
+from typing import Union
 
 from pydantic import Field
 
@@ -26,11 +26,11 @@ class WalletOut(SBaseOutModel):
     networkType: NetworkType = Field(default=NetworkType.TESTNET)
     fiatCurrency: FiatCurrency = Field(default=FiatCurrency.USD)
     isDefault: bool = Field(default=True)
-    qrImage: Optional[str]
+    qrImage: str | None = None
 
 
 class Wallet(WalletOut, SBaseModel):
-    mnemonic: Optional[str]
+    mnemonic: str | None = None
 
     # @property
     # async def assets(self) -> list[WalletAsset]:

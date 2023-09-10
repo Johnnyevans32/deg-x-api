@@ -15,7 +15,7 @@ class SlackService:
         title: str,
         msg: str,
         channel: str = "error-report",
-        attachments: Any = None,
+        attachments: Any | None = None,
     ) -> None:
         await self.send_message(f">*{title}* \n {msg}", channel, attachments)
 

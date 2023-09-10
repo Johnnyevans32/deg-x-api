@@ -7,7 +7,7 @@ emails==0.6
 requests==2.31.0
 itsdangerous==2.0.1
 APScheduler==3.10.4
-python-dotenv==0.19.2
+python-dotenv==1.0.0
 uvicorn==0.23.2
 loguru==0.6.0
 dnspython==2.2.1
@@ -22,7 +22,7 @@ pytest==7.4.1
 poetry==1.6.1
 isort==5.10.1
 black==22.6.0
-mypy==1.5.1
+mypy==1.1.1
 web3==6.9.0
 py-solc-x==1.1.1
 frozendict==2.3.0
@@ -44,3 +44,4 @@ google_api_python_client==2.60.0
 google-auth-httplib2==0.1.0
 google-auth-oauthlib==0.5.2
 flake8==5.0.4
+pydantic_settings==2.0.3

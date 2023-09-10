@@ -56,8 +56,8 @@ class UserUpdateDTO(Username):
 
 class UserBase(UserUpdateDTO, SBaseOutModel):
     email: EmailStr
-    qrImage: Optional[str]
-    country: Optional[Union[PyObjectId, Country]]
+    qrImage: Optional[str] = None
+    country: Optional[Union[PyObjectId, Country]] = None
 
     class Config:
         anystr_strip_whitespace = True

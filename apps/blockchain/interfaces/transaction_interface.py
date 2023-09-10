@@ -33,20 +33,20 @@ class TxnStatus(str, Enum):
 
 class BlockchainTransactionOut(SBaseOutModel):
     user: Union[PyObjectId, User]
-    otherUser: Optional[Union[PyObjectId, User]]
+    otherUser: Optional[Union[PyObjectId, User]] = None
     tokenasset: Optional[Union[PyObjectId, TokenAssetOut]]
     wallet: Union[PyObjectId, Wallet]
     network: Union[PyObjectId, Network]
     fromAddress: str
     toAddress: str
     transactionHash: str
-    blockConfirmations: Optional[int]
+    blockConfirmations: Optional[int] = None
     blockNumber: int
     gasPrice: int
-    gasUsed: Optional[int]
+    gasUsed: Optional[int] = None
     amount: float
     status: TxnStatus
-    explorerUrl: Optional[str]
+    explorerUrl: Optional[str] = None
     isContractExecution: bool = Field(default=False)
     txnType: TxnType
     source: TxnSource = Field(default=TxnSource.EXPLORER)

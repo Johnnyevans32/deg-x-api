@@ -33,10 +33,10 @@ class EmailService:
 
     def send_template_email(
         self,
-        email_to: EmailStr = None,
+        email_to: EmailStr | None,
+        environment: dict[str, Any] | None,
         subject_template: str = "",
         html_template: str = "",
-        environment: dict[str, Any] = None,
     ) -> None:
         assert settings.EMAILS_ENABLED, "Email is Disabled"
         if not email_to:
@@ -81,13 +81,13 @@ class EmailService:
             assert user.name, "name can not be null"
             self.send_template_email(
                 email_to=user.email,
-                subject_template=subject,
-                html_template=html,
                 environment={
                     "name": f"{user.name.first} {user.name.last}",
                     "link": confirm_url,
                     "valid_hours": int(self.serializer_expiration_in_hr),
                 },
+                subject_template=subject,
+                html_template=html,
             )
         except Exception as e:
             BackgroundTask(
@@ -124,13 +124,13 @@ class EmailService:
             assert user.name, "name can not be null"
             self.send_template_email(
                 email_to=user.email,
-                subject_template=subject,
-                html_template=html,
                 environment={
                     "name": f"{user.name.first} {user.name.last}",
                     "link": password_reset_url,
                     "valid_hours": int(self.serializer_expiration_in_hr),
                 },
+                subject_template=subject,
+                html_template=html,
             )
         except Exception as e:
             BackgroundTask(

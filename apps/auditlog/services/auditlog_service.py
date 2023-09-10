@@ -20,7 +20,7 @@ class AuditLogService:
         title: str,
         message: str,
         type: NotificationType = NotificationType.Generic,
-        user: User = None,
+        user: User | None = None,
     ) -> Notification:
         notf_obj = await ModelUtilityService.model_create(
             Notification,

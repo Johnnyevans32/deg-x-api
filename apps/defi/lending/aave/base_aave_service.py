@@ -31,7 +31,7 @@ class BaseAaveService(ILendingService):
     async def get_contract_obj(
         self,
         defi_provider: DefiProvider,
-        addr: str = None,
+        addr: str | None,
         crt_name: str = "ILendingPool",
     ) -> tuple[AsyncContract, Web3]:
         str_address = addr if addr else defi_provider.contractAddress

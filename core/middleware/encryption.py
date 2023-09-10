@@ -52,7 +52,7 @@ class DecryptRequestMiddleware(BaseHTTPMiddleware):
 
         request._receive = receive
 
-    async def dispatch(  # type: ignore
+    async def dispatch(
         self,
         request: Request,
         call_next: Callable[[Request], Awaitable[Response]],

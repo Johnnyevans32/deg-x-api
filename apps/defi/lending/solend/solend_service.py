@@ -27,10 +27,10 @@ class SolendService(ILendingService):
     async def get_user_account_data(
         self, user_addr: str, defi_provider: DefiProvider
     ) -> IUserAcccountData:
-        pass
+        raise NotImplementedError
 
     async def get_user_config(self, user_addr: str, defi_provider: DefiProvider) -> Any:
-        pass
+        raise NotImplementedError
 
     @staticmethod
     def get_cluster(networkType: NetworkType) -> str:
@@ -187,7 +187,7 @@ class SolendService(ILendingService):
         rate_mode: int,
         defi_provider: DefiProvider,
     ) -> Any:
-        pass
+        raise NotImplementedError
 
     async def set_user_use_reserve_as_collateral(
         self,
@@ -195,7 +195,7 @@ class SolendService(ILendingService):
         use_as_collateral: bool,
         defi_provider: DefiProvider,
     ) -> Any:
-        pass
+        raise NotImplementedError
 
     @timed_cache(10, 10, asyncFunction=True)
     async def get_reserve_assets(

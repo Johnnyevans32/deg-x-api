@@ -7,4 +7,4 @@ class BaseLendingService:
         self,
         defi_provider: DefiProvider,
     ) -> list[IReserveToken]:
-        pass
+        raise NotImplementedError

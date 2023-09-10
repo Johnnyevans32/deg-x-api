@@ -47,7 +47,7 @@ class LendingService:
         return default_lending_provider
 
     async def get_defi_provider(
-        self, defi_provider_id: PyObjectId | None
+        self, defi_provider_id: PyObjectId | None = None
     ) -> DefiProvider:
         if not defi_provider_id:
             return await self.get_default_provider_key()
@@ -83,7 +83,7 @@ class LendingService:
         user: User,
         page_num: int,
         page_size: int,
-        defi_provider: PyObjectId = None,
+        defi_provider: PyObjectId | None = None,
     ) -> tuple[list[LendingRequest], MetaDataModel]:
 
         user_wallet = await self.walletService.get_user_default_wallet(user)
@@ -102,7 +102,7 @@ class LendingService:
     async def get_user_lending_data(
         self,
         user: User,
-        defi_provider_id: PyObjectId = None,
+        defi_provider_id: PyObjectId | None = None,
     ) -> IUserAcccountData:
         defi_provider = await self.get_defi_provider(defi_provider_id)
         user_wallet = await self.walletService.get_user_default_wallet(user)
@@ -117,7 +117,7 @@ class LendingService:
 
     async def get_reserve_assets(
         self,
-        defi_provider_id: PyObjectId = None,
+        defi_provider_id: PyObjectId | None = None,
     ) -> list[IReserveToken]:
         defi_provider = await self.get_defi_provider(defi_provider_id)
         reserve_assets = await self.lendingRegistry.get_service(
@@ -129,7 +129,7 @@ class LendingService:
     async def get_user_config(
         self,
         user: User,
-        defi_provider_id: PyObjectId = None,
+        defi_provider_id: PyObjectId | None = None,
     ) -> Any:
         defi_provider = await self.get_defi_provider(defi_provider_id)
         user_wallet = await self.walletService.get_user_default_wallet(user)
@@ -192,7 +192,7 @@ class LendingService:
         amount: float,
         assetAddress: str,
         assetSymbol: str,
-        interest_rate_mode: InterestRateMode = None,
+        interest_rate_mode: InterestRateMode | None = None,
     ) -> LendingRequest:
         lending_req = await ModelUtilityService.model_create(
             LendingRequest,

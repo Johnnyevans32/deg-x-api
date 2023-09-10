@@ -20,7 +20,7 @@ class SocketEvent(str, Enum):
 
 
 async def emit_socket_event_to_clients(
-    event: SocketEvent, data: Any, user_id: str = None
+    event: SocketEvent, data: Any, user_id: str | None = None
 ) -> None:
 
     return await sio.emit(event.value, data, to=user_id)

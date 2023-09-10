@@ -1,7 +1,7 @@
 from enum import Enum
 from typing import Optional, Union
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ConfigDict
 
 from apps.blockchain.interfaces.blockchain_interface import Blockchain
 from apps.blockchain.interfaces.network_interface import Network, NetworkOut
@@ -18,7 +18,7 @@ class CoinType(str, Enum):
 
 
 class TokenAssetCore(BaseModel):
-    network: Optional[Union[PyObjectId, NetworkOut]]
+    network: Union[PyObjectId, NetworkOut]
     contractAddress: Optional[str]
 
 
@@ -28,13 +28,11 @@ class TokenAssetOut(TokenAssetCore, SBaseOutModel):
     image: Optional[str]
     coinGeckoId: Optional[str]
 
-    class Config:
-        anystr_strip_whitespace = True
-        anystr_lower = True
+    model_config = ConfigDict(str_strip_whitespace=True, str_to_lower=True)
 
 
 class TokenAsset(TokenAssetOut, SBaseModel):
-    network: Optional[Union[PyObjectId, Network]]
+    network: Union[PyObjectId, Network]
     blockchain: Union[PyObjectId, Blockchain]
     isLayerOne: bool = Field(default=False)
     hasTestToken: bool = Field(default=False)

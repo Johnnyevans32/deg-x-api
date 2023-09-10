@@ -6,7 +6,7 @@ from enum import Enum
 from functools import lru_cache, partial
 from typing import Any, Type, TypeVar
 
-from bson import ObjectId
+from bson.objectid import ObjectId
 from pymongo import DESCENDING, ReturnDocument
 from pymongo.client_session import ClientSession
 from pymongo.results import (
@@ -322,7 +322,7 @@ class ModelUtilityService:
     async def model_create(
         generic_class: Type[T],
         record: dict[str, Any],
-        session: ClientSession = None,
+        session: ClientSession | None = None,
     ) -> T:
         model = db[generic_class.__name__.lower()]
         loop = asyncio.get_event_loop()
@@ -345,7 +345,7 @@ class ModelUtilityService:
         generic_class: Type[T],
         query: dict[str, Any],
         record: dict[str, Any],
-        session: ClientSession = None,
+        session: ClientSession | None = None,
     ) -> UpdateResult:
         model = db[generic_class.__name__.lower()]
         record["updatedAt"] = datetime.now()
@@ -364,7 +364,7 @@ class ModelUtilityService:
         query: dict[str, Any],
         record: dict[str, Any],
         upsert: bool = False,
-        session: ClientSession = None,
+        session: ClientSession | None = None,
         updateAction: UpdateAction = UpdateAction.SET,
     ) -> T | None:
         loop = asyncio.get_event_loop()
@@ -411,7 +411,7 @@ class ModelUtilityService:
     async def model_create_many(
         generic_class: Type[T],
         records: list[Any],
-        session: ClientSession = None,
+        session: ClientSession | None = None,
     ) -> InsertManyResult | None:
         try:
             loop = asyncio.get_event_loop()

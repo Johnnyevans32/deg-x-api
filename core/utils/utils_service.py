@@ -33,7 +33,9 @@ from core.utils.loggly import logger
 
 
 class NotFoundInRecordException(Exception):
-    def __init__(self, model: str = None, message: str = "payload not found") -> None:
+    def __init__(
+        self, model: str | None = None, message: str = "payload not found"
+    ) -> None:
         self.model = model
         self.message = message
         super().__init__(self.message)

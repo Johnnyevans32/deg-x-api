@@ -5,7 +5,7 @@ import spl.token.instructions as spl_token
 from construct import Bytes, Int8ul, Int32ul, Int64ul, Pass
 from construct import Struct as cStruct
 from construct import Switch
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 from solana.publickey import PublicKey
 from solana.rpc.async_api import AsyncClient
 from solana.sysvar import SYSVAR_CLOCK_PUBKEY, SYSVAR_RENT_PUBKEY
@@ -61,8 +61,7 @@ class Key(BaseModel):
     is_signer: bool
     is_writable: bool
 
-    class Config:
-        arbitrary_types_allowed = True
+    model_config = ConfigDict(arbitrary_types_allowed=True)
 
 
 # @lru_cache(128)
@@ -393,7 +392,7 @@ async def get_instruction_data(
     defi_provider: DefiProvider,
     mint_address: str,
     user_addr: PublicKey,
-    martket_addr: str = None,
+    martket_addr: str | None,
 ) -> tuple[SolendMarket, PublicKey, SolendReserve, OracleAsset]:
     solend_info = await get_solend_info(defi_provider)
     token_info = get_token_info(mint_address, solend_info)
@@ -432,7 +431,7 @@ async def get_withdraw_instruction_keys(
     mint_address: str,
     user_token_address: PublicKey,
     user_addr: PublicKey,
-    martket_addr: str = None,
+    martket_addr: str | None,
 ) -> list[AccountMeta]:
     (
         lending_market,
@@ -466,7 +465,7 @@ async def get_borrow_instruction_keys(
     mint_address: str,
     user_token_address: PublicKey,
     user_addr: PublicKey,
-    martket_addr: str = None,
+    martket_addr: str | None,
 ) -> list[AccountMeta]:
     (
         lending_market,
@@ -494,7 +493,7 @@ async def get_deposit_instruction_keys(
     user_token_address: PublicKey,
     user_addr: PublicKey,
     solend_program_id: PublicKey,
-    martket_addr: str = None,
+    martket_addr: str | None,
 ) -> list[AccountMeta]:
     (
         lending_market,
@@ -573,8 +572,7 @@ class ObligationCollateral(BaseModel):
     depositedAmount: float
     marketValue: float
 
-    class Config:
-        arbitrary_types_allowed = True
+    model_config = ConfigDict(arbitrary_types_allowed=True)
 
 
 class ObligationLiquidity(BaseModel):
@@ -583,16 +581,12 @@ class ObligationLiquidity(BaseModel):
     borrowedAmountWads: float
     marketValue: float
 
-    class Config:
-        arbitrary_types_allowed = True
+    model_config = ConfigDict(arbitrary_types_allowed=True)
 
 
 class LastUpdate(BaseModel):
     slot: float
     stale: bool
-
-    class Config:
-        arbitrary_types_allowed = True
 
 
 class Obligation(BaseModel):
@@ -607,8 +601,7 @@ class Obligation(BaseModel):
     allowedBorrowValue: float
     unhealthyBorrowValue: float
 
-    class Config:
-        arbitrary_types_allowed = True
+    model_config = ConfigDict(arbitrary_types_allowed=True)
 
 
 PUBLIC_KEY_LAYOUT = Bytes(32)
@@ -655,8 +648,7 @@ class ProtoObligation(BaseModel):
     borrowsLen: int
     #   dataFlat: Buffer;
 
-    class Config:
-        arbitrary_types_allowed = True
+    model_config = ConfigDict(arbitrary_types_allowed=True)
 
 
 def parse_obligation(info: Any) -> Any:

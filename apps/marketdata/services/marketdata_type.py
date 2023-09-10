@@ -1,4 +1,3 @@
-from typing import Optional
 from pydantic import BaseModel
 
 
@@ -9,9 +8,9 @@ class IPriceData(BaseModel):
     price: float
     marketCap: float
     circulatingSupply: float
-    totalSupply: Optional[int]
-    maxSupply: Optional[int]
+    totalSupply: int | None = None
+    maxSupply: int | None = None
     priceChange24h: float
     priceChangePercentage24h: float
-    marketCapChange24h: Optional[int]
-    marketCapChangePercentage24h: Optional[float]
+    marketCapChange24h: int | None = None
+    marketCapChangePercentage24h: float | None = None

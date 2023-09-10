@@ -71,7 +71,7 @@ class GoogleService(ICloudService):
             raise Exception(f"Error verifing google auth token - {str(e)}")
 
     async def oauth_sign_up(
-        self, auth_token: str, token_type: IDType, idinfo: Any = None
+        self, auth_token: str, token_type: IDType, idinfo: Any | None
     ) -> AuthResponse:
         try:
             if not idinfo:
@@ -123,7 +123,7 @@ class GoogleService(ICloudService):
             raise Exception(f"Error verifing google auth token - {str(e)}")
 
     def create_folder(
-        self, auth_token: str, folder_name: str, service: Resource = None
+        self, auth_token: str, folder_name: str, service: Resource | None
     ) -> str:
         """Create a folder
         Returns : Folder Id
@@ -153,8 +153,8 @@ class GoogleService(ICloudService):
         self,
         auth_token: str,
         folder_name: str,
-        service: Resource = None,
-        custom_query: str = None,
+        service: Resource | None = None,
+        custom_query: str | None = None,
     ) -> str | None:
         """Search file in drive location
 

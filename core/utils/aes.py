@@ -82,7 +82,7 @@ class AesEncryptionService:
         return json.loads(dec_data)
 
     async def encrypt_mnemonic(
-        self, user: str, msg: dict[str, Any] | str, _password: str = None
+        self, user: str, msg: dict[str, Any] | str, _password: str | None
     ) -> KeystoreModel:
         loop = asyncio.get_event_loop()
         encoded_payload = json.dumps(msg).encode(enc_str)
@@ -120,7 +120,10 @@ class AesEncryptionService:
         return KeystoreModel(version=1, id=user, crypto=crypto_model)
 
     async def decrypt_mnemonic(
-        self, key_store: KeystoreModel, generic_class: Type[T], _password: str = None
+        self,
+        key_store: KeystoreModel,
+        generic_class: Type[T],
+        _password: str | None = None,
     ) -> T:
         loop = asyncio.get_event_loop()
         kdf_params = key_store.crypto.kdfparams

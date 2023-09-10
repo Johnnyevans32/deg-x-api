@@ -24,8 +24,8 @@ class HTTPRepository:
         method: REQUEST_METHOD,
         url: str,
         generic_class: Type[T],
-        data: Any = None,
-        opts: Any = None,
+        data: Any | None = None,
+        opts: Any | None = None,
     ) -> T:
         try:
 

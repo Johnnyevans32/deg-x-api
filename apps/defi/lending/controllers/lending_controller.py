@@ -36,7 +36,7 @@ class LendingController:
         self,
         request: UnicornRequest,
         response: Response,
-        defi_provider_id: PyObjectId = None,
+        defi_provider_id: PyObjectId | None,
     ) -> ResponseModel[IUserAcccountData]:
         try:
             user = request.state.user
@@ -93,9 +93,9 @@ class LendingController:
         self,
         request: UnicornRequest,
         response: Response,
+        defi_provider: PyObjectId | None,
         page_num: int = 1,
         page_size: int = 10,
-        defi_provider: PyObjectId = None,
     ) -> ResponseModel[Sequence[LendingRequestOut]]:
         try:
             user = request.state.user
@@ -144,7 +144,6 @@ class LendingController:
             )
 
         except Exception as e:
-            raise e
             return self.responseService.send_response(
                 response,
                 status.HTTP_400_BAD_REQUEST,
@@ -214,7 +213,7 @@ class LendingController:
         self,
         request: UnicornRequest,
         response: Response,
-        defi_provider_id: PyObjectId = None,
+        defi_provider_id: PyObjectId | None,
     ) -> ResponseModel[list[IReserveToken]]:
         try:
             request.app.logger.info("getting reserve assets from protocol")

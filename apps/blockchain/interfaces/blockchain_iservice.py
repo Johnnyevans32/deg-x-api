@@ -58,7 +58,7 @@ class IBlockchainService(metaclass=abc.ABCMeta):
         mnemonic: str,
         token_asset: TokenAsset,
     ) -> str:
-        pass
+        raise NotImplementedError
 
     async def approve_token_delegation(
         self,
@@ -69,7 +69,7 @@ class IBlockchainService(metaclass=abc.ABCMeta):
         asset_address: Any,
         spender_address: Any,
     ) -> Any:
-        pass
+        raise NotImplementedError
 
     async def sign_txn(
         self,
@@ -78,11 +78,11 @@ class IBlockchainService(metaclass=abc.ABCMeta):
         mnemonic: str,
         txn_build: Any,
     ) -> Any:
-        pass
+        raise NotImplementedError
 
     async def get_test_token(
         self,
         to_address: str,
         value: float,
     ) -> str:
-        pass
+        raise NotImplementedError

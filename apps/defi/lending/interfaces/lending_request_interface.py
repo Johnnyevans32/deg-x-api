@@ -33,16 +33,16 @@ class LendingRequestOut(SBaseOutModel):
     status: LendingRequestStatus
     tokenAsset: Union[PyObjectId, TokenAsset, str]
     amount: float
-    repaidAmount: Optional[float]
+    repaidAmount: Optional[float] = None
     requestType: LendingRequestType
-    interestRateMode: Optional[InterestRateMode]
-    assetSymbol: Optional[str]
+    interestRateMode: Optional[InterestRateMode] = None
+    assetSymbol: Optional[str] = None
 
 
 class LendingRequest(LendingRequestOut, SBaseModel):
     wallet: Union[PyObjectId, Wallet]
     defiProvider: Union[PyObjectId, DefiProvider]
-    providerResponse: Optional[Any]
+    providerResponse: Optional[Any] = None
     # requestBeneficiary: str
 
     # dollarRate: float

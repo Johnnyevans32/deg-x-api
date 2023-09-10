@@ -8,6 +8,7 @@ from eth_typing import HexStr
 from web3 import Web3
 from web3.contract.async_contract import AsyncContract
 from web3.middleware.geth_poa import geth_poa_middleware
+from web3.types import Wei
 
 from apps.blockchain.interfaces.blockchain_interface import Blockchain, ChainServiceName
 from apps.blockchain.interfaces.network_interface import Network
@@ -130,7 +131,9 @@ class BaseEvmService(IBlockchainService):
                 Web3.to_bytes(hexstr=HexStr(address))
             ).call()
         else:
-            balance = web3.eth.get_balance(address)
+            balance = web3.eth.get_balance(
+                EthAddress(Web3.to_bytes(hexstr=HexStr(address)))
+            )
         return float(Web3.from_wei(int(balance), "ether"))
 
     async def sign_txn(
@@ -159,7 +162,9 @@ class BaseEvmService(IBlockchainService):
             "maxPriorityFeePerGas": Web3.to_wei(maxPFee, "gwei") or txn_miner_tip,
             "gas": web3.eth.estimate_gas(txn_build),
             "chainId": web3.eth.chain_id,
-            "maxFeePerGas": (Web3.to_wei(maxFee, "gwei") or block_base_fee_per_gas)
+            "maxFeePerGas": cast(
+                Wei, (Web3.to_wei(maxFee, "gwei") or block_base_fee_per_gas)
+            )
             + txn_miner_tip,
         }
 
@@ -275,4 +280,4 @@ class BaseEvmService(IBlockchainService):
         mnemonic: str,
         token_asset: TokenAsset,
     ) -> str:
-        pass
+        raise NotImplementedError

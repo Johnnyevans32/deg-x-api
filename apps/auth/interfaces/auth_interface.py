@@ -8,11 +8,8 @@ from core.utils.aes import EncryptedDTO
 
 
 class AuthResponse(BaseModel):
-    user: Optional[UserBase]
-    accessToken: Optional[str]
-    refreshToken: Optional[str]
-    seed: Optional[EncryptedDTO]
-    wallet: Optional[WalletOut]
-
-    class Config:
-        arbitrary_types_allowed = True
+    user: Optional[UserBase] = None
+    accessToken: Optional[str] = None
+    refreshToken: Optional[str] = None
+    seed: EncryptedDTO | None = None
+    wallet: Optional[WalletOut] = None

@@ -47,7 +47,7 @@ class WalletService:
     async def create_wallet(
         self,
         user: User,
-        session: ClientSession = None,
+        session: ClientSession | None = None,
         walletType: WalletType = WalletType.MULTICHAIN,
     ) -> tuple[Wallet, EncryptedDTO]:
         assert user.id, "user id not found"
@@ -86,7 +86,7 @@ class WalletService:
         wallet: Wallet,
         mnemonic: str,
         chain: Blockchain,
-        session: ClientSession = None,
+        session: ClientSession | None = None,
     ) -> None:
         address = await self.blockchainService.create_address(
             chain.registryName, mnemonic

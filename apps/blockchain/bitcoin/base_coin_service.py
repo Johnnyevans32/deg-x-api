@@ -107,4 +107,4 @@ class BasecoinService(IBlockchainService):
         chain_network: Network,
         start_block: int,
     ) -> list[Any]:
-        pass
+        raise NotImplementedError
