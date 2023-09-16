@@ -24,7 +24,7 @@ import nox
 
 def setup(session: nox.Session) -> None:
     session.install("poetry")
-    session.run("poetry", "lock", "--no-update")
+    # session.run("poetry", "lock", "--no-update")
     session.run("poetry", "install")
 
 
