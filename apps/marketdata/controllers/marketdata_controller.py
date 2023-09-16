@@ -1,14 +1,13 @@
 # -*- coding: utf-8 -*-
-from fastapi import Response, status
+from fastapi import Response, status, APIRouter
 from fastapi_restful.cbv import cbv
-from fastapi_restful.inferring_router import InferringRouter
 
 from apps.marketdata.services.marketdata_service import MarketDataService
 from apps.marketdata.services.marketdata_type import IPriceData
 from core.utils.custom_exceptions import UnicornRequest
 from core.utils.response_service import ResponseModel, ResponseService
 
-router = InferringRouter(prefix="/marketdata", tags=["Market data 🌈"])
+router = APIRouter(prefix="/marketdata", tags=["Market data 🌈"])
 
 
 @cbv(router)

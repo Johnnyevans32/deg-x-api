@@ -1,9 +1,8 @@
 # -*- coding: utf-8 -*-
 from typing import Any, Sequence
 
-from fastapi import Depends, Response, status
+from fastapi import Depends, Response, status, APIRouter
 from fastapi_restful.cbv import cbv
-from fastapi_restful.inferring_router import InferringRouter
 
 from apps.auth.services.auth_bearer import JWTBearer
 from apps.defi.lending.types.lending_types import IReserveToken, IUserAcccountData
@@ -18,7 +17,7 @@ from core.middleware.encryption import DecrptRequestRoute
 from core.utils.custom_exceptions import UnicornRequest
 from core.utils.response_service import ResponseModel, ResponseService
 
-router = InferringRouter(
+router = APIRouter(
     prefix="/defi/lending", tags=["Defi 💸"], route_class=DecrptRequestRoute
 )
 

@@ -1,9 +1,8 @@
 # -*- coding: utf-8 -*-
 from typing import Sequence
 from pydantic import BaseModel
-from fastapi import Response, status, Depends
+from fastapi import Response, status, Depends, APIRouter
 from fastapi_restful.cbv import cbv
-from fastapi_restful.inferring_router import InferringRouter
 
 from apps.auth.services.auth_bearer import JWTBearer
 from apps.auditlog.interfaces.notification_interface import NotificationOut
@@ -11,7 +10,7 @@ from apps.auditlog.services.auditlog_service import AuditLogService
 from core.utils.custom_exceptions import UnicornRequest
 from core.utils.response_service import ResponseModel, ResponseService
 
-router = InferringRouter(prefix="/auditlog", tags=["User Notifications 🇳🇬"])
+router = APIRouter(prefix="/auditlog", tags=["User Notifications 🇳🇬"])
 
 
 class CreateGenericNotificationDTO(BaseModel):

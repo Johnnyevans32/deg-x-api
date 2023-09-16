@@ -1,8 +1,7 @@
 # -*- coding: utf-8 -*-
 
-from fastapi import Response, status
+from fastapi import Response, status, APIRouter
 from fastapi_restful.cbv import cbv
-from fastapi_restful.inferring_router import InferringRouter
 from apps.networkfee.owlracle.owlracle_type import IGasSpeed
 
 from apps.networkfee.services.networkfee_service import (
@@ -12,7 +11,7 @@ from apps.networkfee.types.networkfee_type import TxnSpeedOption
 from core.utils.custom_exceptions import UnicornRequest
 from core.utils.response_service import ResponseModel, ResponseService
 
-router = InferringRouter(prefix="/network-fee", tags=["Gas station info 🌈"])
+router = APIRouter(prefix="/network-fee", tags=["Gas station info 🌈"])
 
 
 @cbv(router)

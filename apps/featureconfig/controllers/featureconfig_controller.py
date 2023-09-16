@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
-from fastapi import Response, status
+from fastapi import Response, status, APIRouter
 from fastapi_restful.cbv import cbv
-from fastapi_restful.inferring_router import InferringRouter
 
 from apps.featureconfig.interfaces.featureconfig_interface import (
     FeatureName,
@@ -11,7 +10,7 @@ from apps.featureconfig.services.featureconfig_service import FeatureConfigServi
 from core.utils.custom_exceptions import UnicornRequest
 from core.utils.response_service import ResponseModel, ResponseService
 
-router = InferringRouter(prefix="/feature-config", tags=["Feature Config 🌈"])
+router = APIRouter(prefix="/feature-config", tags=["Feature Config 🌈"])
 
 
 @cbv(router)

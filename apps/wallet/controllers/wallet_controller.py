@@ -1,9 +1,8 @@
 # -*- coding: utf-8 -*-
 from typing import Sequence
 
-from fastapi import Depends, Response, status
+from fastapi import Depends, Response, status, APIRouter
 from fastapi_restful.cbv import cbv
-from fastapi_restful.inferring_router import InferringRouter
 
 from apps.auth.interfaces.auth_interface import AuthResponse
 from apps.auth.services.auth_bearer import JWTBearer
@@ -16,7 +15,7 @@ from core.depends.get_object_id import PyObjectId
 from core.utils.custom_exceptions import UnicornRequest
 from core.utils.response_service import ResponseModel, ResponseService
 
-router = InferringRouter(prefix="/wallet", tags=["Wallet 💸"])
+router = APIRouter(prefix="/wallet", tags=["Wallet 💸"])
 
 
 @cbv(router)

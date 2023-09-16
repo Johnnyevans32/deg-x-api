@@ -1,14 +1,13 @@
 # -*- coding: utf-8 -*-
-from fastapi import Response, status
+from fastapi import Response, status, APIRouter
 from fastapi_restful.cbv import cbv
-from fastapi_restful.inferring_router import InferringRouter
 
 from apps.appclient.interfaces.appclient_interface import AppClient
 from apps.appclient.services.appclient_service import AppClientService
 from core.utils.custom_exceptions import UnicornRequest
 from core.utils.response_service import ResponseModel, ResponseService
 
-router = InferringRouter(prefix="/appclient", tags=["App Client 🌈"])
+router = APIRouter(prefix="/appclient", tags=["App Client 🌈"])
 
 
 @cbv(router)

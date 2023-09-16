@@ -2,7 +2,7 @@ import os
 from functools import lru_cache
 from typing import Any
 
-from pydantic_settings import BaseSettings, SettingsConfigDict
+from pydantic import BaseSettings
 
 
 class Settings(BaseSettings):
@@ -85,9 +85,10 @@ class Settings(BaseSettings):
         "211971759182-cmu5id6tmr9nk5hq29u7eri7ctdicsja.apps.googleusercontent.com"
     )
 
-    model_config = SettingsConfigDict(
-        env_file=".env", env_file_encoding="utf-8", case_sensitive=True
-    )
+    class Config:
+        env_file = ".env"
+        env_file_encoding = "utf-8"
+        case_sensitive = True
 
 
 @lru_cache()

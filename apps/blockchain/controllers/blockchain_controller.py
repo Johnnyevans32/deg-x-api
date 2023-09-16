@@ -1,9 +1,8 @@
 # -*- coding: utf-8 -*-
 from typing import Sequence
 
-from fastapi import Depends, Response, status
+from fastapi import Depends, Response, status, APIRouter
 from fastapi_restful.cbv import cbv
-from fastapi_restful.inferring_router import InferringRouter
 
 from apps.auth.services.auth_bearer import JWTBearer
 from apps.blockchain.interfaces.transaction_interface import BlockchainTransactionOut
@@ -22,7 +21,7 @@ from core.middleware.encryption import DecrptRequestRoute
 from core.utils.custom_exceptions import UnicornRequest
 from core.utils.response_service import ResponseModel, ResponseService
 
-router = InferringRouter(
+router = APIRouter(
     prefix="/blockchain", tags=["Blockchain 💸"], route_class=DecrptRequestRoute
 )
 

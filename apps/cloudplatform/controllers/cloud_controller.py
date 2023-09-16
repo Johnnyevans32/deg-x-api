@@ -1,7 +1,6 @@
 from typing import Any
-from fastapi import BackgroundTasks, Response, Depends
+from fastapi import BackgroundTasks, Response, Depends, APIRouter
 from fastapi_restful.cbv import cbv
-from fastapi_restful.inferring_router import InferringRouter
 from starlette import status
 
 from apps.auth.services.auth_bearer import JWTBearer
@@ -12,9 +11,7 @@ from core.utils.custom_exceptions import UnicornRequest
 from core.utils.response_service import ResponseModel, ResponseService
 from core.middleware.encryption import DecrptRequestRoute
 
-router = InferringRouter(
-    prefix="/cloud", tags=["Cloud"], route_class=DecrptRequestRoute
-)
+router = APIRouter(prefix="/cloud", tags=["Cloud"], route_class=DecrptRequestRoute)
 
 
 @cbv(router)

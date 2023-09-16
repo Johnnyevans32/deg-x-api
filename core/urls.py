@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from fastapi_restful.inferring_router import InferringRouter
+from fastapi import APIRouter
 
 from apps.appclient.controllers.appclient_controller import router as router_client
 from apps.auth.controllers.auth_controller import router as router_auth
@@ -29,7 +29,7 @@ from apps.marketdata.controllers.marketdata_controller import (
 )
 
 
-router = InferringRouter()
+router = APIRouter()
 router.include_router(router_health_check)
 router.include_router(router_auth)
 router.include_router(router_wallet)

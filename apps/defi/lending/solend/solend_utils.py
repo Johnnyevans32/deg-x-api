@@ -5,7 +5,7 @@ import spl.token.instructions as spl_token
 from construct import Bytes, Int8ul, Int32ul, Int64ul, Pass
 from construct import Struct as cStruct
 from construct import Switch
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel
 from solana.publickey import PublicKey
 from solana.rpc.async_api import AsyncClient
 from solana.sysvar import SYSVAR_CLOCK_PUBKEY, SYSVAR_RENT_PUBKEY
@@ -61,7 +61,8 @@ class Key(BaseModel):
     is_signer: bool
     is_writable: bool
 
-    model_config = ConfigDict(arbitrary_types_allowed=True)
+    class Config:
+        arbitrary_types_allowed = True
 
 
 # @lru_cache(128)
@@ -572,7 +573,8 @@ class ObligationCollateral(BaseModel):
     depositedAmount: float
     marketValue: float
 
-    model_config = ConfigDict(arbitrary_types_allowed=True)
+    class Config:
+        arbitrary_types_allowed = True
 
 
 class ObligationLiquidity(BaseModel):
@@ -581,7 +583,8 @@ class ObligationLiquidity(BaseModel):
     borrowedAmountWads: float
     marketValue: float
 
-    model_config = ConfigDict(arbitrary_types_allowed=True)
+    class Config:
+        arbitrary_types_allowed = True
 
 
 class LastUpdate(BaseModel):
@@ -601,7 +604,8 @@ class Obligation(BaseModel):
     allowedBorrowValue: float
     unhealthyBorrowValue: float
 
-    model_config = ConfigDict(arbitrary_types_allowed=True)
+    class Config:
+        arbitrary_types_allowed = True
 
 
 PUBLIC_KEY_LAYOUT = Bytes(32)
@@ -648,7 +652,8 @@ class ProtoObligation(BaseModel):
     borrowsLen: int
     #   dataFlat: Buffer;
 
-    model_config = ConfigDict(arbitrary_types_allowed=True)
+    class Config:
+        arbitrary_types_allowed = True
 
 
 def parse_obligation(info: Any) -> Any:

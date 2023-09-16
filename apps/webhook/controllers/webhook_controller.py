@@ -1,14 +1,13 @@
 # -*- coding: utf-8 -*-
-from fastapi import Response, status, BackgroundTasks
+from fastapi import Response, status, BackgroundTasks, APIRouter
 from fastapi_restful.cbv import cbv
-from fastapi_restful.inferring_router import InferringRouter
 from apps.chainstream.interfaces.stream_service_interface import StreamProvider
 from apps.chainstream.moralis.moralis_service import IStreamData
 from apps.chainstream.services.stream_service import StreamService
 
 from core.utils.response_service import ResponseModel, ResponseService
 
-router = InferringRouter(prefix="/webhook", tags=["Webhook 🐞"])
+router = APIRouter(prefix="/webhook", tags=["Webhook 🐞"])
 
 
 @cbv(router)

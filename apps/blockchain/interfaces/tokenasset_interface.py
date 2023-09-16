@@ -1,7 +1,7 @@
 from enum import Enum
 from typing import Optional, Union
 
-from pydantic import BaseModel, Field, ConfigDict
+from pydantic import BaseModel, Field
 
 from apps.blockchain.interfaces.blockchain_interface import Blockchain
 from apps.blockchain.interfaces.network_interface import Network, NetworkOut
@@ -28,7 +28,9 @@ class TokenAssetOut(TokenAssetCore, SBaseOutModel):
     image: Optional[str]
     coinGeckoId: Optional[str]
 
-    model_config = ConfigDict(str_strip_whitespace=True, str_to_lower=True)
+    class Config:
+        anystr_strip_whitespace = True
+        anystr_lower = True
 
 
 class TokenAsset(TokenAssetOut, SBaseModel):

@@ -1,6 +1,5 @@
-from fastapi import BackgroundTasks, Response, status, Depends
+from fastapi import BackgroundTasks, Response, status, Depends, APIRouter
 from fastapi_restful.cbv import cbv
-from fastapi_restful.inferring_router import InferringRouter
 from pydantic import EmailStr
 
 from apps.auth.services.auth_bearer import JWTBearer
@@ -18,7 +17,7 @@ from apps.user.services.user_service import UserService
 from core.utils.custom_exceptions import UnicornRequest
 from core.utils.response_service import ResponseModel, ResponseService
 
-router = InferringRouter(prefix="/account", tags=["Auth 🔐"])
+router = APIRouter(prefix="/account", tags=["Auth 🔐"])
 
 
 @cbv(router)
