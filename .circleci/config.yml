@@ -80,7 +80,7 @@ jobs:
       - image: jevan32/deg-x-api:latest
         auth:
           username: $DOCKER_HUB_USER
-          password: $DOCKERHUB_PASSWORD
+          password: $DOCKER_HUB_PASSWORD
     steps:
       - checkout
   heroku-registry-release:
