@@ -2,7 +2,7 @@ pytezos==3.6.1
 pydantic==1.10.1
 PyJWT==2.3.0
 fastapi==0.89.0
-starlette==0.19.1
+starlette==0.22.0
 emails==0.6
 requests==2.28.1
 itsdangerous==2.0.1
