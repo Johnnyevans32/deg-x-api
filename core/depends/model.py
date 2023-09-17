@@ -1,22 +1,22 @@
 from datetime import datetime
 from typing import Any, Optional, cast
 
-from bson import ObjectId
-from pydantic import BaseModel, Field, schema
+from bson.objectid import ObjectId
+from pydantic import BaseModel, Field
 
 from core.depends.get_object_id import PyObjectId
 from core.utils.loggly import logger
 
 
-def field_schema(field: Any, **kwargs: Any) -> Any:
-    if field.field_info.extra.get("hidden_from_schema", False):
-        raise schema.SkipField(f"{field.name} field is being hidden")
-    else:
-        return original_field_schema(field, **kwargs)
+# def field_schema(field: Any, **kwargs: Any) -> Any:
+#     if field.field_info.extra.get("hidden_from_schema", False):
+#         raise schema.SkipField(f"{field.name} field is being hidden")
+#     else:
+#         return original_field_schema(field, **kwargs)
 
 
-original_field_schema = schema.field_schema
-schema.field_schema = field_schema
+# original_field_schema = schema.field_schema
+# schema.field_schema = field_schema
 
 
 class HashableBaseModel(BaseModel):

@@ -18,7 +18,7 @@
 # from binance_chain.http import HttpApiClient
 
 
-# class BNBService(IBlockchainService, HTTPRepository):
+# class BnbService(IBlockchainService, HTTPRepository):
 #     mnemo = Mnemonic("english")
 
 #     def __init__(self) -> None:

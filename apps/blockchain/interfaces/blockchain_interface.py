@@ -1,7 +1,6 @@
 from enum import Enum
 from typing import Any
-
-from core.depends.model import SBaseModel
+from core.depends.model import SBaseModel, SBaseOutModel
 
 
 class ChainServiceName(str, Enum):
@@ -19,7 +18,11 @@ class ChainServiceName(str, Enum):
     TRON = "tron_service"
 
 
-class Blockchain(SBaseModel):
+class BlockchainOut(SBaseOutModel):
     name: str
+    symbol: str
+
+
+class Blockchain(BlockchainOut, SBaseModel):
     registryName: ChainServiceName
     meta: dict[str, Any]

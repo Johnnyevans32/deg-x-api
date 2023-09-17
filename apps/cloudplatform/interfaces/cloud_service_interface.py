@@ -1,7 +1,7 @@
 import abc
 from typing import Any
 from apps.auth.interfaces.auth_interface import AuthResponse
-from apps.cloudplatform.interfaces.cloud_interface import CloudProvider
+from apps.cloudplatform.interfaces.cloud_interface import CloudProvider, IDType
 
 
 class ICloudService(metaclass=abc.ABCMeta):
@@ -18,9 +18,17 @@ class ICloudService(metaclass=abc.ABCMeta):
         raise NotImplementedError
 
     @abc.abstractmethod
-    async def oauth_sign_in(self, auth_token: str) -> AuthResponse:
+    async def oauth_sign_in(self, auth_token: str, token_type: IDType) -> AuthResponse:
         raise NotImplementedError
 
     @abc.abstractmethod
     def upload_file(self, auth_token: str, file_name: str, data: Any) -> str:
+        raise NotImplementedError
+
+    @abc.abstractmethod
+    def recover_file(
+        self,
+        auth_token: str,
+        file_name: str,
+    ) -> Any:
         raise NotImplementedError

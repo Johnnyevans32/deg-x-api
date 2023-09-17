@@ -67,16 +67,20 @@ jobs:
       #     paths:
       #       - '.venv'
       #       - '~/.cache/pip'
+      # - run:
+      #     name: Noxing the codebase
+      #     command: |
+      #       nox --reuse-existing-virtualenvs --no-install
       - run:
           name: Noxing the codebase
           command: |
-            nox --reuse-existing-virtualenvs --no-install
+            nox
   dockerize:
     docker:
       - image: jevan32/deg-x-api:latest
         auth:
           username: $DOCKER_HUB_USER
-          password: $DOCKERHUB_PASSWORD
+          password: $DOCKER_HUB_PASSWORD
     steps:
       - checkout
   heroku-registry-release:

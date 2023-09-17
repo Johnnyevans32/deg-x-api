@@ -13,8 +13,10 @@ class DefiService:
     ) -> list[DefiProvider]:
 
         user_wallet = await self.walletService.get_user_default_wallet(user)
-        defi_providers = await ModelUtilityService.find(
-            DefiProvider, {"networkType": user_wallet.networkType, "isDeleted": False}
+        defi_providers = await ModelUtilityService.find_and_populate(
+            DefiProvider,
+            {"networkType": user_wallet.networkType, "isDeleted": False},
+            ["network"],
         )
 
         if not defi_providers:

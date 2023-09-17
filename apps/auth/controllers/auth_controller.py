@@ -1,13 +1,11 @@
-from fastapi import BackgroundTasks, Response
+from fastapi import BackgroundTasks, Response, status, Depends, APIRouter
 from fastapi_restful.cbv import cbv
-from fastapi_restful.inferring_router import InferringRouter
 from pydantic import EmailStr
-from pymongo.errors import DuplicateKeyError
-from starlette import status
 
+from apps.auth.services.auth_bearer import JWTBearer
 from apps.auth.interfaces.auth_interface import AuthResponse
 from apps.auth.services.auth_service import AuthService
-from apps.cloudplatform.interfaces.cloud_interface import CloudProvider
+from apps.cloudplatform.interfaces.cloud_interface import CloudProvider, IDType
 from apps.cloudplatform.services.cloud_service import CloudService
 from apps.notification.email.services.email_service import EmailService
 from apps.user.interfaces.user_interface import (
@@ -19,7 +17,7 @@ from apps.user.services.user_service import UserService
 from core.utils.custom_exceptions import UnicornRequest
 from core.utils.response_service import ResponseModel, ResponseService
 
-router = InferringRouter(prefix="/account", tags=["Auth 🔐"])
+router = APIRouter(prefix="/account", tags=["Auth 🔐"])
 
 
 @cbv(router)
@@ -56,17 +54,6 @@ class AuthController:
                 " complete verification process",
                 resp,
             )
-        except DuplicateKeyError:
-            request.app.logger.error(
-                f"Error registering user because "
-                f"- User with {user.email} already exist"
-            )
-            return self.responseService.send_response(
-                res,
-                status.HTTP_409_CONFLICT,
-                f"User with {user.email} already exist",
-                use_class_message=False,
-            )
         except Exception as e:
             # raise e
             request.app.logger.error(f"Error registering user {user.email}, {str(e)}")
@@ -98,12 +85,33 @@ class AuthController:
                 res, status.HTTP_400_BAD_REQUEST, f"User Login Failed: {str(e)}"
             )
 
+    @router.get(
+        "/me",
+        status_code=status.HTTP_200_OK,
+        response_model_by_alias=False,
+        dependencies=[Depends(JWTBearer())],
+    )
+    async def me(
+        self,
+        request: UnicornRequest,
+        res: Response,
+    ) -> ResponseModel[AuthResponse]:
+        try:
+            user = request.state.user
+            resp = await self.authService.me(user)
+            return self.responseService.send_response(
+                res, status.HTTP_200_OK, "success", resp
+            )
+        except Exception as e:
+            return self.responseService.send_response(
+                res, status.HTTP_400_BAD_REQUEST, f"{str(e)}"
+            )
+
     @router.get("/verify/{token}")
     async def verify_email(
         self, request: UnicornRequest, res: Response, token: str
     ) -> ResponseModel[None]:
         try:
-
             request.app.logger.info(f"verifying user with token - {token}")
             await self.authService.verify_email(token)
             request.app.logger.info(f"verified user with token - {token}")
@@ -150,7 +158,7 @@ class AuthController:
                 f"Error sending user forgotten password link - {str(e)}",
             )
 
-    @router.put("/update-password/{token}")
+    @router.put("/password/{token}")
     async def update_user_password(
         self,
         request: UnicornRequest,
@@ -219,10 +227,13 @@ class AuthController:
         res: Response,
         cloud_provider: CloudProvider,
         auth_token: str,
+        token_type: IDType = IDType.AccessToken,
     ) -> ResponseModel[AuthResponse]:
         try:
             request.app.logger.info("authenticating user with oauth")
-            user_resp = await self.cloudService.oauth_signin(cloud_provider, auth_token)
+            user_resp = await self.cloudService.oauth_signin(
+                cloud_provider, auth_token, token_type
+            )
             request.app.logger.info("done authenticating user with oauth")
             return self.responseService.send_response(
                 res,
@@ -231,7 +242,6 @@ class AuthController:
                 user_resp,
             )
         except Exception as e:
-            raise e
             request.app.logger.error(f"Error authenticating user {str(e)}")
             return self.responseService.send_response(
                 res,

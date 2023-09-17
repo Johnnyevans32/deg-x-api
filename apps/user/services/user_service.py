@@ -9,15 +9,16 @@ from apps.user.interfaces.user_interface import (
     User,
     UserLoginInput,
     UserResetPasswordInput,
+    UserUpdateDTO,
 )
 from apps.user.interfaces.user_token_interface import UserRefreshToken
 from apps.wallet.services.wallet_service import WalletService
 from apps.wallet.interfaces.wallet_interface import Wallet
 from core.db import client
 from core.depends.get_object_id import PyObjectId
-from core.utils.aes import KeystoreModel
+from core.utils.aes import EncryptedDTO
 from core.utils.model_utility_service import ModelUtilityService, UpdateAction
-from core.utils.utils_service import NotFoundInRecord, Utils
+from core.utils.utils_service import NotFoundInRecordException, Utils
 
 
 class UserService:
@@ -26,18 +27,19 @@ class UserService:
     featureConfigService = FeatureConfigService()
     backgroundTasks = BackgroundTasks()
 
-    async def create_user(self, user: User) -> tuple[User, Wallet, KeystoreModel]:
+    async def create_user(self, user: User) -> tuple[User, Wallet, EncryptedDTO]:
         session = client.start_session()
         session.start_transaction()
         try:
+            assert user.username, "username can not be null"
             await self.check_if_username_exist_and_fail(user.username)
             dict_user = user.dict(by_alias=True, exclude_none=True)
             user_obj = await ModelUtilityService.model_create(User, dict_user, session)
-            wallet, keystore_model = await self.walletService.create_wallet(
+            wallet, encrypted_seed = await self.walletService.create_wallet(
                 user_obj, session
             )
             session.commit_transaction()
-            return user_obj, wallet, keystore_model
+            return user_obj, wallet, encrypted_seed
         except Exception as e:
             session.abort_transaction()
             raise e
@@ -57,18 +59,25 @@ class UserService:
         return user_obj
 
     async def get_user_by_query(self, query: dict[str, Any]) -> User:
-        db_resp = await ModelUtilityService.find_one(User, query)
-        if not db_resp:
-            raise NotFoundInRecord(message="user not found")
-        return db_resp
+        user = await ModelUtilityService.find_one(User, query)
+        if not user:
+            raise NotFoundInRecordException(message="user not found")
+        return user
 
-    async def check_if_username_exist_and_fail(self, username: str) -> None:
+    async def check_if_username_exist_and_fail(
+        self, username: str, return_status: bool = False
+    ) -> None | bool:
         user = await ModelUtilityService.find_one(
             User, {"username": username, "isDeleted": False}
         )
 
+        if return_status:
+            return user is None
+
         if user:
             raise ValueError("username already exist")
+
+        return None
 
     async def update_user_password(
         self, email: EmailStr, password_reset_dto: UserResetPasswordInput
@@ -137,3 +146,10 @@ class UserService:
         assert user, "user not found"
 
         return user
+
+    async def update_user_details(self, user: User, payload: UserUpdateDTO) -> None:
+
+        query = {"_id": user.id, "isDeleted": False}
+        record_to_update = payload.dict(by_alias=True, exclude_none=True)
+
+        await ModelUtilityService.model_update(User, query, record_to_update)

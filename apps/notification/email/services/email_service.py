@@ -5,6 +5,7 @@ from typing import Any
 import emails as emails
 from emails.template import JinjaTemplate
 from pydantic import EmailStr
+from starlette.background import BackgroundTask
 
 from apps.user.interfaces.user_interface import User
 from core.config import settings
@@ -32,10 +33,10 @@ class EmailService:
 
     def send_template_email(
         self,
-        email_to: EmailStr = None,
+        email_to: EmailStr | None,
+        environment: dict[str, Any] | None,
         subject_template: str = "",
         html_template: str = "",
-        environment: dict[str, Any] = None,
     ) -> None:
         assert settings.EMAILS_ENABLED, "Email is Disabled"
         if not email_to:
@@ -77,19 +78,20 @@ class EmailService:
             """
                 + self.email_sigx
             )
-
+            assert user.name, "name can not be null"
             self.send_template_email(
                 email_to=user.email,
-                subject_template=subject,
-                html_template=html,
                 environment={
                     "name": f"{user.name.first} {user.name.last}",
                     "link": confirm_url,
                     "valid_hours": int(self.serializer_expiration_in_hr),
                 },
+                subject_template=subject,
+                html_template=html,
             )
         except Exception as e:
-            self.slackService.send_formatted_message(
+            BackgroundTask(
+                self.slackService.send_formatted_message,
                 "Error sending verification email",
                 f"*User:* {user.id} \n *Error:* {e}",
             )
@@ -119,18 +121,20 @@ class EmailService:
             """
                 + self.email_sigx
             )
+            assert user.name, "name can not be null"
             self.send_template_email(
                 email_to=user.email,
-                subject_template=subject,
-                html_template=html,
                 environment={
                     "name": f"{user.name.first} {user.name.last}",
                     "link": password_reset_url,
                     "valid_hours": int(self.serializer_expiration_in_hr),
                 },
+                subject_template=subject,
+                html_template=html,
             )
         except Exception as e:
-            self.slackService.send_formatted_message(
+            BackgroundTask(
+                self.slackService.send_formatted_message,
                 "Error sending forgotten password email",
                 f"*User:* {user.id} \n *Error:* {e}",
             )

@@ -1,14 +1,13 @@
 # -*- coding: utf-8 -*-
-from fastapi import Response, status
+from fastapi import Response, status, APIRouter
 from fastapi_restful.cbv import cbv
-from fastapi_restful.inferring_router import InferringRouter
 
 from apps.country.interfaces.country_interface import Country
 from apps.country.services.country_service import CountryService
 from core.utils.custom_exceptions import UnicornRequest
 from core.utils.response_service import ResponseModel, ResponseService
 
-router = InferringRouter(prefix="/country", tags=["Country 🇳🇬"])
+router = APIRouter(prefix="/country", tags=["Country 🇳🇬"])
 
 
 @cbv(router)

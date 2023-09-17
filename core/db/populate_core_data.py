@@ -45,7 +45,7 @@ async def populate_networks() -> None:
                     {"name": "ethereum"},
                 )
             ),
-            "blockExplorerUrl": "https://kovan.etherscan.io/",
+            "blockExplorerUrl": "https://kovan.etherscan.io/tx/",
             "apiExplorer": {
                 "url": "https://api-kovan.etherscan.io/api",
                 "keyToken": "VTQN3HINP8JJND9CEQR7UXK3KX5BFTSVE1",
@@ -62,7 +62,7 @@ async def populate_networks() -> None:
                     {"name": "solana"},
                 )
             ),
-            "blockExplorerUrl": "https://solscan.io/",
+            "blockExplorerUrl": "https://solscan.io/tx/",
             "apiExplorer": {},
             "isDefault": True,
             "providerUrl": "https://api.devnet.solana.com",

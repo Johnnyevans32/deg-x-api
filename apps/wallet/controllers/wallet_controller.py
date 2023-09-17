@@ -1,13 +1,13 @@
 # -*- coding: utf-8 -*-
 from typing import Sequence
 
-from fastapi import Depends, Response, status
+from fastapi import Depends, Response, status, APIRouter
 from fastapi_restful.cbv import cbv
-from fastapi_restful.inferring_router import InferringRouter
 
 from apps.auth.interfaces.auth_interface import AuthResponse
 from apps.auth.services.auth_bearer import JWTBearer
 from apps.blockchain.interfaces.network_interface import NetworkType
+from apps.blockchain.interfaces.tokenasset_interface import TokenAssetCore
 from apps.wallet.interfaces.wallet_interface import WalletOut
 from apps.wallet.interfaces.walletasset_interface import WalletAssetOut
 from apps.wallet.services.wallet_service import WalletService
@@ -15,7 +15,7 @@ from core.depends.get_object_id import PyObjectId
 from core.utils.custom_exceptions import UnicornRequest
 from core.utils.response_service import ResponseModel, ResponseService
 
-router = InferringRouter(prefix="/wallet", tags=["Wallet 💸"])
+router = APIRouter(prefix="/wallet", tags=["Wallet 💸"])
 
 
 @cbv(router)
@@ -24,7 +24,7 @@ class WalletController:
     responseService = ResponseService()
 
     @router.get(
-        "/retrieve-wallet-assets",
+        "/assets",
         dependencies=[Depends(JWTBearer())],
         response_model_by_alias=False,
     )
@@ -50,7 +50,7 @@ class WalletController:
             )
 
     @router.post(
-        "/create",
+        "/",
         dependencies=[Depends(JWTBearer())],
         response_model_by_alias=False,
     )
@@ -60,13 +60,13 @@ class WalletController:
         try:
             user = request.state.user
             request.app.logger.info(f"creating wallet for - {user.id}")
-            user_wallet, key_store_model = await self.walletService.create_wallet(user)
+            user_wallet, seed = await self.walletService.create_wallet(user)
             request.app.logger.info("done creating user wallet")
             return self.responseService.send_response(
                 response,
                 status.HTTP_201_CREATED,
                 "user wallet created successfully",
-                AuthResponse(wallet=user_wallet, keystore=key_store_model),
+                AuthResponse(wallet=user_wallet, seed=seed),
             )
         except Exception as e:
             return self.responseService.send_response(
@@ -76,7 +76,7 @@ class WalletController:
             )
 
     @router.get(
-        "/retrieve-wallets",
+        "/",
         dependencies=[Depends(JWTBearer())],
         response_model_by_alias=False,
     )
@@ -101,7 +101,7 @@ class WalletController:
                 f"Error in getting user wallets: {str(e)}",
             )
 
-    @router.patch(
+    @router.put(
         "/set-wallet-network-type",
         dependencies=[Depends(JWTBearer())],
     )
@@ -125,7 +125,7 @@ class WalletController:
                 f"Error in setting user wallet network: {str(e)}",
             )
 
-    @router.patch(
+    @router.put(
         "/set-default-user-wallet",
         dependencies=[Depends(JWTBearer())],
     )
@@ -147,4 +147,28 @@ class WalletController:
                 response,
                 status.HTTP_400_BAD_REQUEST,
                 f"Error in setting user default wallet: {str(e)}",
+            )
+
+    @router.post(
+        "/token",
+        dependencies=[Depends(JWTBearer())],
+        response_model_by_alias=False,
+    )
+    async def add_wallet_address(
+        self, request: UnicornRequest, response: Response, payload: TokenAssetCore
+    ) -> ResponseModel[WalletAssetOut]:
+        try:
+            user = request.state.user
+            asset = await self.walletService.add_token_asset(user, payload)
+            return self.responseService.send_response(
+                response,
+                status.HTTP_201_CREATED,
+                "user wallet asset added successfully",
+                asset,
+            )
+        except Exception as e:
+            return self.responseService.send_response(
+                response,
+                status.HTTP_400_BAD_REQUEST,
+                f"Error in adding user wallet asset: {str(e)}",
             )

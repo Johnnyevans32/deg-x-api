@@ -39,9 +39,9 @@ class JWTService:
     @staticmethod
     def decode_jwt(token: str, token_type: str) -> UserJWTPayload:
         encode_key = str(JWTService.TOKEN_TYPE[token_type]["key"])
-
+        jwt_decode_payload = jwt.decode(token, encode_key, algorithms=["HS256"])
         decoded_token = UserJWTPayload(
-            **jwt.decode(token, encode_key, algorithms=["HS256"])
+            user=jwt_decode_payload["user"], expiresAt=jwt_decode_payload["expiresAt"]
         )
 
         if decoded_token.expiresAt < pendulum.now().float_timestamp:

@@ -1,3 +1,4 @@
+import asyncio
 import math
 import re
 from datetime import datetime
@@ -5,13 +6,12 @@ from enum import Enum
 from functools import lru_cache, partial
 from typing import Any, Type, TypeVar
 
-from bson import ObjectId
+from bson.objectid import ObjectId
 from pymongo import DESCENDING, ReturnDocument
 from pymongo.client_session import ClientSession
 from pymongo.results import (
     DeleteResult,
     InsertManyResult,
-    InsertOneResult,
     UpdateResult,
 )
 
@@ -52,7 +52,9 @@ class ModelUtilityService:
         query: dict[str, Any],
         page_num: int,
         page_size: int,
+        sort_field: str = "createdAt",
     ) -> tuple[list[T], MetaDataModel]:
+        loop = asyncio.get_event_loop()
         model = db[generic_class.__name__.lower()]
 
         """returns a set of documents belonging to page number `page_num`
@@ -61,7 +63,7 @@ class ModelUtilityService:
         # Calculate number of documents to skip
         skips = page_size * (page_num - 1)
 
-        total_count = model.count_documents(query)
+        total_count = await loop.run_in_executor(None, model.count_documents, query)
 
         total_page = math.ceil(total_count / page_size)
 
@@ -69,7 +71,10 @@ class ModelUtilityService:
         next_page = (lambda: page_num + 1 if (page_num + 1) <= total_page else None)()
 
         documents = (
-            model.find(query).sort("createdAt", DESCENDING).skip(skips).limit(page_size)
+            (await loop.run_in_executor(None, model.find, query))
+            .sort(sort_field, DESCENDING)
+            .skip(skips)
+            .limit(page_size)
         )
 
         # Skip and limit
@@ -106,6 +111,7 @@ class ModelUtilityService:
         fields: list[str],
         page_num: int = 1,
         page_size: int = 10,
+        sort_field: str = "createdAt",
     ) -> tuple[list[T], MetaDataModel]:
         model = db[generic_class.__name__.lower()]
         # Calculate number of documents to skip
@@ -118,7 +124,7 @@ class ModelUtilityService:
                         {
                             "$match": query,
                         },
-                        {"$sort": {"createdAt": DESCENDING}},
+                        {"$sort": {sort_field: DESCENDING}},
                         {"$skip": skips},
                         {"$limit": page_size},
                     ],
@@ -144,7 +150,7 @@ class ModelUtilityService:
             lookup = [
                 {
                     "$lookup": {
-                        "from": field,
+                        "from": field.split(".")[-1].lower(),
                         "localField": field,
                         "foreignField": "_id",
                         "as": field,
@@ -154,13 +160,16 @@ class ModelUtilityService:
                     "$unwind": {
                         "path": f"${field}",
                         "includeArrayIndex": "arrayIndex",
-                        "preserveNullAndEmptyArrays": False,
+                        "preserveNullAndEmptyArrays": True,
                     }
                 },
             ]
-            pipeline[0]["$facet"]["pipelineData"].insert(1, *lookup)
-
-        aggregation_result = list(model.aggregate(pipeline))
+            for i, pl in enumerate(lookup):
+                pipeline[0]["$facet"]["pipelineData"].insert(1 + i, pl)
+        loop = asyncio.get_event_loop()
+        aggregation_result = list(
+            await loop.run_in_executor(None, model.aggregate, pipeline)
+        )
 
         result = aggregation_result[0]["pipelineData"]
         pipeline_count = aggregation_result[0]["pipelineCount"]
@@ -184,7 +193,6 @@ class ModelUtilityService:
             "previousPage": prev_page,
             "nextPage": next_page,
         }
-
         # And there goes the populate function just as mongoose populate works 🚀🕺🏽
         return (
             list(
@@ -214,7 +222,7 @@ class ModelUtilityService:
             lookup: list[dict[str, Any]] = [
                 {
                     "$lookup": {
-                        "from": field,
+                        "from": field.split(".")[-1].lower(),
                         "localField": field,
                         "foreignField": "_id",
                         "as": field,
@@ -231,7 +239,8 @@ class ModelUtilityService:
             pipeline += lookup
 
         pipeline += [{"$limit": 1}]
-        result = list(model.aggregate(pipeline))
+        loop = asyncio.get_event_loop()
+        result = list(await loop.run_in_executor(None, model.aggregate, pipeline))
 
         aggregation_result = None
         if result:
@@ -246,6 +255,7 @@ class ModelUtilityService:
         fields: list[str],
     ) -> list[T]:
         model = db[generic_class.__name__.lower()]
+        loop = asyncio.get_event_loop()
         pipeline = [
             {
                 "$match": query,
@@ -256,7 +266,7 @@ class ModelUtilityService:
             lookup = [
                 {
                     "$lookup": {
-                        "from": field,
+                        "from": field.split(".")[-1].lower(),
                         "localField": field,
                         "foreignField": "_id",
                         "as": field,
@@ -265,7 +275,7 @@ class ModelUtilityService:
                 {"$unwind": {"path": f"${field}"}},
             ]
             pipeline += lookup
-        results = model.aggregate(pipeline)
+        results = await loop.run_in_executor(None, model.aggregate, pipeline)
 
         if not results:
             return []
@@ -280,7 +290,8 @@ class ModelUtilityService:
     @staticmethod
     async def find_one(generic_class: Type[T], query: dict[str, Any]) -> T | None:
         model = db[generic_class.__name__.lower()]
-        result = model.find_one(query)
+        loop = asyncio.get_event_loop()
+        result = await loop.run_in_executor(None, model.find_one, query)
 
         return generic_class(**result) if result else None
 
@@ -293,9 +304,10 @@ class ModelUtilityService:
 
     @staticmethod
     async def find(generic_class: Type[T], query: dict[str, Any]) -> list[T]:
+        loop = asyncio.get_event_loop()
         model = db[generic_class.__name__.lower()]
 
-        results = model.find(query)
+        results = await loop.run_in_executor(None, model.find, query)
         if not results:
             return []
 
@@ -310,13 +322,21 @@ class ModelUtilityService:
     async def model_create(
         generic_class: Type[T],
         record: dict[str, Any],
-        session: ClientSession = None,
+        session: ClientSession | None = None,
     ) -> T:
         model = db[generic_class.__name__.lower()]
-        created_record: InsertOneResult = model.insert_one(record, session=session)
-        res = model.find_one(
-            {"_id": ObjectId(created_record.inserted_id)}, session=session
+        loop = asyncio.get_event_loop()
+
+        created_record = await loop.run_in_executor(
+            None, model.insert_one, record, False, session
         )
+
+        def find_one() -> Any | None:
+            return model.find_one(
+                {"_id": ObjectId(created_record.inserted_id)}, session=session
+            )
+
+        res = await loop.run_in_executor(None, find_one)
 
         return generic_class(**res)
 
@@ -325,13 +345,16 @@ class ModelUtilityService:
         generic_class: Type[T],
         query: dict[str, Any],
         record: dict[str, Any],
-        session: ClientSession = None,
+        session: ClientSession | None = None,
     ) -> UpdateResult:
         model = db[generic_class.__name__.lower()]
         record["updatedAt"] = datetime.now()
-        updated_record: UpdateResult = model.update_one(
-            query, {"$set": record}, session=session
-        )
+        loop = asyncio.get_event_loop()
+
+        def update_one() -> UpdateResult:
+            return model.update_one(query, {"$set": record}, session=session)
+
+        updated_record = await loop.run_in_executor(None, update_one)
 
         return updated_record
 
@@ -341,22 +364,27 @@ class ModelUtilityService:
         query: dict[str, Any],
         record: dict[str, Any],
         upsert: bool = False,
-        session: ClientSession = None,
+        session: ClientSession | None = None,
         updateAction: UpdateAction = UpdateAction.SET,
     ) -> T | None:
+        loop = asyncio.get_event_loop()
         model = db[generic_class.__name__.lower()]
         update_payload = {"$set": {"updatedAt": datetime.now()}}
         if updateAction == UpdateAction.SET:
             update_payload["$set"] = {**record, **update_payload["$set"]}
         else:
             update_payload[updateAction.value] = record
-        updated_record = model.find_one_and_update(
-            query,
-            update_payload,
-            upsert=upsert,
-            return_document=ReturnDocument.AFTER,
-            session=session,
-        )
+
+        def find_one_and_update() -> Any:
+            return model.find_one_and_update(
+                query,
+                update_payload,
+                upsert=upsert,
+                return_document=ReturnDocument.AFTER,
+                session=session,
+            )
+
+        updated_record = await loop.run_in_executor(None, find_one_and_update)
 
         return generic_class(**updated_record) if updated_record else None
 
@@ -364,10 +392,18 @@ class ModelUtilityService:
     async def model_find_one_or_create(
         generic_class: Type[T], query: dict[str, Any], record: dict[str, Any]
     ) -> T:
+        loop = asyncio.get_event_loop()
         model = db[generic_class.__name__.lower()]
-        result = model.find_one(query)
-        if not result:
-            return await ModelUtilityService.model_create(generic_class, record)
+
+        def find_one_and_update() -> Any:
+            return model.find_one_and_update(
+                query,
+                {"$setOnInsert": record},
+                upsert=True,
+                return_document=ReturnDocument.AFTER,
+            )
+
+        result = await loop.run_in_executor(None, find_one_and_update)
 
         return generic_class(**result)
 
@@ -375,12 +411,13 @@ class ModelUtilityService:
     async def model_create_many(
         generic_class: Type[T],
         records: list[Any],
-        session: ClientSession = None,
+        session: ClientSession | None = None,
     ) -> InsertManyResult | None:
         try:
+            loop = asyncio.get_event_loop()
             model = db[generic_class.__name__.lower()]
-            created_records: InsertManyResult = model.insert_many(
-                records, False, session=session
+            created_records = await loop.run_in_executor(
+                None, model.insert_many, records, False, False, session
             )
 
             return created_records
@@ -392,7 +429,8 @@ class ModelUtilityService:
     async def model_hard_delete(
         generic_class: Type[T], query: dict[str, Any]
     ) -> DeleteResult:
+        loop = asyncio.get_event_loop()
         model = db[generic_class.__name__.lower()]
-        deleted_record: DeleteResult = model.delete_one(query)
+        deleted_record = await loop.run_in_executor(None, model.delete_one, query)
 
         return deleted_record

@@ -64,8 +64,8 @@ class ResponseService:
         res: Response,
         status_code: int,
         message: str,
-        data: T = None,
-        meta: MetaDataModel = None,
+        data: T | None = None,
+        meta: MetaDataModel | None = None,
         use_class_message: bool = False,
     ) -> ResponseModel[T]:
         res.status_code = status_code

@@ -16,7 +16,7 @@ from scout_apm.api import Config
 
 # from scout_apm.async_.starlette import ScoutMiddleware
 from starlette import status
-from starlette.exceptions import ExceptionMiddleware
+from starlette.middleware.exceptions import ExceptionMiddleware
 from starlette.exceptions import HTTPException as StarletteHTTPException
 
 # from starlette.middleware import Middleware
@@ -32,15 +32,12 @@ from core.db import client, cursor
 from core.db.event_listeners import CommandLogger
 
 # from core.db.populate_core_data import seed_deg_x
-# from core.middlewares.sentry import sentry_setup
+from core.middleware.sentry import sentry_setup
 from core.utils.custom_exceptions import UnicornException, UnicornRequest
 from core.utils.loggly import logger
 from core.utils.response_service import ResponseService
 
 # from fastapi_socketio import SocketManager
-
-
-# from fastapi_admin.app import app as admin_app
 
 
 cronJob = CronJob()
@@ -89,7 +86,6 @@ def create_app() -> FastAPI:
         debug=False,
         openapi_url=openapi_url,
     )
-
     app.logger = logger  # type: ignore[attr-defined]
 
     # FASTAPI ADMIN
@@ -98,13 +94,13 @@ def create_app() -> FastAPI:
     # Set all CORS enabled origins
 
     if settings.BACKEND_CORS_ORIGINS:
-        origins_raw = settings.BACKEND_CORS_ORIGINS.split(",")
-        for origin in origins_raw:
-            use_origin = origin.strip()
-            origins.append(use_origin)
+        # origins_raw =
+        # for origin in origins_raw:
+        #     use_origin = origin.strip()
+        #     origins.append(use_origin)
         app.add_middleware(
             CORSMiddleware,
-            allow_origins=origins,
+            allow_origins=settings.BACKEND_CORS_ORIGINS.split(","),
             allow_credentials=True,
             allow_methods=["*"],
             allow_headers=["*"],
@@ -117,7 +113,7 @@ def create_app() -> FastAPI:
     app.add_middleware(ExceptionMiddleware, handlers=app.exception_handlers)
 
     @app.on_event("startup")
-    async def startup() -> None:
+    def startup() -> None:
         logger.info("Setting up model collections")
         monitoring.register(CommandLogger())
         if settings.CRON_ENABLED:
@@ -125,13 +121,13 @@ def create_app() -> FastAPI:
         # await seed_deg_x()
         User.init()
         BlockchainTransaction.init()
-        # sentry_setup()
+        sentry_setup()
         logger.info("Done setting up model collections")
 
         # run_in_threadpool(mongo_data_streaming)
 
     @app.on_event("shutdown")
-    async def shutdown() -> None:
+    def shutdown() -> None:
         logger.info("Closing connection with MongoDB.")
         cursor.close()
         client.close()
@@ -139,7 +135,7 @@ def create_app() -> FastAPI:
         logger.info("Closed connection with MongoDB.")
 
     @app.exception_handler(UnicornException)
-    async def unicorn_exception_handler(
+    def unicorn_exception_handler(
         request: UnicornRequest, exc: UnicornException
     ) -> JSONResponse:
         return JSONResponse(
@@ -162,7 +158,7 @@ def create_app() -> FastAPI:
         return await http_exception_handler(request, exc)
 
     @app.exception_handler(RequestValidationError)
-    async def validation_exception_handler(
+    def validation_exception_handler(
         request: Request, exc: RequestValidationError
     ) -> JSONResponse:
         return JSONResponse(

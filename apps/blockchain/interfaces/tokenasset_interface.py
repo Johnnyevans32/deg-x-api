@@ -1,10 +1,10 @@
 from enum import Enum
 from typing import Optional, Union
 
-from pydantic import Field
+from pydantic import BaseModel, Field
 
 from apps.blockchain.interfaces.blockchain_interface import Blockchain
-from apps.blockchain.interfaces.network_interface import Network
+from apps.blockchain.interfaces.network_interface import Network, NetworkOut
 from core.depends.get_object_id import PyObjectId
 from core.depends.model import SBaseModel, SBaseOutModel
 
@@ -17,15 +17,24 @@ class CoinType(str, Enum):
     BTC = "btc"
 
 
-class TokenOut(SBaseOutModel):
-    name: str
-    symbol: str
-    image: str
-    # coinType: Optional[CoinType]
+class TokenAssetCore(BaseModel):
+    network: Union[PyObjectId, NetworkOut]
     contractAddress: Optional[str]
 
 
-class TokenAsset(TokenOut, SBaseModel):
-    network: Optional[Union[PyObjectId, Network]]
+class TokenAssetOut(TokenAssetCore, SBaseOutModel):
+    name: str
+    symbol: str
+    image: Optional[str]
+    coinGeckoId: Optional[str]
+
+    class Config:
+        anystr_strip_whitespace = True
+        anystr_lower = True
+
+
+class TokenAsset(TokenAssetOut, SBaseModel):
+    network: Union[PyObjectId, Network]
     blockchain: Union[PyObjectId, Blockchain]
     isLayerOne: bool = Field(default=False)
+    hasTestToken: bool = Field(default=False)

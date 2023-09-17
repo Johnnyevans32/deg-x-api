@@ -9,7 +9,7 @@ from mnemonic import Mnemonic
 from apps.blockchain.interfaces.blockchain_interface import ChainServiceName
 from apps.blockchain.interfaces.network_interface import Network, NetworkType
 from apps.blockchain.interfaces.tokenasset_interface import TokenAsset
-from apps.blockchain.interfaces.blockchain_service_interface import IBlockchainService
+from apps.blockchain.interfaces.blockchain_iservice import IBlockchainService
 from apps.user.interfaces.user_interface import User
 from apps.wallet.interfaces.wallet_interface import Wallet
 from apps.wallet.interfaces.walletasset_interface import Address
@@ -63,15 +63,12 @@ class BasecoinService(IBlockchainService):
         main_wallet = self.get_wallet_from_mnemonic(mnemonic, NetworkType.MAINNET)
         # Construct from seed
         return Address(
-            **{
-                "main": main_wallet.get_key().address,
-                "test": test_wallet.get_key().address,
-            }
+            main=main_wallet.get_key().address, test=test_wallet.get_key().address
         )
 
     async def send(
         self,
-        from_address: Address,
+        address: str,
         to_address: str,
         value: float,
         token_asset: TokenAsset,
@@ -92,16 +89,10 @@ class BasecoinService(IBlockchainService):
 
     async def get_balance(
         self,
-        address_obj: Address,
+        address: str,
         token_asset: TokenAsset,
     ) -> float:
         network = cast(Network, token_asset.network)
-
-        address = (
-            address_obj.test
-            if network.networkType == NetworkType.TESTNET
-            else address_obj.main
-        )
 
         balance = Service(
             network=self.network_map[self.coin_network(network.networkType)]
@@ -110,10 +101,10 @@ class BasecoinService(IBlockchainService):
 
     async def get_transactions(
         self,
-        address: Address,
+        address: str,
         user: User,
         wallet: Wallet,
         chain_network: Network,
         start_block: int,
     ) -> list[Any]:
-        pass
+        raise NotImplementedError

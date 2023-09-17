@@ -1,11 +1,10 @@
 from enum import Enum
 from typing import Optional, Union
 
-from pydantic import HttpUrl
 
 from apps.blockchain.interfaces.blockchain_interface import Blockchain
 from core.depends.get_object_id import PyObjectId
-from core.depends.model import HashableBaseModel, SBaseModel
+from core.depends.model import HashableBaseModel, SBaseModel, SBaseOutModel
 
 
 class NetworkType(str, Enum):
@@ -14,17 +13,20 @@ class NetworkType(str, Enum):
 
 
 class ApiExplorer(HashableBaseModel):
-    url: Optional[HttpUrl]
+    url: Optional[str]
     keyToken: Optional[str]
 
 
-class Network(SBaseModel):
+class NetworkOut(SBaseOutModel):
     name: str
+
+
+class Network(NetworkOut, SBaseModel):
     chainId: Optional[str]
     networkType: NetworkType
     blockchain: Union[PyObjectId, Blockchain]
-    blockExplorerUrl: Optional[HttpUrl]
+    blockExplorerUrl: Optional[str]
     apiExplorer: Optional[ApiExplorer]
     isDefault: bool
-    faucetUrl: Optional[HttpUrl]
-    providerUrl: Optional[HttpUrl]
+    faucetUrl: Optional[str] = None
+    providerUrl: Optional[str] = None

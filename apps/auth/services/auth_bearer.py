@@ -19,29 +19,28 @@ class JWTBearer(HTTPBearer):
     async def __call__(self, request: Request) -> HTTPAuthorizationCredentials | None:
         try:
             credentials = await super(JWTBearer, self).__call__(request)
-            if credentials:
-                if not credentials.scheme == "Bearer":
-                    raise UnicornException(
-                        status_code=403, message="Invalid authentication scheme."
-                    )
-                else:
-                    user_decoded_jwt = self.jwtService.decode_jwt(
-                        credentials.credentials, "ACCESS_TOKEN"
-                    )
-                    if not user_decoded_jwt:
-                        raise UnicornException(
-                            status_code=403, message="Invalid token or expired token."
-                        )
-
-                    request.state.user = await self.userService.get_user_by_query(
-                        {"_id": user_decoded_jwt.user, "isDeleted": False}
-                    )
-
-                    return credentials
-            else:
+            if not credentials:
                 raise UnicornException(
                     status_code=403, message="Invalid authorization code."
                 )
+            if not credentials.scheme == "Bearer":
+                raise UnicornException(
+                    status_code=403, message="Invalid authentication scheme."
+                )
+
+            user_decoded_jwt = self.jwtService.decode_jwt(
+                credentials.credentials, "ACCESS_TOKEN"
+            )
+            if not user_decoded_jwt:
+                raise UnicornException(
+                    status_code=403, message="Invalid token or expired token."
+                )
+
+            request.state.user = await self.userService.get_user_by_query(
+                {"_id": user_decoded_jwt.user, "isDeleted": False}
+            )
+
+            return credentials
         except DecodeError:
             raise UnicornException(
                 status_code=403, message="Invalid authorization code."

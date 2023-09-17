@@ -1,19 +1,25 @@
 # -*- coding: utf-8 -*-
-from typing import Any
+from typing import Any, Sequence
 
-from fastapi import Depends, Response, status
+from fastapi import Depends, Response, status, APIRouter
 from fastapi_restful.cbv import cbv
-from fastapi_restful.inferring_router import InferringRouter
 
 from apps.auth.services.auth_bearer import JWTBearer
-from apps.defi.lending.aave.aave_interface import IReserveTokens
-from apps.defi.lending.interfaces.lending_request_interface import LendingRequest
+from apps.defi.lending.types.lending_types import IReserveToken, IUserAcccountData
+from apps.defi.lending.interfaces.lending_request_interface import (
+    LendingRequest,
+    LendingRequestOut,
+)
 from apps.defi.lending.services.lending_service import LendingService
 from apps.defi.lending.types.lending_types import BaseLendingActionDTO, BorrowAssetDTO
+from core.depends.get_object_id import PyObjectId
+from core.middleware.encryption import DecrptRequestRoute
 from core.utils.custom_exceptions import UnicornRequest
 from core.utils.response_service import ResponseModel, ResponseService
 
-router = InferringRouter(prefix="/defi/lending", tags=["Defi 💸"])
+router = APIRouter(
+    prefix="/defi/lending", tags=["Defi 💸"], route_class=DecrptRequestRoute
+)
 
 
 @cbv(router)
@@ -22,16 +28,21 @@ class LendingController:
     responseService = ResponseService()
 
     @router.get(
-        "/get-user-account-data",
+        "/account-data",
         dependencies=[Depends(JWTBearer())],
     )
     async def get_user_account_data(
-        self, request: UnicornRequest, response: Response
-    ) -> ResponseModel[Any]:
+        self,
+        request: UnicornRequest,
+        response: Response,
+        defi_provider_id: PyObjectId | None,
+    ) -> ResponseModel[IUserAcccountData]:
         try:
             user = request.state.user
             request.app.logger.info(f"getting user lending pool data for - {user.id}")
-            user_lending_data = await self.lendingService.get_user_lending_data(user)
+            user_lending_data = await self.lendingService.get_user_lending_data(
+                user, defi_provider_id
+            )
             request.app.logger.info("done getting user lending pool data ")
             return self.responseService.send_response(
                 response,
@@ -48,7 +59,7 @@ class LendingController:
             )
 
     @router.get(
-        "/get-user-config",
+        "/config",
         dependencies=[Depends(JWTBearer())],
     )
     async def get_user_config(
@@ -56,13 +67,13 @@ class LendingController:
     ) -> ResponseModel[Any]:
         try:
             user = request.state.user
-            request.app.logger.info(f"getting user lending pool data for - {user.id}")
+            request.app.logger.info(f"getting user lending config data for - {user.id}")
             user_lending_data = await self.lendingService.get_user_config(user)
-            request.app.logger.info("done getting user lending pool data ")
+            request.app.logger.info("done getting user lending config data ")
             return self.responseService.send_response(
                 response,
                 status.HTTP_200_OK,
-                "user lending account data retrieved",
+                "user lending config data retrieved",
                 user_lending_data,
             )
 
@@ -70,14 +81,51 @@ class LendingController:
             return self.responseService.send_response(
                 response,
                 status.HTTP_400_BAD_REQUEST,
-                f"Error in getting user lending account data: {str(e)}",
+                f"Error in getting user lending config data: {str(e)}",
+            )
+
+    @router.get(
+        "/",
+        dependencies=[Depends(JWTBearer())],
+    )
+    async def get_user_lending_requests(
+        self,
+        request: UnicornRequest,
+        response: Response,
+        defi_provider: PyObjectId | None,
+        page_num: int = 1,
+        page_size: int = 10,
+    ) -> ResponseModel[Sequence[LendingRequestOut]]:
+        try:
+            user = request.state.user
+            request.app.logger.info(f"getting user lending requests - {user.id}")
+            (
+                user_lending_data,
+                metadata,
+            ) = await self.lendingService.get_user_lending_requests(
+                user, page_num, page_size, defi_provider
+            )
+            request.app.logger.info("done getting user lending requests ")
+            return self.responseService.send_response(
+                response,
+                status.HTTP_200_OK,
+                "user lending requests retrieved",
+                user_lending_data,
+                metadata,
+            )
+
+        except Exception as e:
+            return self.responseService.send_response(
+                response,
+                status.HTTP_400_BAD_REQUEST,
+                f"Error in getting user lending requests data: {str(e)}",
             )
 
     @router.post(
-        "/deposit",
+        "/supply",
         dependencies=[Depends(JWTBearer())],
     )
-    async def deposit_asset(
+    async def supply_asset(
         self, request: UnicornRequest, response: Response, payload: BaseLendingActionDTO
     ) -> ResponseModel[LendingRequest]:
         try:
@@ -85,7 +133,7 @@ class LendingController:
             request.app.logger.info(
                 f"initiating deposit request to protocol - {user.id}"
             )
-            borrow_asset_res = await self.lendingService.deposit(user, payload)
+            borrow_asset_res = await self.lendingService.supply(user, payload)
             request.app.logger.info("done initiating deposit request to protocol ")
             return self.responseService.send_response(
                 response,
@@ -95,7 +143,6 @@ class LendingController:
             )
 
         except Exception as e:
-            raise e
             return self.responseService.send_response(
                 response,
                 status.HTTP_400_BAD_REQUEST,
@@ -159,20 +206,25 @@ class LendingController:
             )
 
     @router.get(
-        "/reserved-assets",
+        "/reserve-assets",
     )
-    async def get_reserved_assets(
-        self, request: UnicornRequest, response: Response
-    ) -> ResponseModel[list[IReserveTokens]]:
+    async def get_reserve_assets(
+        self,
+        request: UnicornRequest,
+        response: Response,
+        defi_provider_id: PyObjectId | None,
+    ) -> ResponseModel[list[IReserveToken]]:
         try:
-            request.app.logger.info("getting reserved assets from protocol")
-            reserved_assets_res = await self.lendingService.get_reserve_assets()
-            request.app.logger.info("done getting reserved assets from protocol")
+            request.app.logger.info("getting reserve assets from protocol")
+            reserved_assets_res = await self.lendingService.get_reserve_assets(
+                defi_provider_id
+            )
+            request.app.logger.info("done getting reserve assets from protocol")
 
             return self.responseService.send_response(
                 response,
                 status.HTTP_200_OK,
-                "reserved assets retrieved successfully",
+                "reserve assets retrieved successfully",
                 reserved_assets_res,
             )
 
@@ -180,5 +232,5 @@ class LendingController:
             return self.responseService.send_response(
                 response,
                 status.HTTP_400_BAD_REQUEST,
-                f"Error in getting reserved assets from protocol: {str(e)}",
+                f"Error in getting reserve assets from protocol: {str(e)}",
             )

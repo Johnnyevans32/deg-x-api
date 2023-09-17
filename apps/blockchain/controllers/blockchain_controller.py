@@ -1,37 +1,38 @@
 # -*- coding: utf-8 -*-
-from typing import Any, Sequence
+from typing import Sequence
 
-from fastapi import Depends, Response, status
+from fastapi import Depends, Response, status, APIRouter
 from fastapi_restful.cbv import cbv
-from fastapi_restful.inferring_router import InferringRouter
 
 from apps.auth.services.auth_bearer import JWTBearer
 from apps.blockchain.interfaces.transaction_interface import BlockchainTransactionOut
 from apps.blockchain.services.blockchain_service import (
-    BalanceRes,
     BlockchainService,
-    GetTokenBalance,
+)
+from apps.blockchain.types.blockchain_type import (
     SendTokenDTO,
     SendTxnRes,
+    GetTokenBalance,
+    BalanceRes,
+    GetTestTokenDTO,
     SwapTokenDTO,
 )
-from apps.blockchain.solana.solana_service import SolanaService
-from apps.blockchain.tezos.tezos_service import TezosService
+from core.middleware.encryption import DecrptRequestRoute
 from core.utils.custom_exceptions import UnicornRequest
 from core.utils.response_service import ResponseModel, ResponseService
 
-router = InferringRouter(prefix="/blockchain", tags=["Blockchain 💸"])
+router = APIRouter(
+    prefix="/blockchain", tags=["Blockchain 💸"], route_class=DecrptRequestRoute
+)
 
 
 @cbv(router)
 class BlockchainController:
     blockchainService = BlockchainService()
     responseService = ResponseService()
-    solanaService = SolanaService()
-    tezosService = TezosService()
 
     @router.get(
-        "/get-transaction",
+        "/transactions",
         dependencies=[Depends(JWTBearer())],
         response_model_by_alias=False,
     )
@@ -88,7 +89,7 @@ class BlockchainController:
             )
 
     @router.post(
-        "/get-token-balance",
+        "/token-balance",
         dependencies=[Depends(JWTBearer())],
     )
     async def get_token_balance(
@@ -143,52 +144,22 @@ class BlockchainController:
             )
 
     @router.post(
-        "/fund-solana-account-devnet",
+        "/get-test-token",
+        dependencies=[Depends(JWTBearer())],
     )
-    async def fund_my_solana_account(
-        self, request: UnicornRequest, response: Response, payload: SendTokenDTO
-    ) -> ResponseModel[list[str]]:
+    async def get_test_token(
+        self, request: UnicornRequest, response: Response, payload: GetTestTokenDTO
+    ) -> ResponseModel[SendTxnRes]:
         try:
-            request.app.logger.info(
-                f"sending airdrop token balance to address - {payload.toAddress}"
-            )
-            user_token_balance = await self.solanaService.get_test_token(
-                payload.toAddress, int(payload.amount)
-            )
+            user = request.state.user
+            request.app.logger.info("sending airdrop token balance ")
+            txn_res = await self.blockchainService.get_test_token(user, payload)
             request.app.logger.info("done sending airdrop token balance to address")
             return self.responseService.send_response(
                 response,
                 status.HTTP_200_OK,
                 "airdrop token balance sent",
-                user_token_balance,
-            )
-
-        except Exception as e:
-            return self.responseService.send_response(
-                response,
-                status.HTTP_400_BAD_REQUEST,
-                f"Error in sending airdrop token balance - {str(e)}",
-            )
-
-    @router.post(
-        "/fund-tezos-account-devnet",
-    )
-    async def fund_my_tezos_account(
-        self, request: UnicornRequest, response: Response, payload: SendTokenDTO
-    ) -> ResponseModel[Any]:
-        try:
-            request.app.logger.info(
-                f"sending airdrop token balance to address - {payload.toAddress}"
-            )
-            user_token_balance = await self.tezosService.fund_tezos_wallet(
-                payload.toAddress, int(payload.amount)
-            )
-            request.app.logger.info("done sending airdrop token balance to address")
-            return self.responseService.send_response(
-                response,
-                status.HTTP_200_OK,
-                "airdrop token balance sent",
-                user_token_balance,
+                txn_res,
             )
 
         except Exception as e:

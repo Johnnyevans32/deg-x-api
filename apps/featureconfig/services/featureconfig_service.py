@@ -1,4 +1,5 @@
 from fastapi import status
+from starlette.background import BackgroundTask
 
 from apps.featureconfig.interfaces.featureconfig_interface import (
     FeatureConfig,
@@ -50,7 +51,9 @@ class FeatureConfigService:
         record_to_update = {"isEnabled": feature_status_update_dto.status}
 
         await ModelUtilityService.model_update(FeatureConfig, query, record_to_update)
-        self.slackService.send_message(
+        BackgroundTask(
+            self.slackService.send_formatted_message,
+            "Feature status update",
             f"{feature_name} feature status has been updated to "
             f"{feature_status_update_dto.status}",
             "backend",

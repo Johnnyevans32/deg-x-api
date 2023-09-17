@@ -23,7 +23,6 @@ from apps.defi.lending.solend.solend_types import (
     SolendReserve,
 )
 from core.utils.request import REQUEST_METHOD, HTTPRepository
-from core.utils.utils_service import timed_cache
 
 httpRepository = HTTPRepository()
 
@@ -55,25 +54,6 @@ def get_token_info(mint_address: str, solend_info: ISolendMarketReserve) -> Sole
     if not token_info:
         raise Exception(f"Could not find {mint_address} in ASSETS")
     return token_info
-
-
-@timed_cache(100, 10, asyncFunction=True)
-async def get_solend_info(
-    defi_provider: DefiProvider,
-) -> ISolendMarketReserve:
-    assert defi_provider.meta, "solend metadata not found"
-    url = (
-        f"{defi_provider.meta['API_ENDPOINT']}/"
-        f"v1/config?deployment={defi_provider.meta['ENV']}"
-    )
-
-    solend_info = await httpRepository.call(
-        REQUEST_METHOD.GET,
-        url,
-        ISolendMarketReserve,
-    )
-
-    return solend_info
 
 
 class Key(BaseModel):
@@ -393,11 +373,27 @@ def get_init_obligation_keys(
     )
 
 
+async def get_solend_info(defi_provider: DefiProvider) -> ISolendMarketReserve:
+    assert defi_provider.meta, "solend metadata not found"
+    url = (
+        f"{defi_provider.meta['API_ENDPOINT']}/"
+        f"v1/config?deployment={defi_provider.meta['ENV']}"
+    )
+
+    solend_info = await httpRepository.call(
+        REQUEST_METHOD.GET,
+        url,
+        ISolendMarketReserve,
+    )
+
+    return solend_info
+
+
 async def get_instruction_data(
     defi_provider: DefiProvider,
     mint_address: str,
     user_addr: PublicKey,
-    martket_addr: str = None,
+    martket_addr: str | None,
 ) -> tuple[SolendMarket, PublicKey, SolendReserve, OracleAsset]:
     solend_info = await get_solend_info(defi_provider)
     token_info = get_token_info(mint_address, solend_info)
@@ -436,7 +432,7 @@ async def get_withdraw_instruction_keys(
     mint_address: str,
     user_token_address: PublicKey,
     user_addr: PublicKey,
-    martket_addr: str = None,
+    martket_addr: str | None,
 ) -> list[AccountMeta]:
     (
         lending_market,
@@ -470,7 +466,7 @@ async def get_borrow_instruction_keys(
     mint_address: str,
     user_token_address: PublicKey,
     user_addr: PublicKey,
-    martket_addr: str = None,
+    martket_addr: str | None,
 ) -> list[AccountMeta]:
     (
         lending_market,
@@ -498,7 +494,7 @@ async def get_deposit_instruction_keys(
     user_token_address: PublicKey,
     user_addr: PublicKey,
     solend_program_id: PublicKey,
-    martket_addr: str = None,
+    martket_addr: str | None,
 ) -> list[AccountMeta]:
     (
         lending_market,
@@ -594,9 +590,6 @@ class ObligationLiquidity(BaseModel):
 class LastUpdate(BaseModel):
     slot: float
     stale: bool
-
-    class Config:
-        arbitrary_types_allowed = True
 
 
 class Obligation(BaseModel):

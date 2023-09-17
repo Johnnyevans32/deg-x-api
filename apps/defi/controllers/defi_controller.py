@@ -1,9 +1,8 @@
 # -*- coding: utf-8 -*-
 from typing import Sequence
 
-from fastapi import Depends, Response, status
+from fastapi import Depends, Response, status, APIRouter
 from fastapi_restful.cbv import cbv
-from fastapi_restful.inferring_router import InferringRouter
 
 from apps.auth.services.auth_bearer import JWTBearer
 from apps.defi.interfaces.defiprovider_interface import DefiProviderOut
@@ -11,7 +10,7 @@ from apps.defi.services.defi_service import DefiService
 from core.utils.custom_exceptions import UnicornRequest
 from core.utils.response_service import ResponseModel, ResponseService
 
-router = InferringRouter(prefix="/defi", tags=["Defi 💸"])
+router = APIRouter(prefix="/defi", tags=["Defi 💸"])
 
 
 @cbv(router)
@@ -20,7 +19,7 @@ class DefiController:
     responseService = ResponseService()
 
     @router.get(
-        "/get-defi-providers",
+        "/providers",
         dependencies=[Depends(JWTBearer())],
         response_model_by_alias=False,
     )

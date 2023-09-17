@@ -1,11 +1,10 @@
 # -*- coding: utf-8 -*-
-from fastapi import Response, status
+from fastapi import Response, status, APIRouter
 from fastapi_restful.cbv import cbv
-from fastapi_restful.inferring_router import InferringRouter
 
 from core.utils.response_service import ResponseModel, ResponseService
 
-router = InferringRouter(prefix="/health-check", tags=["Health Check 🩺"])
+router = APIRouter(prefix="/health-check", tags=["Health Check 🩺"])
 
 
 @cbv(router)

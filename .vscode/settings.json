@@ -13,7 +13,7 @@
   "mypy.debugLogging": true,
   "mypy.dmypyExecutable": "dmypy",
   "mypy.configFile": "mypy.ini",
-  "mypy.runUsingActiveInterpreter": true,
+  "mypy.runUsingActiveInterpreter": false,
   "python.linting.ignorePatterns": ["venv/**/*.py"],
   "protoc": {
     "path": "",

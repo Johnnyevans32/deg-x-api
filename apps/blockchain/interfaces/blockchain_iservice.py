@@ -1,7 +1,7 @@
 import abc
 from typing import Any
 
-from apps.blockchain.interfaces.blockchain_interface import ChainServiceName
+from apps.blockchain.interfaces.blockchain_interface import Blockchain, ChainServiceName
 from apps.blockchain.interfaces.network_interface import Network
 from apps.blockchain.interfaces.tokenasset_interface import TokenAsset
 from apps.user.interfaces.user_interface import User
@@ -29,22 +29,22 @@ class IBlockchainService(metaclass=abc.ABCMeta):
     @abc.abstractmethod
     async def send(
         self,
-        from_address: Address,
+        from_address: str,
         to: str,
         value: float,
         token_asset: TokenAsset,
         mnemonic: str,
-    ) -> Any:
+    ) -> str:
         raise NotImplementedError
 
     @abc.abstractmethod
-    async def get_balance(self, address: Address, token_asset: TokenAsset) -> float:
+    async def get_balance(self, address: str, token_asset: TokenAsset) -> float:
         raise NotImplementedError
 
     @abc.abstractmethod
     async def get_transactions(
         self,
-        address: Address,
+        address: str,
         user: User,
         wallet: Wallet,
         chain_network: Network,
@@ -58,4 +58,31 @@ class IBlockchainService(metaclass=abc.ABCMeta):
         mnemonic: str,
         token_asset: TokenAsset,
     ) -> str:
-        pass
+        raise NotImplementedError
+
+    async def approve_token_delegation(
+        self,
+        network: Network,
+        blockchain: Blockchain,
+        mnemonic: str,
+        amount: int,
+        asset_address: Any,
+        spender_address: Any,
+    ) -> Any:
+        raise NotImplementedError
+
+    async def sign_txn(
+        self,
+        network: Network,
+        blockchain: Blockchain,
+        mnemonic: str,
+        txn_build: Any,
+    ) -> Any:
+        raise NotImplementedError
+
+    async def get_test_token(
+        self,
+        to_address: str,
+        value: float,
+    ) -> str:
+        raise NotImplementedError

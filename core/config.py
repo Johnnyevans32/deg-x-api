@@ -1,5 +1,4 @@
 import os
-from base64 import b64encode
 from functools import lru_cache
 from typing import Any
 
@@ -18,7 +17,7 @@ class Settings(BaseSettings):
     # ~~~~~ TEST ~~~~~
     TEST_RUN: bool = False
 
-    SECRET_KEY: str = b64encode(os.urandom(32)).decode("utf-8")
+    SECRET_KEY: str = os.urandom(32).hex()
 
     # ~~~~~ CORS ~~~~~
     BACKEND_CORS_ORIGINS: str = "http://localhost:4200"
@@ -53,6 +52,8 @@ class Settings(BaseSettings):
 
     UI_URL: str = "https://degx.com"
 
+    BASE_URL: str = ""
+
     # ~~~~~ AWS S3 ~~~~~
     S3_BUCKET_NAME: str = "demo-bucket"
     AWS_ACCESS_KEY_ID: str = "your-access-key-id"
@@ -85,9 +86,9 @@ class Settings(BaseSettings):
     )
 
     class Config:
-        case_sensitive = True
         env_file = ".env"
         env_file_encoding = "utf-8"
+        case_sensitive = True
 
 
 @lru_cache()

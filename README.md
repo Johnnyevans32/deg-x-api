@@ -32,10 +32,10 @@ then activate the venv by so
 
 * and create a `logs.log` file to store the logs of the console
 
-It's easy, you two options to run project.
+It's easy, you have 3 options to run project.
 
 - sh scripts/runserver.sh
-- python main.py
+- python application.py
 - sh scripts/runserver-dev.sh
 
 then navigate to the swagger documentation view on route to see the docs view
