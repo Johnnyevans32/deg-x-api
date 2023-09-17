@@ -20,7 +20,7 @@ sentry-sdk[fastapi]==1.29.2
 google-auth==2.3.3
 nox==2022.8.7
 pytest==7.4.1
-poetry==1.6.1
+poetry==1.2.2
 isort==5.10.1
 black==22.6.0
 mypy==1.5.1
