@@ -7,7 +7,7 @@ WORKDIR /code
 ENV PYTHONDONTWRITEBYTECODE 1
 ENV PYTHONUNBUFFERED 1
 ENV USE_DOCKER=true
-ENV PORT 8000
+# ENV PORT 8000
 
 # 
 COPY ./requirements.txt /code/requirements.txt
@@ -37,6 +37,6 @@ COPY ./solidity /code/solidity
 COPY ./scripts/runserver.sh /code/runserver.sh
 
 # 
-# CMD ["python", "application.py"]
+CMD ["python", "application.py"]
 
-CMD ["uvicorn", "application:_app", "--host", "0.0.0.0", "--port", "8000"]
+# CMD ["uvicorn", "application:_app", "--host", "0.0.0.0", "--port", "8000"]

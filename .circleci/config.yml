@@ -76,13 +76,6 @@ jobs:
           command: |
             nox
   dockerize:
-    # docker:
-    #   - image: jevan32/deg-x-api:latest
-    #     auth:
-    #       username: $DOCKER_HUB_USER
-    #       password: $DOCKER_HUB_PASSWORD
-    # steps:
-    #   - checkout
     executor: docker/docker
     steps:
       - setup_remote_docker
@@ -120,10 +113,10 @@ workflows:
   nox_and_deploy:
     jobs:
       # - system_dependencies
-      # - build_and_nox
+      - build_and_nox
       - dockerize:
-          # requires:
-          #   - build_and_nox # Only run docker job once the nox job has completed
+          requires:
+            - build_and_nox # Only run docker job once the nox job has completed
           filters:
             branches:
               only: master
