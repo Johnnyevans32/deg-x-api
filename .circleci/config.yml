@@ -88,8 +88,8 @@ jobs:
       - setup_remote_docker
       - checkout
       - docker/check:
-          docker-username: $DOCKER_HUB_USERNAME
-          docker-password: $DOCKER_HUB_PASSWORD
+          docker-username: DOCKER_HUB_USERNAME
+          docker-password: DOCKER_HUB_PASSWORD
       - docker/build:
           image: jevan32/deg-x-api:latest
       - docker/push:
