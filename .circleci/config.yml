@@ -84,17 +84,15 @@ jobs:
     # steps:
     #   - checkout
     executor: docker/docker
-    docker:
-      - image: jevan32/deg-x-api:latest
-        auth:
-          username: $DOCKER_HUB_USER
-          password: $DOCKER_HUB_PASSWORD
     steps:
       - setup_remote_docker
       - checkout
       - docker/check
       - docker/build:
           image: jevan32/deg-x-api:latest
+      - docker/login:
+          username: $DOCKER_HUB_USERNAME
+          password: $DOCKER_HUB_PASSWORD
       - docker/push:
           digest-path: /tmp/digest.txt
           image: jevan32/deg-x-api:latest
