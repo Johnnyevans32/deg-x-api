@@ -107,6 +107,18 @@ jobs:
       - heroku/push-docker-image:
           process-types: web
       - heroku/release-docker-image
+  render_auto_deploy:
+    docker:
+      - image: cimg/python:3.10.2
+    steps:
+      - checkout # This step checks out your project's source code
+      # Perform the HTTP call to the Render deployment hook
+      - run:
+          name: Trigger Render Deployment
+          command: |
+
+            # Perform the HTTP GET request
+            curl -X GET $RENDER_DEPLOYMENT_HOOK_URL
 
 # Orchestrate our job run sequence
 workflows:
@@ -120,7 +132,7 @@ workflows:
           filters:
             branches:
               only: master
-      - heroku-registry-release:
+      - render_auto_deploy:
           requires:
             - dockerize # Only run deploy job once the docker job has completed
           filters:
