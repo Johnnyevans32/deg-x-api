@@ -92,6 +92,8 @@ jobs:
           docker-password: DOCKER_HUB_PASSWORD
       - docker/build:
           image: jevan32/deg-x-api:latest
+          debug: true
+          tag: latest
       - docker/push:
           digest-path: /tmp/digest.txt
           image: jevan32/deg-x-api:latest
