@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
 from typing import Sequence
 
-from fastapi import Depends, Response, status, APIRouter
+from fastapi import Response, status, APIRouter
 from fastapi_restful.cbv import cbv
 
-from apps.auth.services.auth_bearer import JWTBearer
+from apps.auth.services.auth_bearer import CurrentUser
 from apps.defi.interfaces.defiprovider_interface import DefiProviderOut
 from apps.defi.services.defi_service import DefiService
 from core.utils.custom_exceptions import UnicornRequest
@@ -20,16 +20,15 @@ class DefiController:
 
     @router.get(
         "/providers",
-        dependencies=[Depends(JWTBearer())],
         response_model_by_alias=False,
     )
     async def get_defi_providers_by_default_network(
         self,
         request: UnicornRequest,
         response: Response,
+        user: CurrentUser,
     ) -> ResponseModel[Sequence[DefiProviderOut]]:
         try:
-            user = request.state.user
             request.app.logger.info(
                 f"retrieving defi providers for networks for user - {user.id}"
             )

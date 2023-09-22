@@ -1,8 +1,8 @@
-from fastapi import BackgroundTasks, Response, status, Depends, APIRouter
+from fastapi import BackgroundTasks, Response, status, APIRouter
 from fastapi_restful.cbv import cbv
 from pydantic import EmailStr
 
-from apps.auth.services.auth_bearer import JWTBearer
+from apps.auth.services.auth_bearer import CurrentUser
 from apps.auth.interfaces.auth_interface import AuthResponse
 from apps.auth.services.auth_service import AuthService
 from apps.cloudplatform.interfaces.cloud_interface import CloudProvider, IDType
@@ -89,16 +89,15 @@ class AuthController:
         "/me",
         status_code=status.HTTP_200_OK,
         response_model_by_alias=False,
-        dependencies=[Depends(JWTBearer())],
     )
     async def me(
         self,
         request: UnicornRequest,
         res: Response,
+        current_user: CurrentUser,
     ) -> ResponseModel[AuthResponse]:
         try:
-            user = request.state.user
-            resp = await self.authService.me(user)
+            resp = await self.authService.me(current_user)
             return self.responseService.send_response(
                 res, status.HTTP_200_OK, "success", resp
             )

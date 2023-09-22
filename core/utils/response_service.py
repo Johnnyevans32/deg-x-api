@@ -1,6 +1,6 @@
 import json
 from typing import Any, Generic, Optional, TypeVar
-
+from bson.objectid import ObjectId
 from fastapi import Response
 from pydantic import BaseModel
 from pydantic.generics import GenericModel
@@ -40,6 +40,9 @@ class ResponseModel(GenericModel, Generic[T]):
 
     class Config:
         arbitrary_types_allowed = True
+        json_encoders = {
+            ObjectId: lambda oid: str(oid),
+        }
 
 
 class ResponseService:

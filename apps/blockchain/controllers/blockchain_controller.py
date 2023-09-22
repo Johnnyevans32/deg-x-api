@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
 from typing import Sequence
 
-from fastapi import Depends, Response, status, APIRouter
+from fastapi import Response, status, APIRouter
 from fastapi_restful.cbv import cbv
 
-from apps.auth.services.auth_bearer import JWTBearer
+from apps.auth.services.auth_bearer import CurrentUser
 from apps.blockchain.interfaces.transaction_interface import BlockchainTransactionOut
 from apps.blockchain.services.blockchain_service import (
     BlockchainService,
@@ -33,18 +33,17 @@ class BlockchainController:
 
     @router.get(
         "/transactions",
-        dependencies=[Depends(JWTBearer())],
         response_model_by_alias=False,
     )
     async def get_blockchain_txn(
         self,
         request: UnicornRequest,
         response: Response,
+        user: CurrentUser,
         page_num: int = 1,
         page_size: int = 10,
     ) -> ResponseModel[Sequence[BlockchainTransactionOut]]:
         try:
-            user = request.state.user
             request.app.logger.info(f"getting user blockchain transactions - {user.id}")
             user_txns, meta_data = await self.blockchainService.get_transactions(
                 user, page_num, page_size
@@ -65,12 +64,17 @@ class BlockchainController:
                 f"Error in getting user blockchain transction data: {str(e)}",
             )
 
-    @router.post("/send-token", dependencies=[Depends(JWTBearer())])
+    @router.post(
+        "/send-token",
+    )
     async def send_token(
-        self, request: UnicornRequest, response: Response, payload: SendTokenDTO
+        self,
+        request: UnicornRequest,
+        response: Response,
+        user: CurrentUser,
+        payload: SendTokenDTO,
     ) -> ResponseModel[SendTxnRes]:
         try:
-            user = request.state.user
             request.app.logger.info(f"sending blockchain token for - {user.id}")
             user_txn = await self.blockchainService.send(user, payload)
             request.app.logger.info("done sending blockchain token")
@@ -90,13 +94,16 @@ class BlockchainController:
 
     @router.post(
         "/token-balance",
-        dependencies=[Depends(JWTBearer())],
     )
     async def get_token_balance(
-        self, request: UnicornRequest, response: Response, payload: GetTokenBalance
+        self,
+        request: UnicornRequest,
+        response: Response,
+        user: CurrentUser,
+        payload: GetTokenBalance,
     ) -> ResponseModel[BalanceRes]:
         try:
-            user = request.state.user
+
             request.app.logger.info(f"getting token balance for - {user.id}")
             user_token_balance = await self.blockchainService.get_balance(user, payload)
             request.app.logger.info("done getting token balance")
@@ -116,13 +123,15 @@ class BlockchainController:
 
     @router.post(
         "/chain-swap",
-        dependencies=[Depends(JWTBearer())],
     )
     async def swap_between_wraps(
-        self, request: UnicornRequest, response: Response, payload: SwapTokenDTO
+        self,
+        request: UnicornRequest,
+        response: Response,
+        user: CurrentUser,
+        payload: SwapTokenDTO,
     ) -> ResponseModel[str]:
         try:
-            user = request.state.user
             request.app.logger.info(
                 f"swapping tokens between wraps for user - {user.id}"
             )
@@ -145,13 +154,15 @@ class BlockchainController:
 
     @router.post(
         "/get-test-token",
-        dependencies=[Depends(JWTBearer())],
     )
     async def get_test_token(
-        self, request: UnicornRequest, response: Response, payload: GetTestTokenDTO
+        self,
+        request: UnicornRequest,
+        response: Response,
+        user: CurrentUser,
+        payload: GetTestTokenDTO,
     ) -> ResponseModel[SendTxnRes]:
         try:
-            user = request.state.user
             request.app.logger.info("sending airdrop token balance ")
             txn_res = await self.blockchainService.get_test_token(user, payload)
             request.app.logger.info("done sending airdrop token balance to address")

@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
-from fastapi import Response, status, Depends, APIRouter
+from fastapi import Response, status, APIRouter
 from fastapi_restful.cbv import cbv
 
-from apps.auth.services.auth_bearer import JWTBearer
+from apps.auth.services.auth_bearer import CurrentUser
 from apps.user.interfaces.user_interface import UserUpdateDTO
 from apps.user.services.user_service import UserService
 from core.utils.custom_exceptions import UnicornRequest
@@ -18,17 +18,16 @@ class UserController:
 
     @router.put(
         "/",
-        dependencies=[Depends(JWTBearer())],
         response_model_by_alias=False,
     )
     async def update_user_profile(
         self,
         request: UnicornRequest,
         res: Response,
+        user: CurrentUser,
         update_payload: UserUpdateDTO,
     ) -> ResponseModel[None]:
         try:
-            user = request.state.user
             request.app.logger.info("updating user profile")
             await self.userService.update_user_details(user, update_payload)
 
@@ -46,13 +45,13 @@ class UserController:
 
     @router.get(
         "/check-username",
-        dependencies=[Depends(JWTBearer())],
         response_model_by_alias=False,
     )
     async def check_if_username_unique(
         self,
         request: UnicornRequest,
         res: Response,
+        user: CurrentUser,
         username: str,
     ) -> ResponseModel[bool]:
         try:

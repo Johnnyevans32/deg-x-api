@@ -252,7 +252,6 @@ class Utils:
         img.save(buffer)
         img_base64 = base64.b64encode(buffer.getvalue()).decode()
         image_url = Utils.upload_file(data_to_encode, img_base64)
-        print("image_url", image_url)
         return image_url
 
     @staticmethod

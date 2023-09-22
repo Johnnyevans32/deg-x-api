@@ -1,6 +1,5 @@
 from typing import Any, Optional
 
-from pydantic import Field
 from pymongo import ASCENDING
 
 from core.db import db
@@ -12,7 +11,7 @@ class Country(SBaseModel):
     code: str
     callingCode: str
     flag: str
-    metaData: Optional[dict[str, Any]] = Field(hidden_from_schema=True)
+    metaData: Optional[dict[str, Any]]
 
     @staticmethod
     def init() -> None:

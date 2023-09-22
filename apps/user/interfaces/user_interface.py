@@ -65,11 +65,11 @@ class UserBase(UserUpdateDTO, SBaseOutModel):
 
 
 class User(UserBase, SBaseModel):
-    password: Optional[str] = Field(default=None, hidden_from_schema=True)
-    socketIds: list[str] = Field(default=[], hidden_from_schema=True)
-    isVerified: bool = Field(default=False, hidden_from_schema=True)
+    password: Optional[str] = Field(default=None)
+    socketIds: list[str] = Field(default=[])
+    isVerified: bool = Field(default=False)
     signUpMethod: SignUpMethod = Field(
-        default=SignUpMethod.EMAIL, hidden_from_schema=True
+        default=SignUpMethod.EMAIL,
     )
 
     class Config:

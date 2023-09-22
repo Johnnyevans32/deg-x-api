@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
 from typing import Sequence
 from pydantic import BaseModel
-from fastapi import Response, status, Depends, APIRouter
+from fastapi import Response, status, APIRouter
 from fastapi_restful.cbv import cbv
 
-from apps.auth.services.auth_bearer import JWTBearer
+from apps.auth.services.auth_bearer import CurrentUser
 from apps.auditlog.interfaces.notification_interface import NotificationOut
 from apps.auditlog.services.auditlog_service import AuditLogService
 from core.utils.custom_exceptions import UnicornRequest
@@ -25,18 +25,17 @@ class AuditLogController:
 
     @router.get(
         "/notification",
-        dependencies=[Depends(JWTBearer())],
         response_model_by_alias=False,
     )
     async def get_user_transactions(
         self,
         request: UnicornRequest,
         response: Response,
+        user: CurrentUser,
         page_num: int = 1,
         page_size: int = 10,
     ) -> ResponseModel[Sequence[NotificationOut]]:
         try:
-            user = request.state.user
             request.app.logger.info("getting user notifications")
             res, meta = await self.auditLogService.get_users_notification(
                 user, page_num, page_size

@@ -2,6 +2,7 @@ from typing import Optional
 
 from pydantic import BaseModel
 
+
 from apps.user.interfaces.user_interface import UserBase
 from apps.wallet.interfaces.wallet_interface import WalletOut
 from core.utils.aes import EncryptedDTO

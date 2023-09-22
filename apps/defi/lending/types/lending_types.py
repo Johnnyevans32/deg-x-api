@@ -13,7 +13,6 @@ class BaseLendingActionDTO(BaseModel):
     mnemonic: str
 
     class Config:
-        arbitrary_types_allowed = True
         json_schema_extra = {
             "example": {
                 "asset": "0xd0A1E359811322d97991E03f863a0C30C2cF029C",

@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
 from typing import Sequence
 
-from fastapi import Depends, Response, status, APIRouter
+from fastapi import Response, status, APIRouter
 from fastapi_restful.cbv import cbv
 
 from apps.auth.interfaces.auth_interface import AuthResponse
-from apps.auth.services.auth_bearer import JWTBearer
+from apps.auth.services.auth_bearer import CurrentUser
 from apps.blockchain.interfaces.network_interface import NetworkType
 from apps.blockchain.interfaces.tokenasset_interface import TokenAssetCore
 from apps.wallet.interfaces.wallet_interface import WalletOut
@@ -25,14 +25,15 @@ class WalletController:
 
     @router.get(
         "/assets",
-        dependencies=[Depends(JWTBearer())],
         response_model_by_alias=False,
     )
     async def retrieve_wallet_assets(
-        self, request: UnicornRequest, response: Response
+        self,
+        request: UnicornRequest,
+        response: Response,
+        user: CurrentUser,
     ) -> ResponseModel[Sequence[WalletAssetOut]]:
         try:
-            user = request.state.user
             request.app.logger.info(f"checking wallet for - {user.id}")
             user_walletassets = await self.walletService.retrieve_wallet_assets(user)
             request.app.logger.info("done retrieving wallet assets")
@@ -51,14 +52,15 @@ class WalletController:
 
     @router.post(
         "/",
-        dependencies=[Depends(JWTBearer())],
         response_model_by_alias=False,
     )
     async def create_user_wallet(
-        self, request: UnicornRequest, response: Response
+        self,
+        request: UnicornRequest,
+        response: Response,
+        user: CurrentUser,
     ) -> ResponseModel[AuthResponse]:
         try:
-            user = request.state.user
             request.app.logger.info(f"creating wallet for - {user.id}")
             user_wallet, seed = await self.walletService.create_wallet(user)
             request.app.logger.info("done creating user wallet")
@@ -77,14 +79,15 @@ class WalletController:
 
     @router.get(
         "/",
-        dependencies=[Depends(JWTBearer())],
         response_model_by_alias=False,
     )
     async def retrieve_wallets(
-        self, request: UnicornRequest, response: Response
+        self,
+        request: UnicornRequest,
+        response: Response,
+        user: CurrentUser,
     ) -> ResponseModel[Sequence[WalletOut]]:
         try:
-            user = request.state.user
             request.app.logger.info(f"retrieving user wallets for - {user.id}")
             user_wallets = await self.walletService.retrieve_user_wallets(user)
             request.app.logger.info("done retrieving user wallets")
@@ -103,13 +106,15 @@ class WalletController:
 
     @router.put(
         "/set-wallet-network-type",
-        dependencies=[Depends(JWTBearer())],
     )
     async def switch_wallet_network(
-        self, request: UnicornRequest, response: Response, network_type: NetworkType
+        self,
+        request: UnicornRequest,
+        response: Response,
+        user: CurrentUser,
+        network_type: NetworkType,
     ) -> ResponseModel[None]:
         try:
-            user = request.state.user
             request.app.logger.info(f"setting user wallet network for - {user.id}")
             await self.walletService.update_wallet_network(user, network_type)
             request.app.logger.info("done setting user wallet network")
@@ -127,13 +132,15 @@ class WalletController:
 
     @router.put(
         "/set-default-user-wallet",
-        dependencies=[Depends(JWTBearer())],
     )
     async def switch_default_wallet(
-        self, request: UnicornRequest, response: Response, wallet_id: PyObjectId
+        self,
+        request: UnicornRequest,
+        response: Response,
+        user: CurrentUser,
+        wallet_id: PyObjectId,
     ) -> ResponseModel[None]:
         try:
-            user = request.state.user
             request.app.logger.info(f"setting user default wallet for - {user.id}")
             await self.walletService.update_dafault_wallet(user, wallet_id)
             request.app.logger.info("done setting user default wallet")
@@ -151,14 +158,16 @@ class WalletController:
 
     @router.post(
         "/token",
-        dependencies=[Depends(JWTBearer())],
         response_model_by_alias=False,
     )
     async def add_wallet_address(
-        self, request: UnicornRequest, response: Response, payload: TokenAssetCore
+        self,
+        request: UnicornRequest,
+        response: Response,
+        user: CurrentUser,
+        payload: TokenAssetCore,
     ) -> ResponseModel[WalletAssetOut]:
         try:
-            user = request.state.user
             asset = await self.walletService.add_token_asset(user, payload)
             return self.responseService.send_response(
                 response,

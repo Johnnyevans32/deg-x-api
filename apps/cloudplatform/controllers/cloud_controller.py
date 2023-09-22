@@ -1,9 +1,9 @@
 from typing import Any
-from fastapi import BackgroundTasks, Response, Depends, APIRouter
+from fastapi import BackgroundTasks, Response, APIRouter
 from fastapi_restful.cbv import cbv
 from starlette import status
 
-from apps.auth.services.auth_bearer import JWTBearer
+from apps.auth.services.auth_bearer import CurrentUser
 from apps.cloudplatform.interfaces.cloud_interface import BackupSeedPhraseDTO
 from apps.cloudplatform.services.cloud_service import CloudService
 
@@ -22,17 +22,16 @@ class CloudController:
     @router.post(
         "/backup",
         status_code=status.HTTP_201_CREATED,
-        dependencies=[Depends(JWTBearer())],
     )
     async def backup_mnemonic(
         self,
         request: UnicornRequest,
         res: Response,
+        user: CurrentUser,
         background_tasks: BackgroundTasks,
         payload: BackupSeedPhraseDTO,
     ) -> ResponseModel[str]:
         try:
-            user = request.state.user
             request.app.logger.info("uploading file to cloud")
             resp = await self.cloudService.backup_seedphrase(payload, user)
             request.app.logger.info("uploaded file to cloud")
@@ -48,12 +47,12 @@ class CloudController:
     @router.post(
         "/recovery",
         status_code=status.HTTP_201_CREATED,
-        dependencies=[Depends(JWTBearer())],
     )
     def recover_file_from_cloud(
         self,
         request: UnicornRequest,
         res: Response,
+        user: CurrentUser,
         background_tasks: BackgroundTasks,
         payload: BackupSeedPhraseDTO,
     ) -> ResponseModel[Any]:

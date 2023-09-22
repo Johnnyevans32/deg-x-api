@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
 from typing import Any, Sequence
 
-from fastapi import Depends, Response, status, APIRouter
+from fastapi import Response, status, APIRouter
 from fastapi_restful.cbv import cbv
 
-from apps.auth.services.auth_bearer import JWTBearer
+from apps.auth.services.auth_bearer import CurrentUser
 from apps.defi.lending.types.lending_types import IReserveToken, IUserAcccountData
 from apps.defi.lending.interfaces.lending_request_interface import (
     LendingRequest,
@@ -29,16 +29,15 @@ class LendingController:
 
     @router.get(
         "/account-data",
-        dependencies=[Depends(JWTBearer())],
     )
     async def get_user_account_data(
         self,
         request: UnicornRequest,
         response: Response,
+        user: CurrentUser,
         defi_provider_id: PyObjectId | None,
     ) -> ResponseModel[IUserAcccountData]:
         try:
-            user = request.state.user
             request.app.logger.info(f"getting user lending pool data for - {user.id}")
             user_lending_data = await self.lendingService.get_user_lending_data(
                 user, defi_provider_id
@@ -60,13 +59,11 @@ class LendingController:
 
     @router.get(
         "/config",
-        dependencies=[Depends(JWTBearer())],
     )
     async def get_user_config(
-        self, request: UnicornRequest, response: Response
+        self, request: UnicornRequest, user: CurrentUser, response: Response
     ) -> ResponseModel[Any]:
         try:
-            user = request.state.user
             request.app.logger.info(f"getting user lending config data for - {user.id}")
             user_lending_data = await self.lendingService.get_user_config(user)
             request.app.logger.info("done getting user lending config data ")
@@ -86,18 +83,17 @@ class LendingController:
 
     @router.get(
         "/",
-        dependencies=[Depends(JWTBearer())],
     )
     async def get_user_lending_requests(
         self,
         request: UnicornRequest,
         response: Response,
+        user: CurrentUser,
         defi_provider: PyObjectId | None,
         page_num: int = 1,
         page_size: int = 10,
     ) -> ResponseModel[Sequence[LendingRequestOut]]:
         try:
-            user = request.state.user
             request.app.logger.info(f"getting user lending requests - {user.id}")
             (
                 user_lending_data,
@@ -123,13 +119,15 @@ class LendingController:
 
     @router.post(
         "/supply",
-        dependencies=[Depends(JWTBearer())],
     )
     async def supply_asset(
-        self, request: UnicornRequest, response: Response, payload: BaseLendingActionDTO
+        self,
+        request: UnicornRequest,
+        response: Response,
+        user: CurrentUser,
+        payload: BaseLendingActionDTO,
     ) -> ResponseModel[LendingRequest]:
         try:
-            user = request.state.user
             request.app.logger.info(
                 f"initiating deposit request to protocol - {user.id}"
             )
@@ -151,13 +149,15 @@ class LendingController:
 
     @router.post(
         "/borrow",
-        dependencies=[Depends(JWTBearer())],
     )
     async def borrrow_asset(
-        self, request: UnicornRequest, response: Response, payload: BorrowAssetDTO
+        self,
+        request: UnicornRequest,
+        response: Response,
+        user: CurrentUser,
+        payload: BorrowAssetDTO,
     ) -> ResponseModel[LendingRequest]:
         try:
-            user = request.state.user
             request.app.logger.info(
                 f"initiating borrow request to protocol - {user.id}"
             )
@@ -179,13 +179,15 @@ class LendingController:
 
     @router.post(
         "/repay",
-        dependencies=[Depends(JWTBearer())],
     )
     async def repay_asset(
-        self, request: UnicornRequest, response: Response, payload: BorrowAssetDTO
+        self,
+        request: UnicornRequest,
+        response: Response,
+        user: CurrentUser,
+        payload: BorrowAssetDTO,
     ) -> ResponseModel[LendingRequest]:
         try:
-            user = request.state.user
             request.app.logger.info(
                 f"initiating repaid request to protocol - {user.id}"
             )

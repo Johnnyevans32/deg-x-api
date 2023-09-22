@@ -75,8 +75,8 @@ class WalletService:
             {"isDeleted": {"$ne": True}}
         )
 
-        for chain in blockchains:
-            await self.create_wallet_assets(user, wallet_obj, mnemonic, chain, session)
+        # for chain in blockchains:
+        #     await self.create_wallet_assets(user, wallet_obj, mnemonic, chain, session)
 
         return wallet_obj, encrypted_mnemonic_obj
 
@@ -115,10 +115,13 @@ class WalletService:
                 token_assets,
             )
         )
+        print("dict_wallet_assets", dict_wallet_assets)
 
-        await ModelUtilityService.model_create_many(
+        res = await ModelUtilityService.model_create_many(
             WalletAsset, dict_wallet_assets, session
         )
+
+        print("res", res)
 
     async def retrieve_wallet_assets(self, user: User) -> list[WalletAsset]:
         user_wallet = await self.get_user_default_wallet(user)
