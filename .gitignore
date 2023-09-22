@@ -149,3 +149,5 @@ cython_debug/
 **/.DS_Store
 
 ./poetry.lock
+
+poetry.lock
