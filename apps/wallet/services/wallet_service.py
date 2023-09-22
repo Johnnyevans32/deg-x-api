@@ -75,8 +75,8 @@ class WalletService:
             {"isDeleted": {"$ne": True}}
         )
 
-        # for chain in blockchains:
-        #     await self.create_wallet_assets(user, wallet_obj, mnemonic, chain, session)
+        for chain in blockchains:
+            await self.create_wallet_assets(user, wallet_obj, mnemonic, chain, session)
 
         return wallet_obj, encrypted_mnemonic_obj
 

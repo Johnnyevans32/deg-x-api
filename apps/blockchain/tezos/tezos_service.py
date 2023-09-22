@@ -161,7 +161,6 @@ class TezosService(IBlockchainService, HTTPRepository):
             assert tokenasset.id, "token asset id not found"
 
             chain_txn = BlockchainTransaction(
-                id=None,
                 transactionHash=txn.hash,
                 fromAddress=txn.sender,
                 toAddress=txn.receiver,

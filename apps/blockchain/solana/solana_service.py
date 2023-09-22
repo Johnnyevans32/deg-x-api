@@ -321,7 +321,6 @@ class SolanaService(IBlockchainService):
             assert tokenasset, "token asset not found"
             assert tokenasset.id, "token asset id not found"
             chain_txn = BlockchainTransaction(
-                id=None,
                 transactionHash=txn.txHash,
                 fromAddress=from_address,
                 toAddress=to_address,
