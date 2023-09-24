@@ -44,6 +44,12 @@ class WalletService:
             raise Exception("default wallet not set")
         return user_default_wallet
 
+    async def get_user_default_wallet_without_error(self, user: User) -> Wallet | None:
+        user_default_wallet = await ModelUtilityService.find_one(
+            Wallet, {"user": user.id, "isDeleted": False, "isDefault": True}
+        )
+        return user_default_wallet
+
     async def create_wallet_with_session(
         self,
         user: User,
@@ -75,12 +81,6 @@ class WalletService:
             walletType=walletType,
         ).dict(by_alias=True, exclude_none=True)
 
-        await ModelUtilityService.model_find_one_and_update(
-            Wallet,
-            {"user": user.id, "isDeleted": False, "isDefault": True},
-            {"isDefault": False},
-        )
-
         encrypted_mnemonic_obj = await self.aesEncryptionService.encrypt_AES_GCM(
             mnemonic
         )
@@ -97,6 +97,17 @@ class WalletService:
                 self.create_wallet_assets(user, wallet_obj, mnemonic, chain, session)
                 for chain in blockchains
             ]
+        )
+
+        await ModelUtilityService.model_find_one_and_update(
+            Wallet,
+            {
+                "user": user.id,
+                "isDeleted": False,
+                "_id": {"$ne": wallet_obj.id},
+                "isDefault": True,
+            },
+            {"isDefault": False},
         )
 
         return wallet_obj, encrypted_mnemonic_obj
@@ -117,6 +128,8 @@ class WalletService:
         token_assets = await BlockchainService.get_token_assets(
             {"isDeleted": False, "blockchain": chain.id, "isLayerOne": True}
         )
+
+        print("mapping for ", chain.name)
         dict_wallet_assets = list(
             map(
                 lambda token_asset: WalletAsset(
@@ -138,6 +151,7 @@ class WalletService:
             )
         )
 
+        print("creating for ", chain.name)
         await ModelUtilityService.model_create_many(
             WalletAsset, dict_wallet_assets, session
         )

@@ -420,6 +420,8 @@ class ModelUtilityService:
                 None, model.insert_many, records, False, False, session
             )
 
+            # created_records = model.insert_many(records, False, False, session=session)
+
             return created_records
         except Exception as e:
             logger.error(f"Error inserting many records - {str(e)}")

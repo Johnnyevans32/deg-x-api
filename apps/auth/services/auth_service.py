@@ -41,7 +41,7 @@ class AuthService:
         )
 
     async def me(self, user: User) -> AuthResponse:
-        wallet = await self.walletService.get_user_default_wallet(user)
+        wallet = await self.walletService.get_user_default_wallet_without_error(user)
         return AuthResponse(user=user, wallet=wallet)
 
     async def update_user_password(

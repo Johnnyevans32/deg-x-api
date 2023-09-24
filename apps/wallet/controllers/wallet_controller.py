@@ -15,7 +15,7 @@ from core.depends.get_object_id import PyObjectId
 from core.utils.custom_exceptions import UnicornRequest
 from core.utils.response_service import ResponseModel, ResponseService
 
-router = APIRouter(prefix="/wallet", tags=["Wallet 💸"])
+router = APIRouter(prefix="/wallets", tags=["Wallet 💸"])
 
 
 @cbv(router)

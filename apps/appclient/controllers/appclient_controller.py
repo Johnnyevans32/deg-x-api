@@ -7,7 +7,7 @@ from apps.appclient.services.appclient_service import AppClientService
 from core.utils.custom_exceptions import UnicornRequest
 from core.utils.response_service import ResponseModel, ResponseService
 
-router = APIRouter(prefix="/appclient", tags=["App Client 🌈"])
+router = APIRouter(prefix="/clients", tags=["App Client 🌈"])
 
 
 @cbv(router)
