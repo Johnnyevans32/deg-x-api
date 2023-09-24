@@ -423,7 +423,7 @@ class ModelUtilityService:
             return created_records
         except Exception as e:
             logger.error(f"Error inserting many records - {str(e)}")
-            return None
+            raise e
 
     @staticmethod
     async def model_hard_delete(

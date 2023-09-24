@@ -62,7 +62,9 @@ class WalletController:
     ) -> ResponseModel[AuthResponse]:
         try:
             request.app.logger.info(f"creating wallet for - {user.id}")
-            user_wallet, seed = await self.walletService.create_wallet(user)
+            user_wallet, seed = await self.walletService.create_wallet_with_session(
+                user
+            )
             request.app.logger.info("done creating user wallet")
             return self.responseService.send_response(
                 response,

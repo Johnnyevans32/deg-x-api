@@ -11,7 +11,7 @@ import uuid
 from functools import lru_cache, wraps
 from io import BytesIO
 from pathlib import Path
-from typing import Any, Callable, Type, TypeVar
+from typing import Any, Awaitable, Callable, List, Type, TypeVar
 
 from PIL import Image
 import requests
@@ -290,3 +290,13 @@ class Utils:
         return "https://s3-{}.amazonaws.com/{}/{}".format(
             location, settings.S3_BUCKET_NAME, file_name
         )
+
+    @staticmethod
+    async def promise_all(
+        promises: List[Awaitable[T]], return_exceptions: bool = True
+    ) -> List[T]:
+        async def await_and_return(awaitable: Awaitable[Any]) -> Any:
+            return await awaitable
+
+        tasks = [asyncio.create_task(await_and_return(promise)) for promise in promises]
+        return [await task for task in tasks]

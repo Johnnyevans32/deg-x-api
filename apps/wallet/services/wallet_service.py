@@ -11,7 +11,7 @@ from apps.user.interfaces.user_interface import User
 from apps.wallet.interfaces.wallet_interface import Wallet, WalletType
 from apps.wallet.interfaces.walletasset_interface import WalletAsset
 
-# from core.db import client
+from core.db import client
 from core.depends.get_object_id import PyObjectId
 from core.utils.aes import AesEncryptionService, EncryptedDTO
 from core.utils.model_utility_service import ModelUtilityService
@@ -44,6 +44,22 @@ class WalletService:
             raise Exception("default wallet not set")
         return user_default_wallet
 
+    async def create_wallet_with_session(
+        self,
+        user: User,
+    ) -> tuple[Wallet, EncryptedDTO]:
+        session = client.start_session()
+        session.start_transaction()
+        try:
+            res = await self.create_wallet(user, session)
+            session.commit_transaction()
+            return res
+        except Exception as e:
+            session.abort_transaction()
+            raise e
+        finally:
+            session.end_session()
+
     async def create_wallet(
         self,
         user: User,
@@ -51,6 +67,7 @@ class WalletService:
         walletType: WalletType = WalletType.MULTICHAIN,
     ) -> tuple[Wallet, EncryptedDTO]:
         assert user.id, "user id not found"
+
         mnemonic = self.mnemo.generate(strength=256)
         dict_wallet = Wallet(
             user=user.id,
@@ -75,8 +92,12 @@ class WalletService:
             {"isDeleted": {"$ne": True}}
         )
 
-        for chain in blockchains:
-            await self.create_wallet_assets(user, wallet_obj, mnemonic, chain, session)
+        await Utils.promise_all(
+            [
+                self.create_wallet_assets(user, wallet_obj, mnemonic, chain, session)
+                for chain in blockchains
+            ]
+        )
 
         return wallet_obj, encrypted_mnemonic_obj
 
@@ -88,6 +109,7 @@ class WalletService:
         chain: Blockchain,
         session: ClientSession | None = None,
     ) -> None:
+
         address = await self.blockchainService.create_address(
             chain.registryName, mnemonic
         )
@@ -115,13 +137,10 @@ class WalletService:
                 token_assets,
             )
         )
-        print("dict_wallet_assets", dict_wallet_assets)
 
-        res = await ModelUtilityService.model_create_many(
+        await ModelUtilityService.model_create_many(
             WalletAsset, dict_wallet_assets, session
         )
-
-        print("res", res)
 
     async def retrieve_wallet_assets(self, user: User) -> list[WalletAsset]:
         user_wallet = await self.get_user_default_wallet(user)
