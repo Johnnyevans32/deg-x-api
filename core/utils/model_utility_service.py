@@ -414,13 +414,13 @@ class ModelUtilityService:
         session: ClientSession | None = None,
     ) -> InsertManyResult | None:
         try:
-            loop = asyncio.get_event_loop()
+            # loop = asyncio.get_event_loop()
             model = db[generic_class.__name__.lower()]
-            created_records = await loop.run_in_executor(
-                None, model.insert_many, records, False, False, session
-            )
+            # created_records = await loop.run_in_executor(
+            #     None, model.insert_many, records, False, False, session
+            # )
 
-            # created_records = model.insert_many(records, False, False, session=session)
+            created_records = model.insert_many(records, False, False, session=session)
 
             return created_records
         except Exception as e:
