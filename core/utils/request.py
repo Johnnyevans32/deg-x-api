@@ -28,8 +28,6 @@ class HTTPRepository:
         opts: Any | None = None,
     ) -> T:
         try:
-
-            # req.add_header('User-agent', PYCOIN_AGENT)
             url = self.base_url + url if self.base_url else url
 
             def run_req() -> requests.Response:
@@ -44,11 +42,10 @@ class HTTPRepository:
 
             loop = asyncio.get_event_loop()
             req = await loop.run_in_executor(None, run_req)
+
             if type(req.json()) is list:
                 return generic_class(**{"data": req.json(), "message": "success"})
             return generic_class(**req.json())
-        # except requests.exceptions.RequestException as e:
         except Exception as e:
             logger.error(f"Error making request call - {str(e)}")
-
-            raise Exception("A request error has occured")
+            raise Exception(str(e))

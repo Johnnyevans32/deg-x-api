@@ -1,6 +1,6 @@
 from datetime import datetime
 from typing import Optional
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from apps.appclient.services.appclient_service import AppClientService, Apps
 
 from apps.marketdata.services.marketdata_iservice import IMarketDataService
@@ -25,12 +25,12 @@ class IGeckoPriceData(BaseModel):
     market_cap_rank: int
     fully_diluted_valuation: Optional[int]
     total_volume: int
-    high_24h: float
-    low_24h: float
-    price_change_24h: float
-    price_change_percentage_24h: float
-    market_cap_change_24h: int
-    market_cap_change_percentage_24h: float
+    high_24h: Optional[float]
+    low_24h: Optional[float]
+    price_change_24h: Optional[float] = Field(default=0)
+    price_change_percentage_24h: Optional[float] = Field(default=0)
+    market_cap_change_24h: Optional[int]
+    market_cap_change_percentage_24h: Optional[float]
     circulating_supply: float
     total_supply: Optional[int]
     max_supply: Optional[int]
