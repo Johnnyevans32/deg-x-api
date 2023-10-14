@@ -3,7 +3,7 @@ import math
 import re
 from datetime import datetime
 from enum import Enum
-from functools import lru_cache, partial
+from functools import lru_cache
 from typing import Any, Type, TypeVar
 from bson.objectid import ObjectId
 from pymongo import DESCENDING, ReturnDocument
@@ -94,7 +94,7 @@ class ModelUtilityService:
         return (
             list(
                 map(
-                    partial(Utils.to_class_object, generic_class),
+                    lambda x: Utils.to_class_object(generic_class, x),
                     result,
                 )
             )
@@ -196,7 +196,7 @@ class ModelUtilityService:
         return (
             list(
                 map(
-                    partial(Utils.to_class_object, generic_class),
+                    lambda x: Utils.to_class_object(generic_class, x),
                     result,
                 )
             )
@@ -281,7 +281,7 @@ class ModelUtilityService:
 
         return list(
             map(
-                partial(Utils.to_class_object, generic_class),
+                lambda x: Utils.to_class_object(generic_class, x),
                 results,
             )
         )
@@ -312,7 +312,7 @@ class ModelUtilityService:
 
         return list(
             map(
-                partial(Utils.to_class_object, generic_class),
+                lambda x: Utils.to_class_object(generic_class, x),
                 results,
             )
         )
