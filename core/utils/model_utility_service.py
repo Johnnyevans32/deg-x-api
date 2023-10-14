@@ -5,7 +5,6 @@ from datetime import datetime
 from enum import Enum
 from functools import lru_cache, partial
 from typing import Any, Type, TypeVar
-import traceback
 from bson.objectid import ObjectId
 from pymongo import DESCENDING, ReturnDocument
 from pymongo.client_session import ClientSession
@@ -427,7 +426,6 @@ class ModelUtilityService:
 
             return created_records
         except Exception as e:
-            traceback.print_exc()
             logger.error(f"Error inserting many records - {str(e)}")
             raise e
 

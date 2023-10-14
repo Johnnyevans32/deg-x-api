@@ -32,7 +32,7 @@ from core.utils.model_utility_service import ModelUtilityService
 from core.utils.request import HTTPRepository
 from core.utils.response_service import MetaDataModel
 from core.depends.get_object_id import PyObjectId
-from core.utils.utils_service import NotFoundInRecordException
+from core.utils.utils_service import NotFoundInRecordException, Utils
 
 
 class BlockchainService:
@@ -285,7 +285,11 @@ class BlockchainService:
         self, user: User, user_default_wallet: Wallet, network: Network
     ) -> Any:
         try:
-            blockchain = cast(Blockchain, network.blockchain)
+            blockchain = await ModelUtilityService.find_one(
+                Blockchain,
+                {"_id": network.blockchain},
+            )
+            assert blockchain, "blockchaim not found"
 
             user_asset = await ModelUtilityService.find_one(
                 WalletAsset,
@@ -341,20 +345,22 @@ class BlockchainService:
         if not user_default_wallet:
             raise Exception("no default wallet set")
 
-        chain_networks = await ModelUtilityService.find_and_populate(
+        chain_networks = await ModelUtilityService.find(
             Network,
             {
                 "networkType": user_default_wallet.networkType,
                 "isDeleted": False,
                 "isDefault": True,
             },
-            ["blockchain"],
         )
         # update user txns before returning
-        chain_ids = []
-        for network in chain_networks:
-            chain_ids.append(network.id)
-            await self.update_user_txns(user, user_default_wallet, network)
+        await Utils.promise_all(
+            [
+                self.update_user_txns(user, user_default_wallet, network)
+                for network in chain_networks
+            ]
+        )
+
         await emit_socket_event_to_clients(
             SocketEvent.ASSETBALANCE,
             SocketEvent.ASSETBALANCE.value,
@@ -365,7 +371,9 @@ class BlockchainService:
             {
                 "user": user.id,
                 "wallet": user_default_wallet.id,
-                "network": {"$in": chain_ids},
+                "network": {
+                    "$in": list(map(lambda network: network.id, chain_networks))
+                },
                 "isDeleted": False,
             },
             ["tokenasset"],

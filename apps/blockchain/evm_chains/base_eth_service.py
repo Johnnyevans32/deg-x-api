@@ -215,7 +215,8 @@ class BaseEvmService(IBlockchainService):
         )
         txns_result = res.result
         txn_obj = []
-        for txn in txns_result:
+
+        async def format_txns(txn: IEtherscanNormalTxns) -> None:
             txn_type = (
                 TxnType.DEBIT if txn.fromAddress == address.lower() else TxnType.CREDIT
             )
@@ -271,6 +272,8 @@ class BaseEvmService(IBlockchainService):
             ).dict(by_alias=True, exclude_none=True)
 
             txn_obj.append(chain_txn)
+
+        await Utils.promise_all([format_txns(txn) for txn in txns_result])
 
         return txn_obj
 

@@ -32,7 +32,7 @@ class HTTPRepository:
 
             def run_req() -> requests.Response:
                 req: requests.Response = self.session.request(
-                    method,
+                    method.name,
                     url,
                     data=data,
                     headers=self.headers,

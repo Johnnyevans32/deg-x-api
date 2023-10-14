@@ -21,6 +21,7 @@ from apps.blockchain.interfaces.transaction_interface import (
 )
 from apps.blockchain.solana.solana_utils import (
     ISolanaExplorer,
+    ISolanaExplorerTxn,
     create_sync_native_instruction,
     get_or_create_assoc_token_acc,
 )
@@ -31,6 +32,7 @@ from apps.wallet.interfaces.walletasset_interface import Address
 from core.depends.get_object_id import PyObjectId
 from core.utils.model_utility_service import ModelUtilityService
 from core.utils.request import REQUEST_METHOD, HTTPRepository
+from core.utils.utils_service import Utils
 
 
 class SolanaService(IBlockchainService):
@@ -292,7 +294,8 @@ class SolanaService(IBlockchainService):
         txns_result = res.data
         solana_client = self.get_network_provider(chain_network)
         txn_obj: list[Any] = []
-        for txn in txns_result:
+
+        async def format_txns(txn: ISolanaExplorerTxn) -> None:
             from_address = txn.signer[0]
             txn_type = (
                 TxnType.DEBIT
@@ -344,6 +347,8 @@ class SolanaService(IBlockchainService):
                 metaData=txn.dict(by_alias=True),
             ).dict(by_alias=True, exclude_none=True)
             txn_obj.append(chain_txn)
+
+        await Utils.promise_all([format_txns(txn) for txn in txns_result])
 
         return txn_obj
 

@@ -24,6 +24,7 @@ from core.depends.get_object_id import PyObjectId
 from core.utils.model_utility_service import ModelUtilityService
 from core.utils.request import REQUEST_METHOD, HTTPRepository
 from core.utils.response_service import ResponseModel
+from core.utils.utils_service import Utils
 
 
 class TezosService(IBlockchainService, HTTPRepository):
@@ -144,7 +145,8 @@ class TezosService(IBlockchainService, HTTPRepository):
         assert txns_result, "no tezos transaction"
 
         txn_obj: list[Any] = []
-        for txn in txns_result:
+
+        async def format_txns(txn: ITezosAccountTxn) -> None:
             txn_type = (
                 TxnType.DEBIT if txn.sender == address.lower() else TxnType.CREDIT
             )
@@ -184,6 +186,9 @@ class TezosService(IBlockchainService, HTTPRepository):
                 metaData=txn.dict(by_alias=True),
             ).dict(by_alias=True, exclude_none=True)
             txn_obj.append(chain_txn)
+
+        await Utils.promise_all([format_txns(txn) for txn in txns_result])
+
         return txn_obj
 
     async def activate_and_reveal_acc(
