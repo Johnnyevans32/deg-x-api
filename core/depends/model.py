@@ -29,13 +29,6 @@ class SBaseOutModel(HashableBaseModel, BaseModel):
     createdAt: datetime = Field(default=datetime.now())
     updatedAt: datetime = Field(default=datetime.now())
 
-    # def __init__(self, **pydict: dict[str, Any]) -> None:
-    #     try:
-    #         super().__init__(**pydict)
-    #         self.id = cast(PyObjectId, pydict.pop("_id"))
-    #     except Exception as e:
-    #         logger.error(f"Error while mapping the id to record - {e}")
-
     class Config:
         arbitrary_types_allowed = True
 

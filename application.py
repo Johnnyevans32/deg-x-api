@@ -46,8 +46,6 @@ responseService = ResponseService()
 # CORS
 origins = ["*"]
 
-#  servers=[{"url": settings.base_path}],
-
 
 def custom_openapi(app: FastAPI) -> dict[str, Any]:
     if app.openapi_schema:
@@ -88,16 +86,9 @@ def create_app() -> FastAPI:
     )
     app.logger = logger  # type: ignore[attr-defined]
 
-    # FASTAPI ADMIN
-    # app.mount("/admin", admin_app)
-
     # Set all CORS enabled origins
 
     if settings.BACKEND_CORS_ORIGINS:
-        # origins_raw =
-        # for origin in origins_raw:
-        #     use_origin = origin.strip()
-        #     origins.append(use_origin)
         app.add_middleware(
             CORSMiddleware,
             allow_origins=settings.BACKEND_CORS_ORIGINS.split(","),

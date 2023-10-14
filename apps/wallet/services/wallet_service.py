@@ -1,3 +1,4 @@
+import asyncio
 from typing import Any, cast
 
 from mnemonic import Mnemonic
@@ -58,9 +59,12 @@ class WalletService:
         session.start_transaction()
         try:
             res = await self.create_wallet(user, session)
+            print("done")
             session.commit_transaction()
+            print("commit_transaction done")
             return res
         except Exception as e:
+            print(e)
             session.abort_transaction()
             raise e
         finally:
@@ -128,28 +132,31 @@ class WalletService:
         token_assets = await BlockchainService.get_token_assets(
             {"isDeleted": False, "blockchain": chain.id, "isLayerOne": True}
         )
+        loop = asyncio.get_event_loop()
 
-        print("mapping for ", chain.name)
-        dict_wallet_assets = list(
-            map(
-                lambda token_asset: WalletAsset(
-                    user=cast(PyObjectId, user.id),
-                    wallet=cast(PyObjectId, wallet.id),
-                    tokenasset=cast(PyObjectId, token_asset.id),
-                    address=self.blockchainService.get_address(
-                        address, cast(Network, token_asset.network)
-                    ),
-                    qrImage=Utils.create_qr_image(
-                        self.blockchainService.get_address(
+        def convert_assets_to_dict() -> list[dict[str, Any]]:
+            return list(
+                map(
+                    lambda token_asset: WalletAsset(
+                        user=cast(PyObjectId, user.id),
+                        wallet=cast(PyObjectId, wallet.id),
+                        tokenasset=cast(PyObjectId, token_asset.id),
+                        address=self.blockchainService.get_address(
                             address, cast(Network, token_asset.network)
-                        )
-                    ),
-                    networkType=cast(Network, token_asset.network).networkType,
-                    blockchain=cast(PyObjectId, chain.id),
-                ).dict(by_alias=True, exclude_none=True),
-                token_assets,
+                        ),
+                        qrImage=Utils.create_qr_image(
+                            self.blockchainService.get_address(
+                                address, cast(Network, token_asset.network)
+                            )
+                        ),
+                        networkType=cast(Network, token_asset.network).networkType,
+                        blockchain=cast(PyObjectId, chain.id),
+                    ).dict(by_alias=True, exclude_none=True),
+                    token_assets,
+                )
             )
-        )
+
+        dict_wallet_assets = await loop.run_in_executor(None, convert_assets_to_dict)
 
         print("creating for ", chain.name)
         await ModelUtilityService.model_create_many(

@@ -1,4 +1,3 @@
-# from functools import lru_cache
 from typing import Any, Generic, Literal, Optional, TypeVar
 
 import certifi
@@ -13,7 +12,6 @@ from core.config import settings
 from core.depends.get_object_id import PyObjectId
 
 
-# @lru_cache()
 def get_db() -> tuple[MongoClient[Any], Database[Any], DatabaseChangeStream[Any]]:
     db_name = settings.DATABASE_NAME
     uri = settings.DATABASE_URI

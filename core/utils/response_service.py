@@ -1,24 +1,12 @@
 import json
-from typing import Any, Generic, Optional, TypeVar
+from typing import Generic, Optional, TypeVar
 from bson.objectid import ObjectId
 from fastapi import Response
 from pydantic import BaseModel
 from pydantic.generics import GenericModel
 
 
-def get_response_model(base: object, rep: str) -> Any:
-    class DynamicResponse(ResponseModelT):
-        data: Optional[base]  # type: ignore
-        metaData: Optional[MetaDataModel]
-
-    return type(rep, (DynamicResponse,), {})
-
-
 T = TypeVar("T")
-
-
-class ResponseModelT(BaseModel):
-    message: str
 
 
 class MetaDataModel(BaseModel):
