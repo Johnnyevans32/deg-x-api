@@ -5,10 +5,10 @@ from pydantic import BaseModel
 
 class IGasSpeed(BaseModel):
     acceptance: float
-    maxFeePerGas: Optional[float]
-    maxPriorityFeePerGas: Optional[float]
-    baseFee: Optional[float]
-    gasPrice: Optional[float]
+    maxFeePerGas: Optional[float] = None
+    maxPriorityFeePerGas: Optional[float] = None
+    baseFee: Optional[float] = None
+    gasPrice: Optional[float] = None
     estimatedFee: float
 
 

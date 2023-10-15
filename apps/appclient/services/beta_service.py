@@ -1,6 +1,5 @@
 from typing import Any, Generic, TypeVar
-
-from pydantic.generics import GenericModel
+from pydantic import BaseModel
 
 from apps.appclient.services.appclient_service import AppClientService, Apps
 from core.utils.request import REQUEST_METHOD, HTTPRepository
@@ -8,7 +7,7 @@ from core.utils.request import REQUEST_METHOD, HTTPRepository
 T = TypeVar("T")
 
 
-class BaseBetaResponse(GenericModel, Generic[T]):
+class BaseBetaResponse(BaseModel, Generic[T]):
     message: str
     data: T
 

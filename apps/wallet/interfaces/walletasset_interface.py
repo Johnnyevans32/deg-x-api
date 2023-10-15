@@ -28,7 +28,7 @@ class WalletAssetOut(SBaseOutModel):
     address: str
     balance: float = Field(default=0)
     networkType: NetworkType
-    qrImage: Optional[str]
+    qrImage: Optional[str] = None
 
 
 class WalletAsset(WalletAssetOut, SBaseModel):

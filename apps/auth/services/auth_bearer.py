@@ -24,6 +24,7 @@ async def get_current_user(
             raise UnicornException(
                 status_code=403, message="Invalid token or expired token."
             )
+
         current_user = await userService.get_user_by_query(
             {"_id": user_decoded_jwt.user, "isDeleted": False}
         )

@@ -2,35 +2,35 @@ import json
 from typing import Generic, Optional, TypeVar
 from bson.objectid import ObjectId
 from fastapi import Response
-from pydantic import BaseModel
-from pydantic.generics import GenericModel
+from pydantic import BaseModel, ConfigDict
 
 
 T = TypeVar("T")
 
 
 class MetaDataModel(BaseModel):
-    page: Optional[int]
-    perPage: Optional[int]
-    total: Optional[int]
-    pageCount: Optional[int]
-    previousPage: Optional[int]
-    nextPage: Optional[int]
+    page: Optional[int] = None
+    perPage: Optional[int] = None
+    total: Optional[int] = None
+    pageCount: Optional[int] = None
+    previousPage: Optional[int] = None
+    nextPage: Optional[int] = None
 
 
-class ResponseModel(GenericModel, Generic[T]):
+class ResponseModel(BaseModel, Generic[T]):
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        json_encoders={
+            ObjectId: lambda oid: str(oid),
+        },
+    )
+
     message: str
     data: T | None = None
     metaData: MetaDataModel | None = None
 
     def toJSON(self) -> str:
         return json.dumps(self, default=lambda o: o.__dict__, sort_keys=True, indent=4)
-
-    class Config:
-        arbitrary_types_allowed = True
-        json_encoders = {
-            ObjectId: lambda oid: str(oid),
-        }
 
 
 class ResponseService:
@@ -59,6 +59,7 @@ class ResponseService:
         meta: MetaDataModel | None = None,
         use_class_message: bool = False,
     ) -> ResponseModel[T]:
+        print("bruuhhh")
         res.status_code = status_code
         if use_class_message:
             message = self.status_code_message[status_code]

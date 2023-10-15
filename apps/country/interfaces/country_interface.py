@@ -11,7 +11,7 @@ class Country(SBaseModel):
     code: str
     callingCode: str
     flag: str
-    metaData: Optional[dict[str, Any]]
+    metaData: Optional[dict[str, Any]] = None
 
     @staticmethod
     def init() -> None:

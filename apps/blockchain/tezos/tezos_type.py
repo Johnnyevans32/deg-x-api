@@ -21,7 +21,7 @@ class ITezosAccountTxn(BaseModel):
     storage_limit: int
     volume: float
     fee: float
-    burned: Optional[float]
+    burned: Optional[float] = None
     sender: str
     receiver: str
     confirmations: int

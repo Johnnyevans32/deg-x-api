@@ -34,7 +34,7 @@ class TxnStatus(str, Enum):
 class BlockchainTransactionOut(SBaseOutModel):
     user: Union[PyObjectId, User]
     otherUser: Optional[Union[PyObjectId, User]] = None
-    tokenasset: Optional[Union[PyObjectId, TokenAssetOut]]
+    tokenasset: Optional[Union[PyObjectId, TokenAssetOut]] = None
     wallet: Union[PyObjectId, Wallet]
     network: Union[PyObjectId, Network]
     fromAddress: str
@@ -55,7 +55,7 @@ class BlockchainTransactionOut(SBaseOutModel):
 
 class BlockchainTransaction(BlockchainTransactionOut, SBaseModel):
     metaData: Any
-    tokenasset: Optional[Union[PyObjectId, TokenAsset]]
+    tokenasset: Optional[Union[PyObjectId, TokenAsset]] = None
 
     @staticmethod
     def init() -> None:

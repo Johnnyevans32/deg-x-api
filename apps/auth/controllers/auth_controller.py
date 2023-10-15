@@ -1,3 +1,4 @@
+import traceback
 from fastapi import BackgroundTasks, Response, status, APIRouter
 from fastapi_restful.cbv import cbv
 from pydantic import EmailStr
@@ -77,7 +78,7 @@ class AuthController:
                 res, status.HTTP_200_OK, "User Log in Successful", resp
             )
         except Exception as e:
-            # raise e
+            traceback.print_exc()
             request.app.logger.error(
                 f"Error logging user {login_input.email}, {str(e)}"
             )

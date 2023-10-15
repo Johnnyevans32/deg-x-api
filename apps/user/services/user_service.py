@@ -104,18 +104,18 @@ class UserService:
         await ModelUtilityService.model_hard_delete(User, {"email": email})
 
     async def create_user_refresh_token(self, user: User, refresh_token: str) -> None:
-        await ModelUtilityService.model_find_one_and_update(
-            UserRefreshToken,
-            {"user": user.id, "isDeleted": False},
-            {"isDeleted": True},
-        )
-        assert user.id, "user id not foun"
+        assert user.id, "user id not found"
 
         await ModelUtilityService.model_create(
             UserRefreshToken,
             UserRefreshToken(user=user.id, refreshToken=refresh_token).dict(
                 by_alias=True, exclude_none=True
             ),
+        )
+        await ModelUtilityService.model_find_one_and_update(
+            UserRefreshToken,
+            {"user": user.id, "isDeleted": False},
+            {"isDeleted": True},
         )
 
     async def get_user_refresh_token(self, refresh_token: str) -> UserRefreshToken:

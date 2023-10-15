@@ -1,33 +1,32 @@
 from typing import Generic, Optional, TypeVar
 
 from pydantic import BaseModel, Field
-from pydantic.generics import GenericModel
 
 T = TypeVar("T")
 
 
-class EtherscanBaseResponse(GenericModel, Generic[T]):
+class EtherscanBaseResponse(BaseModel, Generic[T]):
     status: str
     message: str
     result: T
 
 
 class IEtherscanNormalTxns(BaseModel):
-    blockNumber: Optional[int]
+    blockNumber: Optional[int] = None
     timeStamp: str
     hash: str
-    nonce: Optional[str]
-    blockHash: Optional[str]
-    transactionIndex: Optional[str]
-    fromAddress: Optional[str] = Field(alias="from")
-    to: Optional[str]
-    value: Optional[str]
-    gas: Optional[str]
-    gasPrice: Optional[int]
-    isError: Optional[str]
-    txreceipt_status: Optional[str]
-    input: Optional[str]
-    contractAddress: Optional[str]
-    cumulativeGasUsed: Optional[str]
-    gasUsed: Optional[int]
-    confirmations: Optional[str]
+    nonce: Optional[str] = None
+    blockHash: Optional[str] = None
+    transactionIndex: Optional[str] = None
+    fromAddress: Optional[str] = Field(alias="from", default=None)
+    to: Optional[str] = None
+    value: Optional[str] = None
+    gas: Optional[str] = None
+    gasPrice: Optional[int] = None
+    isError: Optional[str] = None
+    txreceipt_status: Optional[str] = None
+    input: Optional[str] = None
+    contractAddress: Optional[str] = None
+    cumulativeGasUsed: Optional[str] = None
+    gasUsed: Optional[int] = None
+    confirmations: Optional[str] = None

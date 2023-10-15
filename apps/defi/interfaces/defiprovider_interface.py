@@ -20,17 +20,17 @@ class DefiServiceType(str, Enum):
 
 class DefiProviderOut(SBaseOutModel):
     name: str
-    desc: Optional[str]
-    tags: Optional[list[str]]
-    logo: Optional[str]
-    website: Optional[str]
+    desc: Optional[str] = None
+    tags: Optional[list[str]] = None
+    logo: Optional[str] = None
+    website: Optional[str] = None
     serviceType: DefiServiceType
     isEnabled: bool = Field(default=True)
     network: Union[PyObjectId, NetworkOut]
 
 
 class DefiProvider(DefiProviderOut, SBaseModel):
-    meta: Optional[Any]
+    meta: Optional[Any] = None
     serviceName: str
     contractAddress: str
     isDefault: bool = Field(default=False)

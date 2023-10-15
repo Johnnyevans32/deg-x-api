@@ -171,11 +171,11 @@ class LendingService:
             user_wallet,
             LendingRequestType.BORROW,
             defi_provider,
-            token_asset,
             protocol_borrow_res,
             payload.amount,
             payload.assetAddress,
             payload.assetSymbol,
+            token_asset,
             payload.interestRateMode,
         )
 
@@ -187,11 +187,11 @@ class LendingService:
         user_wallet: Wallet,
         lending_type: LendingRequestType,
         defi_provider: DefiProvider,
-        token_asset: Optional[TokenAsset],
         provider_res: str,
         amount: float,
         assetAddress: str,
         assetSymbol: str,
+        token_asset: Optional[TokenAsset] = None,
         interest_rate_mode: InterestRateMode | None = None,
     ) -> LendingRequest:
         lending_req = await ModelUtilityService.model_create(
@@ -250,11 +250,11 @@ class LendingService:
             user_wallet,
             LendingRequestType.DEPOSIT,
             defi_provider,
-            token_asset,
             protocol_deposit_res,
             payload.amount,
             payload.assetAddress,
             payload.assetSymbol,
+            token_asset,
         )
         return lending_req
 
@@ -286,11 +286,11 @@ class LendingService:
             user_wallet,
             LendingRequestType.REPAY,
             defi_provider,
-            token_asset,
             protocol_repay_res,
             payload.amount,
             payload.assetAddress,
             payload.assetSymbol,
+            token_asset,
             payload.interestRateMode,
         )
         return lending_req
@@ -332,10 +332,10 @@ class LendingService:
             user_wallet,
             LendingRequestType.WITHDRAW,
             defi_provider,
-            token_asset,
             protocol_deposit_res,
             payload.amount,
             payload.assetAddress,
             payload.assetSymbol,
+            token_asset,
         )
         return lending_req

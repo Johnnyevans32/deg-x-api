@@ -1,7 +1,6 @@
 from pydantic import BaseModel
 from datetime import datetime
 from typing import Generic, TypeVar
-from pydantic.generics import GenericModel
 
 
 class RequestStatus(BaseModel):
@@ -42,6 +41,6 @@ class IHistoricalPriceData(BaseModel):
 T = TypeVar("T")
 
 
-class BaseResponseModel(GenericModel, Generic[T]):
+class BaseResponseModel(BaseModel, Generic[T]):
     status: RequestStatus
     data: T

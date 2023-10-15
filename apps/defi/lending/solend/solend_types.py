@@ -22,7 +22,7 @@ class SolendReserve(BaseModel):
 class SolendMarket(BaseModel):
     name: str
     isPrimary: bool
-    description: Optional[str]
+    description: Optional[str] = None
     creator: str
     address: str
     authorityAddress: str

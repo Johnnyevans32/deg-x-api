@@ -23,24 +23,24 @@ class IGeckoPriceData(BaseModel):
     current_price: float
     market_cap: int
     market_cap_rank: int
-    fully_diluted_valuation: Optional[int]
+    fully_diluted_valuation: Optional[int] = None
     total_volume: int
-    high_24h: Optional[float]
-    low_24h: Optional[float]
-    price_change_24h: Optional[float] = Field(default=0)
-    price_change_percentage_24h: Optional[float] = Field(default=0)
-    market_cap_change_24h: Optional[int]
-    market_cap_change_percentage_24h: Optional[float]
+    high_24h: Optional[float] = None
+    low_24h: Optional[float] = None
+    price_change_24h: float = Field(default=0)
+    price_change_percentage_24h: float = Field(default=0)
+    market_cap_change_24h: Optional[int] = None
+    market_cap_change_percentage_24h: Optional[float] = None
     circulating_supply: float
-    total_supply: Optional[int]
-    max_supply: Optional[int]
+    total_supply: Optional[int] = None
+    max_supply: Optional[int] = None
     ath: float
     ath_change_percentage: float
     ath_date: datetime
     atl: float
     atl_change_percentage: float
     atl_date: datetime
-    roi: Optional[Roi]
+    roi: Optional[Roi] = None
     last_updated: datetime
 
 

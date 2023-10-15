@@ -56,7 +56,7 @@ class ITxn(BaseModel):
     gasPrice: str
     nonce: str
     input: str
-    transactionIndex: Optional[str]
+    transactionIndex: Optional[str] = None
     fromAddress: str
     toAddress: str
     value: str

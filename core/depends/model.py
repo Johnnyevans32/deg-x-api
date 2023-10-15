@@ -1,7 +1,7 @@
 from datetime import datetime
 from typing import Optional
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ConfigDict
 
 from core.depends.get_object_id import PyObjectId
 
@@ -21,16 +21,17 @@ class HashableBaseModel(BaseModel):
 
 class SBaseInModel(HashableBaseModel):
     isDeleted: bool = Field(default=False)
-    deletedAt: Optional[datetime] = Field(default=None)
+    deletedAt: Optional[datetime] = None
 
 
 class SBaseOutModel(HashableBaseModel, BaseModel):
-    id: Optional[PyObjectId] = Field(alias="_id")
+    id: Optional[PyObjectId] = Field(alias="_id", default=None)
     createdAt: datetime = Field(default=datetime.now())
     updatedAt: datetime = Field(default=datetime.now())
 
-    class Config:
-        arbitrary_types_allowed = True
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+    )
 
 
 class SBaseModel(SBaseInModel, SBaseOutModel):

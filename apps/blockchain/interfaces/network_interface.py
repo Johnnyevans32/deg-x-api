@@ -13,8 +13,8 @@ class NetworkType(str, Enum):
 
 
 class ApiExplorer(HashableBaseModel):
-    url: Optional[str]
-    keyToken: Optional[str]
+    url: Optional[str] = None
+    keyToken: Optional[str] = None
 
 
 class NetworkOut(SBaseOutModel):
@@ -22,11 +22,11 @@ class NetworkOut(SBaseOutModel):
 
 
 class Network(NetworkOut, SBaseModel):
-    chainId: Optional[str]
+    chainId: Optional[str] = None
     networkType: NetworkType
     blockchain: Union[PyObjectId, Blockchain]
-    blockExplorerUrl: Optional[str]
-    apiExplorer: Optional[ApiExplorer]
+    blockExplorerUrl: Optional[str] = None
+    apiExplorer: Optional[ApiExplorer] = None
     isDefault: bool
     faucetUrl: Optional[str] = None
     providerUrl: Optional[str] = None

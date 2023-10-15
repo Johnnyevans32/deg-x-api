@@ -156,6 +156,7 @@ class WalletService:
                 )
             )
 
+        print("brpooing for ", chain.name)
         dict_wallet_assets = await loop.run_in_executor(None, convert_assets_to_dict)
 
         print("creating for ", chain.name)

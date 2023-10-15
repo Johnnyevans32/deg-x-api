@@ -1,7 +1,7 @@
 from enum import Enum
 from typing import Optional, Union
 
-from pydantic import BaseModel, EmailStr, Field
+from pydantic import BaseModel, EmailStr, ConfigDict, Field
 from pymongo import ASCENDING
 
 from apps.country.interfaces.country_interface import Country
@@ -12,10 +12,9 @@ from core.depends.model import SBaseModel, SBaseOutModel
 
 class Name(BaseModel):
     first: str
-    last: Optional[str]
+    last: Optional[str] = None
 
-    class Config:
-        anystr_strip_whitespace = True
+    model_config = ConfigDict(str_strip_whitespace=True)
 
 
 class SignUpMethod(str, Enum):
@@ -25,14 +24,15 @@ class SignUpMethod(str, Enum):
 
 class UserLoginInput(BaseModel):
     password: str
-    email: Optional[EmailStr]
+    email: EmailStr
 
-    class Config:
-        anystr_lower = True
-        anystr_strip_whitespace = True
-        schema_extra = {
+    model_config = ConfigDict(
+        str_to_lower=True,
+        str_strip_whitespace=True,
+        json_schema_extra={
             "example": {"email": "evans@demigod.com", "password": "password"}
-        }
+        },
+    )
 
 
 class UserResetPasswordInput(BaseModel):
@@ -40,18 +40,15 @@ class UserResetPasswordInput(BaseModel):
 
 
 class Username(BaseModel):
-    username: Optional[str]
+    username: Optional[str] = None
 
-    class Config:
-        anystr_lower = True
-        anystr_strip_whitespace = True
+    model_config = ConfigDict(str_to_lower=True, str_strip_whitespace=True)
 
 
 class UserUpdateDTO(Username):
-    name: Optional[Name]
+    name: Optional[Name] = None
 
-    class Config:
-        anystr_strip_whitespace = True
+    model_config = ConfigDict(str_strip_whitespace=True)
 
 
 class UserBase(UserUpdateDTO, SBaseOutModel):
@@ -59,22 +56,20 @@ class UserBase(UserUpdateDTO, SBaseOutModel):
     qrImage: Optional[str] = None
     country: Optional[Union[PyObjectId, Country]] = None
 
-    class Config:
-        anystr_strip_whitespace = True
-        anystr_lower = True
+    model_config = ConfigDict(str_strip_whitespace=True, str_to_lower=True)
 
 
 class User(UserBase, SBaseModel):
-    password: Optional[str] = Field(default=None)
+    password: Optional[str] = None
     socketIds: list[str] = Field(default=[])
     isVerified: bool = Field(default=False)
     signUpMethod: SignUpMethod = Field(
         default=SignUpMethod.EMAIL,
     )
 
-    class Config:
-        anystr_strip_whitespace = True
-        schema_extra = {
+    model_config = ConfigDict(
+        str_strip_whitespace=True,
+        json_schema_extra={
             "example": {
                 "name": {
                     "first": "demigod",
@@ -85,7 +80,8 @@ class User(UserBase, SBaseModel):
                 "username": "sss",
                 "country": "61689fc4dc4f8ba4c07f52e2",
             }
-        }
+        },
+    )
 
     @staticmethod
     def init() -> None:

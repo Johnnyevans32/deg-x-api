@@ -1,5 +1,5 @@
 from enum import Enum
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 from core.depends.get_object_id import PyObjectId
 
 
@@ -28,9 +28,7 @@ class SendTokenDTO(SwapTokenDTO):
     receipient: str
     receipientType: ReceipientType = ReceipientType.ADDRESS
 
-    class Config:
-        anystr_strip_whitespace = True
-        anystr_lower = True
+    model_config = ConfigDict(str_strip_whitespace=True, str_to_lower=True)
 
 
 class SendTxnRes(BaseModel):

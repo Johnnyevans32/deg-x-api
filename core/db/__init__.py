@@ -2,8 +2,7 @@ from typing import Any, Generic, Literal, Optional, TypeVar
 
 import certifi
 from bson.timestamp import Timestamp
-from pydantic import BaseModel, Field
-from pydantic.generics import GenericModel
+from pydantic import BaseModel, Field, ConfigDict
 from pymongo import MongoClient
 from pymongo.change_stream import DatabaseChangeStream
 from pymongo.database import Database
@@ -33,21 +32,20 @@ class Ns(BaseModel):
 
 class UpdateDesc(BaseModel):
     updatedFields: dict[str, Any]
-    removedFields: list[Optional[str]]
-    truncatedArrays: list[Optional[str]]
+    removedFields: Optional[list[str]] = None
+    truncatedArrays: Optional[list[str]] = None
 
 
-class CursorModel(GenericModel, Generic[T]):
+class CursorModel(BaseModel, Generic[T]):
     id: dict[str, str] = Field(alias="_id")
     operationType: Literal["insert", "delete", "update"]
     clusterTime: Timestamp
-    fullDocument: Optional[T]
+    fullDocument: Optional[T] = None
     ns: Ns
     documentKey: dict[str, PyObjectId]
-    updateDescription: Optional[UpdateDesc]
+    updateDescription: Optional[UpdateDesc] = None
 
-    class Config:
-        arbitrary_types_allowed = True
+    model_config = ConfigDict(arbitrary_types_allowed=True, populate_by_name=True)
 
 
 def mongo_data_streaming() -> None:
