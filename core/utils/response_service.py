@@ -1,6 +1,5 @@
 import json
 from typing import Generic, Optional, TypeVar
-from bson.objectid import ObjectId
 from fastapi import Response
 from pydantic import BaseModel, ConfigDict
 
@@ -20,9 +19,6 @@ class MetaDataModel(BaseModel):
 class ResponseModel(BaseModel, Generic[T]):
     model_config = ConfigDict(
         arbitrary_types_allowed=True,
-        json_encoders={
-            ObjectId: lambda oid: str(oid),
-        },
     )
 
     message: str
@@ -59,7 +55,6 @@ class ResponseService:
         meta: MetaDataModel | None = None,
         use_class_message: bool = False,
     ) -> ResponseModel[T]:
-        print("bruuhhh")
         res.status_code = status_code
         if use_class_message:
             message = self.status_code_message[status_code]

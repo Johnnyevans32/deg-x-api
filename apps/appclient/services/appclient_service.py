@@ -67,7 +67,7 @@ class AppClientService:
     async def create_client(self, client: AppClient) -> AppClient:
         client.clientSecret = Utils.generate_random(24)
         client.clientID = Utils.generate_random(12)
-        dict_client = client.dict(by_alias=True, exclude_none=True)
+        dict_client = client.model_dump(by_alias=True, exclude_none=True)
 
         client_obj = await ModelUtilityService.model_create(
             AppClient,

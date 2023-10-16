@@ -151,7 +151,7 @@ class WalletService:
                         ),
                         networkType=cast(Network, token_asset.network).networkType,
                         blockchain=cast(PyObjectId, chain.id),
-                    ).dict(by_alias=True, exclude_none=True),
+                    ).model_dump(by_alias=True, exclude_none=True),
                     token_assets,
                 )
             )
@@ -163,6 +163,7 @@ class WalletService:
         await ModelUtilityService.model_create_many(
             WalletAsset, dict_wallet_assets, session
         )
+        print("done creating for ", chain.name)
 
     async def retrieve_wallet_assets(self, user: User) -> list[WalletAsset]:
         user_wallet = await self.get_user_default_wallet(user)

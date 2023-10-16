@@ -7,25 +7,11 @@ from bson.objectid import ObjectId
 
 # https://python.plainenglish.io/how-to-use-fastapi-with-mongodb-75b43c8e541d
 class PyObjectId(ObjectId):
-    # @classmethod
-    # def __get_validators__(cls) -> Any:
-    #     yield cls.validate
-
-    # @classmethod
-    # def validate(cls, v: Any) -> ObjectId:
-    #     if not ObjectId.is_valid(str(v)):
-    #         raise ValueError("Invalid objectid")
-    #     return ObjectId(str(v))
-
     @classmethod
     def validate(cls, __input_value: Any, _: core_schema.ValidationInfo) -> ObjectId:
         if not ObjectId.is_valid(str(__input_value)):
             raise ValueError("Invalid objectid")
         return ObjectId(__input_value)
-
-    # @classmethod
-    # def __modify_schema__(cls, field_schema: Any) -> None:
-    #     field_schema.update(type="string")
 
     @classmethod
     def __get_pydantic_json_schema__(

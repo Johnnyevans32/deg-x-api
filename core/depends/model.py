@@ -1,6 +1,6 @@
 from datetime import datetime
 from typing import Optional
-
+from bson.objectid import ObjectId
 from pydantic import BaseModel, Field, ConfigDict
 
 from core.depends.get_object_id import PyObjectId
@@ -31,6 +31,9 @@ class SBaseOutModel(HashableBaseModel, BaseModel):
 
     model_config = ConfigDict(
         arbitrary_types_allowed=True,
+        json_encoders={
+            ObjectId: lambda oid: str(oid),
+        },
     )
 
 
