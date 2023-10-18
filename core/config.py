@@ -71,18 +71,13 @@ class Settings(BaseSettings):
     LOGGLY_HOOK: str = "test"
 
     # ~~~~~ Slack ~~~~~
-    SLACK_HOOK: str = (
-        "https://hooks.slack.com/services/"
-        "T01T4R47JSH/B01U76TRXJT/DyQJ57eLijWPMlAdp7XC97TU"
-    )
+    SLACK_HOOK: str = ""
 
     # ~~~~~ Cron ~~~~~
     CRON_ENABLED: bool = True
 
     # ~~~ Google oauth ~~~~
-    WEB_GOOGLE_CLIENT_ID: str = (
-        "211971759182-cmu5id6tmr9nk5hq29u7eri7ctdicsja.apps.googleusercontent.com"
-    )
+    WEB_GOOGLE_CLIENT_ID: str = ""
 
     model_config = SettingsConfigDict(
         env_file=".env", env_file_encoding="utf-8", case_sensitive=True
