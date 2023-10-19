@@ -71,9 +71,10 @@ class CronJob:
                 messages=[
                     {
                         "role": "user",
-                        "content": "go straight to the gist by telling us a random mind blowing thing you "
-                        f"have heard in {random.choice(topics)} also please dont include link quoting AND"
-                        "Go STRAIGHT TO THE POINT BY STARTING, ON A RANDOM NOTE and then the answer",
+                        "content": "go straight to the gist by telling us a "
+                        f"random mind blowing thing you have heard in {random.choice(topics)} "
+                        "also please dont include link quoting AND Go STRAIGHT TO THE "
+                        "POINT BY STARTING, ON A RANDOM NOTE and then the answer",
                     }
                 ],
             )
