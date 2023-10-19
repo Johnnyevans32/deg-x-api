@@ -1,5 +1,7 @@
+import random
 import pendulum
-import openai
+import g4f
+import traceback
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 
 from apps.notification.slack.services.slack_service import SlackService
@@ -38,6 +40,7 @@ class CronJob:
             "07-03": ["godswill"],
             "06-16": ["samswift"],
             "08-30": ["sammy"],
+            "12-08": ["noel"],
         }
         todays_date = pendulum.now().format("MM-DD")
 
@@ -50,16 +53,31 @@ class CronJob:
             Utils.sendMessageToBros(message)
 
     def sendQuoteToBROs(self) -> None:
-        message = openai.ChatCompletion.create(
-            model="gpt-3.5-turbo",
-            messages=[
-                {
-                    "role": "user",
-                    "content": "whats a random mind blowing thing you have heard in any of these "
-                    "faucets  of our lives also selected randomly, quantum, tech, programming, universe, "
-                    "financial advice, travelling, world exploration, conspiracy theory, software engineering",
-                }
-            ],
-        )
-        print(message)
-        Utils.sendMessageToBros(message)
+        try:
+            topics = [
+                "quantum",
+                "tech",
+                "programming",
+                "universe",
+                "financial advice",
+                "travelling",
+                "world exploration",
+                "conspiracy theory",
+                "software engineering",
+            ]
+            response = g4f.ChatCompletion.create(
+                model="gpt-3.5-turbo",
+                provider=g4f.Provider.Aichat,
+                messages=[
+                    {
+                        "role": "user",
+                        "content": "go straight to the gist by telling us a random mind blowing thing you "
+                        f"have heard in {random.choice(topics)} also please dont include link quoting AND"
+                        "Go STRAIGHT TO THE POINT BY STARTING, ON A RANDOM NOTE and then the answer",
+                    }
+                ],
+            )
+            Utils.sendMessageToBros(response)
+        except Exception as e:
+            traceback.print_exc()
+            print("this is an from quote to bros", e)

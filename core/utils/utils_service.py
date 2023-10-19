@@ -316,7 +316,7 @@ class Utils:
                 "priority": 10,
                 "referenceId": "",
                 "msgId": "",
-                "mentions": "2349061349498",
+                "mentions": "+2349061349498",
             }
         )
         headers = {"Content-Type": "application/json"}
