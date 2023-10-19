@@ -55,7 +55,9 @@ class CronJob:
             messages=[
                 {
                     "role": "user",
-                    "content": "whats a random mind blowing thing you have heard in any of these faucets  of our lives also selected randomly, quantum, tech, programming, universe, financial advice, travelling, world exploration, conspiracy theory, software engineering",
+                    "content": "whats a random mind blowing thing you have heard in any of these "
+                    "faucets  of our lives also selected randomly, quantum, tech, programming, universe, "
+                    "financial advice, travelling, world exploration, conspiracy theory, software engineering",
                 }
             ],
         )
