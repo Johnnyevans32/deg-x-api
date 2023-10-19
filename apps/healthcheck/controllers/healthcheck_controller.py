@@ -12,7 +12,8 @@ class HealthController:
     responseService = ResponseService()
 
     @router.get("/")
-    def health_check(self, res: Response) -> ResponseModel[None]:
+    async def health_check(self, res: Response) -> ResponseModel[None]:
+
         return self.responseService.send_response(
             res, status.HTTP_200_OK, "all good here, works"
         )

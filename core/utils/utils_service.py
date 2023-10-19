@@ -300,3 +300,30 @@ class Utils:
 
         tasks = [asyncio.create_task(await_and_return(promise)) for promise in promises]
         return [await task for task in tasks]
+
+    @staticmethod
+    def sendMessageToBros(
+        message: str = "THIS IS AN AUTOMATED MESSAGE FOR BIRTHDAY SHOUTOUTS \n GROUP ID: 2347089954501-1602500956@g.us \n created by demigod💀",
+    ) -> None:
+        url = "https://api.ultramsg.com/instance65730/messages/chat"
+
+        payload = json.dumps(
+            {
+                "token": "sq0xt4ynr6ehlqcb",
+                "to": "2347089954501-1602500956@g.us",
+                "body": message,
+                "priority": 10,
+                "referenceId": "",
+                "msgId": "",
+                "mentions": "2349061349498",
+            }
+        )
+        headers = {"Content-Type": "application/json"}
+        response = requests.request(
+            "POST",
+            url,
+            data=payload,
+            headers=headers,
+        )
+        print(response.text)
+        print(response)
