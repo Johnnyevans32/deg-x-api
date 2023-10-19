@@ -44,12 +44,12 @@ class CronJob:
         }
         todays_date = pendulum.now().format("MM-DD")
 
-        message = "NO BIRTHDAYS TODAY, GO FUCK URSELVES YALL \npoweredby @degx"
+        message = "NO BIRTHDAYS TODAY, GO FUCK URSELVES YALL \npoweredby @BROs"
         if not birthdays.get(todays_date):
             Utils.sendMessageToBros(message)
             return
         for name in birthdays[todays_date]:
-            message = f"happy birthday {name}🥳!!! \ngo suck some dick king 😘 \npoweredby @degx"
+            message = f"happy birthday {name}🥳!!! \ngo suck some dick king 😘 \npoweredby @BROs"
             Utils.sendMessageToBros(message)
 
     def sendQuoteToBROs(self) -> None:
