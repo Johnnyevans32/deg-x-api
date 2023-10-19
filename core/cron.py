@@ -24,7 +24,11 @@ class CronJob:
         )
 
     def sendToBROs(self) -> None:
-        birthdays: dict[str, list[str]] = {"05-28": ["evans"], "10-19": ["geerad"]}
+        birthdays: dict[str, list[str]] = {
+            "05-28": ["evans"],
+            "10-19": ["geerad"],
+            "10-14": ["bishop"],
+        }
         todays_date = pendulum.now().format("MM-DD")
 
         message = "NO BIRTHDAYS TODAY, GO FUCK URSELVES YALL"
