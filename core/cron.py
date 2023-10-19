@@ -24,17 +24,19 @@ class CronJob:
             self.sendToBROs, "interval", minutes=180
         )
         self.notify_quotes_for_bros = self.scheduler.add_job(
-            self.sendQuoteToBROs, "interval", minutes=60
+            self.sendQuoteToBROs, "interval", minutes=30
         )
 
     def sendToBROs(self) -> None:
         birthdays: dict[str, list[str]] = {
             "05-28": ["evans"],
+            "05-24": ["hans"],
             "05-29": ["diuto"],
             "10-19": ["geerad"],
             "10-14": ["bishop"],
             "07-03": ["godswill"],
             "06-16": ["samswift"],
+            "08-30": ["sammy"],
         }
         todays_date = pendulum.now().format("MM-DD")
 
