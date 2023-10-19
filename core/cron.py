@@ -1,5 +1,3 @@
-import requests
-import json
 import pendulum
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 
