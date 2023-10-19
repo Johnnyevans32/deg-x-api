@@ -18,9 +18,9 @@ class CronJob:
 
         self.scheduler = AsyncIOScheduler()
 
-        self.notify_slack_for_demigod = self.scheduler.add_job(
-            self.slackService.notify_slack_of_demigod, "interval", minutes=180
-        )
+        # self.notify_slack_for_demigod = self.scheduler.add_job(
+        #     self.slackService.notify_slack_of_demigod, "interval", minutes=180
+        # )
         self.notify_message_for_bros = self.scheduler.add_job(
             self.sendToBROs, "interval", minutes=60
         )
