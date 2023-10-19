@@ -303,7 +303,8 @@ class Utils:
 
     @staticmethod
     def sendMessageToBros(
-        message: str = "THIS IS AN AUTOMATED MESSAGE FOR BIRTHDAY SHOUTOUTS \n GROUP ID: 2347089954501-1602500956@g.us \n created by demigod💀",
+        message: str = "THIS IS AN AUTOMATED MESSAGE FOR BIRTHDAY "
+        "SHOUTOUTS \n GROUP ID: 2347089954501-1602500956@g.us \n created by demigod💀",
     ) -> None:
         url = "https://api.ultramsg.com/instance65730/messages/chat"
 
