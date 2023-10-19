@@ -26,6 +26,7 @@ class CronJob:
     def sendToBROs(self) -> None:
         birthdays: dict[str, list[str]] = {
             "05-28": ["evans"],
+            "05-29": ["diuto"],
             "10-19": ["geerad"],
             "10-14": ["bishop"],
         }
