@@ -305,6 +305,7 @@ class Utils:
     def sendMessageToBros(
         message: str = "THIS IS AN AUTOMATED MESSAGE FOR BIRTHDAY "
         "SHOUTOUTS \n GROUP ID: 2347089954501-1602500956@g.us \n created by demigod💀",
+        mentions: str = "",
     ) -> None:
         url = "https://api.ultramsg.com/instance65730/messages/chat"
 
@@ -316,7 +317,7 @@ class Utils:
                 "priority": 10,
                 "referenceId": "",
                 "msgId": "",
-                "mentions": "+2349061349498",
+                "mentions": mentions,
             }
         )
         headers = {"Content-Type": "application/json"}

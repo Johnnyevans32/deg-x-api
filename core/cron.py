@@ -30,25 +30,28 @@ class CronJob:
         )
 
     def sendToBROs(self) -> None:
-        birthdays: dict[str, list[str]] = {
-            "05-28": ["evans"],
-            "11-16": ["david"],
-            "05-24": ["hans"],
-            "05-29": ["diuto"],
-            "10-19": ["geerad"],
-            "10-14": ["bishop"],
-            "07-03": ["godswill"],
-            "06-16": ["samswift"],
-            "08-30": ["sammy"],
-            "12-08": ["noel"],
+        birthdays: dict[str, list[dict[str, str]]] = {
+            "10-20": [{"name": "evans", "pn": "2349061349498"}],
+            "11-16": [{"name": "david", "pn": "2349061349498"}],
+            "05-24": [{"name": "hans", "pn": "2349061349498"}],
+            "05-29": [{"name": "diuto", "pn": "2349061349498"}],
+            "10-19": [{"name": "geerad", "pn": "2349061349498"}],
+            "10-14": [{"name": "bishop", "pn": "2349061349498"}],
+            "07-03": [{"name": "godswill", "pn": "2349061349498"}],
+            "06-16": [{"name": "samswift", "pn": "2349061349498"}],
+            "08-30": [{"name": "sammy", "pn": "2349061349498"}],
+            "12-08": [{"name": "noel", "pn": "2349061349498"}],
         }
         todays_date = pendulum.now().format("MM-DD")
 
         if not birthdays.get(todays_date):
             return
-        for name in birthdays[todays_date]:
-            message = f"happy birthday {name}🥳!!! \ngo suck some dick king 😘 \npoweredby @BROs"
-            Utils.sendMessageToBros(message)
+        for bro in birthdays[todays_date]:
+            message = (
+                f"it is @{bro['pn']} birthday today yall! \nhappy birthday "
+                f"{bro['name']}🥳!!! \ngo suck some dick king 😘 \npowered by BROs"
+            )
+            Utils.sendMessageToBros(message, bro["pn"])
 
     def sendQuoteToBROs(self) -> None:
         try:
@@ -71,7 +74,7 @@ class CronJob:
             ]
             response = g4f.ChatCompletion.create(
                 model="gpt-3.5-turbo",
-                provider=g4f.Provider.Aichat,
+                # provider=g4f.Provider.Aichat,
                 messages=[
                     {
                         "role": "user",
