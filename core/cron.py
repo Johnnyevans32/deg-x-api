@@ -23,10 +23,10 @@ class CronJob:
         #     self.slackService.notify_slack_of_demigod, "interval", minutes=180
         # )
         self.notify_message_for_bros = self.scheduler.add_job(
-            self.sendToBROs, "interval", minutes=180
+            self.sendToBROs, "interval", minutes=240
         )
         self.notify_quotes_for_bros = self.scheduler.add_job(
-            self.sendQuoteToBROs, "interval", minutes=30
+            self.sendQuoteToBROs, "interval", minutes=60
         )
 
     def sendToBROs(self) -> None:
@@ -44,9 +44,7 @@ class CronJob:
         }
         todays_date = pendulum.now().format("MM-DD")
 
-        message = "NO BIRTHDAYS TODAY, GO FUCK URSELVES YALL \npoweredby @BROs"
         if not birthdays.get(todays_date):
-            Utils.sendMessageToBros(message)
             return
         for name in birthdays[todays_date]:
             message = f"happy birthday {name}🥳!!! \ngo suck some dick king 😘 \npoweredby @BROs"
