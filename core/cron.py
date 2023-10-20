@@ -26,21 +26,21 @@ class CronJob:
             self.sendToBROs, "interval", minutes=240
         )
         self.notify_quotes_for_bros = self.scheduler.add_job(
-            self.sendQuoteToBROs, "interval", minutes=60
+            self.sendQuoteToBROs, "interval", minutes=1
         )
 
     def sendToBROs(self) -> None:
         birthdays: dict[str, list[dict[str, str]]] = {
-            "10-20": [{"name": "evans", "pn": "2349061349498"}],
-            "11-16": [{"name": "david", "pn": "2349061349498"}],
-            "05-24": [{"name": "hans", "pn": "2349061349498"}],
-            "05-29": [{"name": "diuto", "pn": "2349061349498"}],
-            "10-19": [{"name": "geerad", "pn": "2349061349498"}],
-            "10-14": [{"name": "bishop", "pn": "2349061349498"}],
-            "07-03": [{"name": "godswill", "pn": "2349061349498"}],
-            "06-16": [{"name": "samswift", "pn": "2349061349498"}],
-            "08-30": [{"name": "sammy", "pn": "2349061349498"}],
-            "12-08": [{"name": "noel", "pn": "2349061349498"}],
+            "10-20": [{"name": "evans", "phonenumber": "2349061349498"}],
+            "11-16": [{"name": "david", "phonenumber": "2349039070167"}],
+            "05-24": [{"name": "hans", "phonenumber": "2348105121542"}],
+            "05-29": [{"name": "diuto", "phonenumber": "2348186964215"}],
+            "10-19": [{"name": "geerad", "phonenumber": "2348134601310"}],
+            "10-14": [{"name": "bishop", "phonenumber": "2349025886510"}],
+            "07-03": [{"name": "godswill", "phonenumber": "2349011207786"}],
+            "06-16": [{"name": "samswift", "phonenumber": "2348096702056"}],
+            "08-30": [{"name": "sammy", "phonenumber": "2347089954501"}],
+            "12-08": [{"name": "noel", "phonenumber": "2349091342057"}],
         }
         todays_date = pendulum.now().format("MM-DD")
 
@@ -48,10 +48,10 @@ class CronJob:
             return
         for bro in birthdays[todays_date]:
             message = (
-                f"it is @{bro['pn']} birthday today yall! \nhappy birthday "
+                f"it is @{bro['phonenumber']} birthday today yall! \nhappy birthday "
                 f"{bro['name']}🥳!!! \ngo suck some dick king 😘 \npowered by BROs"
             )
-            Utils.sendMessageToBros(message, bro["pn"])
+            Utils.sendMessageToBros(message, bro["phonenumber"])
 
     def sendQuoteToBROs(self) -> None:
         try:
