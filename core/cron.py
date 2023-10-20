@@ -62,6 +62,12 @@ class CronJob:
                 "world exploration",
                 "conspiracy theory",
                 "software engineering",
+                "nigeria history",
+                "introduction to computer age",
+                "love",
+                "religion",
+                "astrophysics",
+                "black hole",
             ]
             response = g4f.ChatCompletion.create(
                 model="gpt-3.5-turbo",
