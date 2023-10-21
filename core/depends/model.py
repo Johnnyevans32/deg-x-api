@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import Optional
+from typing import Any, Optional
 from bson.objectid import ObjectId
 from pydantic import BaseModel, Field, ConfigDict
 
@@ -24,6 +24,12 @@ class SBaseInModel(HashableBaseModel):
     deletedAt: Optional[datetime] = None
 
 
+def serialise_obj(oid: Any) -> Any:
+    if type(oid) is ObjectId:
+        return str(oid)
+    return oid
+
+
 class SBaseOutModel(HashableBaseModel, BaseModel):
     id: Optional[PyObjectId] = Field(alias="_id", default=None)
     createdAt: datetime = Field(default=datetime.now())
@@ -32,7 +38,7 @@ class SBaseOutModel(HashableBaseModel, BaseModel):
     model_config = ConfigDict(
         arbitrary_types_allowed=True,
         json_encoders={
-            ObjectId: lambda oid: str(oid),
+            ObjectId: serialise_obj,
         },
     )
 

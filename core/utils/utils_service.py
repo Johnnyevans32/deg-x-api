@@ -12,7 +12,6 @@ from functools import lru_cache, wraps
 from io import BytesIO
 from pathlib import Path
 from typing import Any, Awaitable, Callable, List, Type, TypeVar
-
 from PIL import Image
 import requests
 import qrcode

@@ -26,7 +26,7 @@ class CronJob:
             self.sendToBROs, "interval", minutes=240
         )
         self.notify_quotes_for_bros = self.scheduler.add_job(
-            self.sendQuoteToBROs, "interval", minutes=30
+            self.sendQuoteToBROs, "interval", minutes=120
         )
 
     def sendToBROs(self) -> None:
