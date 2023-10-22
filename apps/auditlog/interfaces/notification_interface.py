@@ -1,5 +1,5 @@
 from enum import Enum
-from typing import Union
+from typing import Union, Optional
 
 
 from apps.user.interfaces.user_interface import User, UserBase
@@ -18,8 +18,8 @@ class NotificationOut(SBaseOutModel):
     title: str
     message: str
     type: NotificationType
-    user: Union[PyObjectId, UserBase, None]
+    user: Optional[Union[PyObjectId, UserBase]] = None
 
 
 class Notification(NotificationOut, SBaseModel):
-    user: Union[PyObjectId, User, None]
+    user: Optional[Union[PyObjectId, User]] = None

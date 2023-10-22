@@ -48,5 +48,6 @@ class AuditLogService:
             page_num,
             page_size,
         )
+        print(res)
 
         return res, meta_data
