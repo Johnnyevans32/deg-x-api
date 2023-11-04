@@ -60,6 +60,7 @@ class CronJob:
                 "tech",
                 "programming",
                 "universe",
+                "mental health",
                 "financial advice",
                 "travelling",
                 "world exploration",
