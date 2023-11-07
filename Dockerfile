@@ -36,6 +36,8 @@ COPY ./solidity /code/solidity
 
 COPY ./scripts/runserver.sh /code/runserver.sh
 
+EXPOSE 8000
+
 # 
 CMD ["python", "application.py"]
 
