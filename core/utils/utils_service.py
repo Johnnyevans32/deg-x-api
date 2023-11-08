@@ -225,6 +225,7 @@ class Utils:
 
     @staticmethod
     def create_qr_image(data_to_encode: Any = "Deg X") -> str:
+        return ""
         # Creating an instance of QRCode class
         qr = qrcode.QRCode(version=2, error_correction=qrcode.ERROR_CORRECT_Q)
 

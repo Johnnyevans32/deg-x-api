@@ -1,4 +1,6 @@
 import asyncio
+import datetime
+import time
 from typing import Any, cast
 
 from mnemonic import Mnemonic
@@ -157,7 +159,10 @@ class WalletService:
             )
 
         print("brpooing for ", chain.name)
+        t1 = time.time()
         dict_wallet_assets = await loop.run_in_executor(None, convert_assets_to_dict)
+        t2 = time.time()
+        print(f"Function {chain.name} executed in {(t2-t1):.4f}s")
 
         print("creating for ", chain.name)
         await ModelUtilityService.model_create_many(

@@ -2,9 +2,6 @@ from logging import Logger
 from typing import Any
 
 from fastapi import Request
-from starlette.datastructures import State
-
-from apps.user.interfaces.user_interface import User
 
 
 class UnicornException(Exception):
@@ -14,14 +11,9 @@ class UnicornException(Exception):
         self.data = data
 
 
-class UnicornState(State):
-    user: User
-
-
 class UnicornApp:
     logger: Logger
 
 
 class UnicornRequest(Request):
-    state: UnicornState
     app: UnicornApp
