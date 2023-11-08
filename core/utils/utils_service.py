@@ -224,7 +224,7 @@ class Utils:
         return genericClass(**_dict)
 
     @staticmethod
-    def create_qr_image(data_to_encode: Any = "Deg X") -> str:
+    def create_qr_image(data_to_encode: Any = "Deg X", isBasic: bool = True) -> str:
         return ""
         # Creating an instance of QRCode class
         qr = qrcode.QRCode(version=2, error_correction=qrcode.ERROR_CORRECT_Q)
@@ -233,20 +233,23 @@ class Utils:
         qr.add_data(data_to_encode)
 
         qr.make(fit=True)
-        response = requests.get(
-            "https://res.cloudinary.com/dfbjysygb/image/upload/"
-            "v1668763106/rsz_1degx-pre_o8m3tt.png",
-            stream=True,
-        )
-        logo = Image.open(response.raw)
-        logo = logo.resize((50, 50))
-        img = qr.make_image(
-            image_factory=StyledPilImage,
-            module_drawer=RoundedModuleDrawer(),
-            color_mask=RadialGradiantColorMask(edge_color=(218, 112, 214)),
-            embeded_image=logo,
-            eye_drawer=RoundedModuleDrawer(),
-        )
+        if isBasic:
+            img = qr.make_image(fill_color="black", back_color="white")
+        else:
+            response = requests.get(
+                "https://res.cloudinary.com/dfbjysygb/image/upload/"
+                "v1668763106/rsz_1degx-pre_o8m3tt.png",
+                stream=True,
+            )
+            logo = Image.open(response.raw)
+            logo = logo.resize((50, 50))
+            img = qr.make_image(
+                image_factory=StyledPilImage,
+                module_drawer=RoundedModuleDrawer(),
+                color_mask=RadialGradiantColorMask(edge_color=(218, 112, 214)),
+                embeded_image=logo,
+                eye_drawer=RoundedModuleDrawer(),
+            )
 
         buffer = BytesIO()
         img.save(buffer)
