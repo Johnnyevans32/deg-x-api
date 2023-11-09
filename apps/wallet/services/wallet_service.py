@@ -1,5 +1,4 @@
 import asyncio
-import time
 from typing import Any, cast
 
 from mnemonic import Mnemonic
@@ -60,12 +59,9 @@ class WalletService:
         session.start_transaction()
         try:
             res = await self.create_wallet(user, session)
-            print("done")
             session.commit_transaction()
-            print("commit_transaction done")
             return res
         except Exception as e:
-            print(e)
             session.abort_transaction()
             raise e
         finally:
@@ -148,7 +144,7 @@ class WalletService:
                         qrImage=Utils.create_qr_image(
                             self.blockchainService.get_address(
                                 address, cast(Network, token_asset.network)
-                            )
+                            ),
                         ),
                         networkType=cast(Network, token_asset.network).networkType,
                         blockchain=cast(PyObjectId, chain.id),
@@ -157,17 +153,11 @@ class WalletService:
                 )
             )
 
-        print("brpooing for ", chain.name)
-        t1 = time.time()
         dict_wallet_assets = await loop.run_in_executor(None, convert_assets_to_dict)
-        t2 = time.time()
-        print(f"Function {chain.name} executed in {(t2-t1):.4f}s")
 
-        print("creating for ", chain.name)
         await ModelUtilityService.model_create_many(
             WalletAsset, dict_wallet_assets, session
         )
-        print("done creating for ", chain.name)
 
     async def retrieve_wallet_assets(self, user: User) -> list[WalletAsset]:
         user_wallet = await self.get_user_default_wallet(user)

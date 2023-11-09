@@ -224,8 +224,9 @@ class Utils:
         return genericClass(**_dict)
 
     @staticmethod
+    @timed_cache(60, 10)
     def create_qr_image(data_to_encode: Any = "Deg X", isBasic: bool = True) -> str:
-        return ""
+        # return ""
         # Creating an instance of QRCode class
         qr = qrcode.QRCode(version=2, error_correction=qrcode.ERROR_CORRECT_Q)
 
